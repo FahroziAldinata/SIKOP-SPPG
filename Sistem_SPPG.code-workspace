@@ -1,0 +1,71 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"task.allowAutomaticTasks": "on"
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Backend",
+				"type": "shell",
+				"command": "node index.js",
+				"options": {
+					"cwd": "${workspaceFolder}/backend"
+				},
+				"isBackground": true,
+				"presentation": {
+					"reveal": "always",
+					"panel": "dedicated",
+					"group": "dev-servers",
+					"clear": false
+				},
+				"problemMatcher": [],
+				"runOptions": {
+					"runOn": "folderOpen"
+				}
+			},
+			{
+				"label": "Frontend",
+				"type": "shell",
+				"command": "npm run dev",
+				"options": {
+					"cwd": "${workspaceFolder}/frontend"
+				},
+				"isBackground": true,
+				"presentation": {
+					"reveal": "always",
+					"panel": "dedicated",
+					"group": "dev-servers",
+					"clear": false
+				},
+				"problemMatcher": [],
+				"runOptions": {
+					"runOn": "folderOpen"
+				}
+			},
+			{
+				"label": "Hermes",
+				"type": "shell",
+				"command": "",
+				"options": {
+					"cwd": "${workspaceFolder}"
+				},
+				"presentation": {
+					"reveal": "always",
+					"panel": "dedicated",
+					"group": "hermes",
+					"clear": false
+				},
+				"problemMatcher": [],
+				"runOptions": {
+					"runOn": "folderOpen"
+				}
+			}
+		]
+	}
+}

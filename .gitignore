@@ -1,0 +1,44 @@
+# Dependencies
+backend/node_modules/
+frontend/node_modules/
+
+# Skills (contains embedded git repos)
+/Skills/
+# NOTE: .agent-pm/skills/ harus IKUT ter-track (sync multi-device) — jangan di-ignore
+!.agent-pm/skills/
+
+# Environment variables
+.env
+backend/.env
+frontend/.env
+*.env.local
+*.env.*.local
+.env.production
+
+# Build output
+frontend/dist/
+frontend/build/
+
+# Prisma
+backend/prisma/*.db
+backend/prisma/*.db-journal
+
+# Uploads (runtime evidence)
+backend/uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+Excel sppg
+
+.agent-pm/plans/
+.agent-pm/prompts/
+

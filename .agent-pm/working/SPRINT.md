@@ -1,0 +1,31 @@
+# Sprint Backlog
+
+## Sprint 24 — V2-1 TTD Basah (2026-08-01) — BELUM DIMULAI
+1. ⏳ V2-1 TTD Basah — upload gambar per user (SEMUA ROLE) + preview + modal. Menunggu TASK_SELECTION.
+
+## Sprint 23 — Laporan Ahli Gizi ✅ (2026-07-31)
+1. ✅ G1 Laporan Pemenuhan Gizi — endpoint rekap target vs realisasi 5 zat gizi + PDF + UI RangeCalendar. Diuji Rozi OK.
+2. ✅ G1-REVISI — hanya menu DISETUJUI (backend hardcode + hapus dropdown status FE).
+3. ✅ G2 Laporan Rekap Menu — endpoint + PDF + dropdown jenis laporan + revisi center PDF G1-G3 (web+PDF). Diuji Rozi OK.
+4. ✅ G3 Laporan Uji Organoleptik & Alergi — endpoint + PDF + opsi dropdown (center, DISETUJUI). Diuji Rozi OK.
+
+## Sprint 22 — Laporan Mitra M1-M3 ✅ (2026-07-31)
+1. ✅ M1 Realisasi PO vs Pesanan — endpoint + PDF (qty pesan/realisasi/diterima + harga + status + penerima).
+2. ✅ M2 Cetak PO / Nota Pesanan — template PDF PO + route PDF.
+3. ✅ M3 Penerimaan Barang + akses pemeriksaan bahan Mitra — endpoint + PDF (qtyDiterima + checklist).
+
+## Sprint 21 — Revisi Layout Akuntan ✅ (2026-07-31)
+1. ✅ Header + isi tabel center semua laporan akuntan (web + PDF)
+2. ✅ BTT TTD — Kepala SPPG kanan, isi center, materai di area jabatan
+3. ✅ LRA — transpose (periode baris, TOTAL bawah) + card style, web + PDF
+4. ✅ Stock Barang PDF — judul ditambahkan
+
+## Release 1.0 — Complete
+Semua fitur per role (Aslap, Ahli Gizi, Akuntan) sudah selesai diimplementasikan.
+Backlog teknis (Custom Zod + Excel Migration) juga selesai.
+Project siap rilis.
+
+## Backlog V2 (menunggu TASK_SELECTION — lihat TODO.md)
+- V2-1 TTD Basah ← NEXT
+- V2-2 Image handling
+- V2-3 Perbaikan minor UX

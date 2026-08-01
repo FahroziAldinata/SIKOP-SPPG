@@ -1,0 +1,130 @@
+'use client';
+import {ChevronLeft, ChevronRight} from 'lucide-react';
+import React from 'react';
+import {getDayOfWeek} from '@internationalized/date';
+import {
+  Calendar as AriaCalendar,
+  CalendarGridHeader as AriaCalendarGridHeader,
+  CalendarCell,
+  CalendarGrid,
+  CalendarGridBody,
+  CalendarHeaderCell,
+  CalendarHeading,
+  Text
+} from 'react-aria-components/Calendar';
+import {useLocale} from 'react-aria-components/I18nProvider';
+import {tv} from 'tailwind-variants';
+import {Button} from './Button';
+import {composeTailwindRenderProps, focusRing} from './utils';
+
+const cellStyles = tv({
+  extend: focusRing,
+  base: 'w-[calc(100cqw/7)] aspect-square text-sm cursor-default rounded-full flex items-center justify-center forced-color-adjust-none [-webkit-tap-highlight-color:transparent]',
+  variants: {
+    isSelected: {
+      false:
+        'text-neutral-900 dark:text-neutral-200 hover:bg-neutral-200 dark:hover:bg-neutral-700 pressed:bg-neutral-300 dark:pressed:bg-neutral-600',
+      true: 'bg-[var(--input-hover-border)] invalid:bg-red-600 text-white forced-colors:bg-[Highlight] forced-colors:invalid:bg-[Mark] forced-colors:text-[HighlightText]'
+    },
+    isSunday: {
+      true: ''
+    },
+    isDisabled: {
+      true: 'text-neutral-300 dark:text-neutral-600 forced-colors:text-[GrayText]'
+    }
+  },
+  compoundVariants: [
+    {
+      isSelected: false,
+      isDisabled: false,
+      isSunday: true,
+      className: 'text-red-600 dark:text-red-400'
+    }
+  ]
+});
+
+function isSunday(date, locale) {
+  return getDayOfWeek(date, locale, 'sun') === 0;
+}
+
+function getSundayHeaderLabel(locale) {
+  return new Intl.DateTimeFormat(locale, {weekday: 'short'}).format(
+    new Date(Date.UTC(2024, 0, 7))
+  );
+}
+
+export function Calendar({errorMessage, ...props}) {
+  let {direction, locale} = useLocale();
+  let months = props.visibleDuration?.months || 1;
+  return (
+    <AriaCalendar
+      {...props}
+      className={composeTailwindRenderProps(
+        props.className,
+        'flex font-sans w-full max-w-fit overflow-auto gap-3'
+      )}>
+      {Array.from({length: months}, (_, i) => (
+        <div key={i} className="@container flex flex-col w-[calc(9*var(--spacing)*7)]">
+          <header className="flex items-center mb-4">
+            {i === 0 && (
+              <Button variant="secondary" slot="previous">
+                {direction === 'rtl' ? (
+                  <ChevronRight aria-hidden size={18} />
+                ) : (
+                  <ChevronLeft aria-hidden size={18} />
+                )}
+              </Button>
+            )}
+            <CalendarHeading
+              offset={{months: i}}
+              className="flex-1 font-sans font-semibold [font-variation-settings:normal] text-base text-center mx-2 my-0 text-neutral-900 dark:text-neutral-200"
+            />
+            {i === months - 1 && (
+              <Button variant="secondary" slot="next">
+                {direction === 'rtl' ? (
+                  <ChevronLeft aria-hidden size={18} />
+                ) : (
+                  <ChevronRight aria-hidden size={18} />
+                )}
+              </Button>
+            )}
+          </header>
+          <CalendarGrid offset={{months: i}} weekdayStyle="short" className="border-spacing-0">
+            <CalendarGridHeader locale={locale} />
+            <CalendarGridBody>
+              {date => (
+                <CalendarCell
+                  date={date}
+                  className={renderProps =>
+                    cellStyles({...renderProps, isSunday: isSunday(date, locale)})
+                  }
+                />
+              )}
+            </CalendarGridBody>
+          </CalendarGrid>
+        </div>
+      ))}
+      {errorMessage && (
+        <Text slot="errorMessage" className="text-sm text-red-600">
+          {errorMessage}
+        </Text>
+      )}
+    </AriaCalendar>
+  );
+}
+
+export function CalendarGridHeader({locale}) {
+  let sundayLabel = getSundayHeaderLabel(locale);
+  return (
+    <AriaCalendarGridHeader>
+      {day => (
+        <CalendarHeaderCell
+          className={`text-xs font-semibold ${
+            day === sundayLabel ? 'text-red-600 dark:text-red-400' : 'text-neutral-500'
+          }`}>
+          {day}
+        </CalendarHeaderCell>
+      )}
+    </AriaCalendarGridHeader>
+  );
+}
