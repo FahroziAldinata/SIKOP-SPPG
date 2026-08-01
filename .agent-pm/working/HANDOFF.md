@@ -1,43 +1,28 @@
-# Handoff — 2026-08-01 — Audit & Rapi .agent-pm
+# Handoff — 2026-08-02 — Reset Repo + Release V1.0.0
 
-## Update Sesi Ini (2026-08-01, sesi ke-2)
-- **Pemindahan file governance (keputusan Rozi)**:
-  - `hard-rules.md` (root) → `knowledge/09-hard-rules.md`
-  - `MODEL_STRATEGY.md` (root) → `knowledge/10-model-strategy.md`
-  - `incident-report-2026-07-28/30/08-01.md` (root) → di-archive ke `working/GOVERNANCE_FINDINGS.md` (section "ARCHIVE — Incident Reports")
-  - Referensi di-update: SESSION_START_PROTOCOL.md (step 2-3, referensi numerik), hermes-workflow-practices.md (step 2-3), TODO.md (pointer model strategy)
-- **Blocker beres**: 5 folder skill ter-commit (`121fffe`) + cron sync-hermes di-recreate (job `05fd5c684e88`, every 30m, silent-on-success + alert Telegram saat error)
-- **Catatan**: file lama di root sudah dihapus — sesi baru baca lokasi baru sesuai SESSION_START_PROTOCOL.md
+## Update Sesi Ini (2026-08-02, sesi 27)
+- **Validasi model**: Hermes = `oc/deepseek-v4-flash-free` via 9router (bukan nemotron-3-ultra) — knowledge/10, SOUL.md (Aturan 3b), TODO.md, DECISION_LOG diselaraskan
+- **V2-4 batch 1 selesai**: refactor akuntan.js → 9 file modular; verifikasi struktural + behavioral PASS; commit `12557a0` (repo lama, ter-include di initial release)
+- **BUG-001** ditemukan saat smoke test: 500 `GET /rab-p12/harian` + `/rab-p12/rekap` — suspected pre-existing (confidence MEDIUM, jalur kode identik original, belum dual-run) — investigasi terpisah
+- **Dokumentasi V1.0.0**: README.md, CHANGELOG.md, LICENSE (Fahrozi Aldinata), docs/ARCHITECTURE.md, docs/SETUP.md, backend/.env.example, frontend/.env.example
+- **Sanitasi seed**: 10 nilai nama asli → generik per role (Windi/Yayang dll dihapus)
+- **Rename `.hermes` → `.agent-pm`**: 16 file referensi di-update, grep verifikasi 0 match
+- **RESET REPO**: history lama dihapus (kredensial `.env.production` bocor tidak ikut); repo baru `https://github.com/FahroziAldinata/SIKOP-SPPG.git` — commit `c017282` "Initial release v1.0.0" + tag `v1.0.0`, branch `main`
 
-## Konteks Sesi (sebelumnya)
-- Audit folder .agent-pm + perbaikan konsistensi governance multi-device
-- Backlog V2 menunggu: V2-1 TTD Basah (NEXT), V2-2 image handling, V2-3 minor UX
-
-## Perubahan Sesi Ini
-| Item | Keterangan |
-|------|------------|
-| .gitignore | Fix `Skills/` → `/Skills/` root-anchored + exception `.agent-pm/skills/` (sebelumnya skill tidak pernah ter-commit) |
-| hard-rules.md | OpenCode = builder default konsisten (semua tabel), AGY per-device terverifikasi, model AGY 2 (claude-sonnet-4-6 / gemini-flash-3.6-medium), hapus typo |
-| AUTOMATION_CYCLE.md | BUILD state → OpenCode default, AGY quota+approval |
-| PROJECT_MANAGER_BEHAVIOR.md | Pembagian agent konsisten, fallback OpenCode → nemotron-4-ultra |
-| MODEL_STRATEGY.md | Hermes = nemotron-3-ultra, AGY 2 model, OpenCode backup nemotron-4-ultra |
-| working/* | TODO/CURRENT_TASK/CURRENT_STATE koreksi: V2-1 masih TODO (bukan SELESAI), single source TODO.md |
-| plans/ + pre-check/ | Dihapus (task selesai, usang) |
-| README-workflow + scripts | Dihapus permanen (konfirmasi Rozi) |
-
-## Keputusan Rozi (2026-08-01)
-- AGY 2 model: `gemini-flash-3.6-medium` + `claude-sonnet-4.6` — saling fallback kuota
-- OpenCode backup: `nemotron-4-ultra` (belum ditesting penuh)
-- Model Hermes: `nemotron-3-ultra`
-- V2-1 TTD Basah: MASIH TODO (belum dikerjakan)
-- README-workflow + scripts: hapus permanen
-- RELEASE_CANDIDATE + validation/: simpan
+## Keputusan Rozi (2026-08-02)
+- Exclude `.agent-pm/plans/` + `.agent-pm/prompts/` dari repo publik (.gitignore)
+- Identity commit: `Fahrozi Aldinata <fahrozialdinata2@gmail.com>`
+- Backup `Sistem_SPPG_BACKUP_20260802` disimpan (1.4 GB)
+- Repo GitHub lama `sppg-management-system`: dihapus manual oleh Rozi (belum dihapus)
 
 ## Catatan Penting
-- V2-1 TTD Basah TIDAK ada commit di git — jangan klaim selesai sebelum ada commit
-- Sync lintas device: pastikan cron sync-hermes aktif setelah fix
+- **Path governance: `.agent-pm/`** (bukan `.hermes`) — SESSION_START_PROTOCOL, SOUL, skill, memory sudah disesuaikan
+- Commit `12557a0` & `15febb9` TIDAK ada di repo baru (history di-reset) — referensi internal saja
+- BUG-001 belum diverifikasi dual-run head-to-head (masih suspected pre-existing)
+- `.agent-pm/plans/` + `prompts/` tidak ter-track (ignored) — prompt audit trail tetap tersimpan lokal
 
 ## Backlog
-- V2-1 TTD Basah (upload gambar per user — SEMUA ROLE) ← NEXT
-- V2-2 Image handling
-- V2-3 Perbaikan minor UX
+- **V2-4 Batch 2**: `frontend/src/pages/akuntan/laporan/LaporanPage.jsx` (3.511 baris) ← NEXT (ditahan, tunggu instruksi)
+- V2-1 TTD Basah (Sprint 24)
+- V2-2 Image handling, V2-3 Perbaikan minor UX
+- BUG-001 investigasi (500 rabP12)

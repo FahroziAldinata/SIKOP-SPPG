@@ -61,3 +61,8 @@
 - **Keputusan**: Dokumentasi model Hermes diselaraskan dengan config.yaml — model aktif = `oc/deepseek-v4-flash-free` (provider custom `9router`), bukan Nemotron-3-Ultra. Fallback chain: `glm-4.5-flash` (zai) → `gemini-3.1-flash-lite` (gemini) → `nvidia/nemotron-3-ultra-550b-a55b:free` (openrouter).
 - **Alasan**: Validasi Rozi 2026-08-02 menemukan knowledge/10-model-strategy.md + TODO.md klaim "Hermes = nemotron-3-ultra" padahal config aktual deepseek-v4-flash-free. Dokumentasi stale = sumber salah informasi untuk agent lintas device.
 - **Catatan**: Tanggal perubahan config tidak tercatat — terdeteksi saat validasi sesi ini. Entry 2026-07-25 (GLM-4.5-flash primary) sudah tidak relevan: GLM kini fallback, bukan primary. File di-update: knowledge/10, SOUL.md (Aturan 3b contoh), TODO.md footer.
+
+### [2026-08-02] - Reset Repo Publik + Release V1.0.0
+- **Keputusan**: History `.git` dihapus total, repo di-upload ulang ke `github.com/FahroziAldinata/SIKOP-SPPG` sebagai `Initial release v1.0.0` (commit `c017282`) + tag `v1.0.0`. Rename `.hermes` → `.agent-pm`. Repo lama `sppg-management-system` dihapus manual oleh Rozi.
+- **Alasan**: `backend/.env.production` PERNAH ke-commit (password DB nyata bocor di commit `bb72a0b`, masih recoverable di history) — purge via reset total lebih bersih dari filter-branch. Password Supabase sudah di-rotate manual Rozi. Backup disimpan `Sistem_SPPG_BACKUP_20260802`.
+- **Catatan**: 222 file di-commit, `.agent-pm/plans/` + `prompts/` di-exclude (gitignore). Identity commit: `Fahrozi Aldinata <fahrozialdinata2@gmail.com>`.

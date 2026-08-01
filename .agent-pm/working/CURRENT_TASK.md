@@ -1,21 +1,16 @@
 # CURRENT TASK — 2026-08-02
 
-## Status: IN_PROGRESS — V2-4 Refactor Batch 1 (verifikasi + commit pending)
+## Status: CYCLE_END — menunggu TASK_SELECTION
 
-### Task
-V2-4: Refactor file ribuan baris — design modular. Batch 1: `backend/src/routes/akuntan.js` (4.637 baris) → folder `routes/akuntan/` 9 file.
+### Selesai sesi ini
+- **V2-4 Batch 1**: `backend/src/routes/akuntan.js` (4.637 baris) → folder `routes/akuntan/` 9 file (index, _helpers, 7 sub-router). Verifikasi struktural PASS (60/60 route identik, node --check 9/9, no circular dep), behavioral smoke PASS (7 sub-router + LPA/SPTJ/BAPSD 200, auth negative 401/404/400 pas). Ditemukan BUG-001 (500 rabP12, suspected pre-existing). Commit `12557a0` (repo lama) — ter-include di initial release repo baru.
+- **Release V1.0.0**: 5 dokumen (README, CHANGELOG, LICENSE, docs/ARCHITECTURE, docs/SETUP) + `backend/.env.example` + `frontend/.env.example` + sanitasi seed + rename `.hermes`→`.agent-pm`. Commit `15febb9` (repo lama) → repo baru `c017282` "Initial release v1.0.0" + tag `v1.0.0`.
 
-### Progress
-- ✅ 9 file dibuat: index.js, _helpers.js, rabP12.js, rabHarian.js, jurnal.js, dokumenResmi.js, nominatifUpah.js, stok.js, master.js
-- ✅ akuntan.js lama dihapus
-- ✅ node --check ALL PASS, APP_OK boot sukses (port 3000)
-- ⏳ BELUM: verifikasi endpoint (curl 401 test), commit
-
-### Next Step
-1. Verifikasi: curl tanpa auth → 401 untuk sample endpoint tiap sub-router; cek daftar route = target
-2. Commit: `refactor: akuntan.js split into modular sub-routers (V2-4 batch 1)`
-3. Lanjut batch 2: `frontend/src/pages/akuntan/laporan/LaporanPage.jsx` (3.511 baris)
+### Next Step (menunggu keputusan Rozi)
+1. **V2-4 Batch 2**: `frontend/src/pages/akuntan/laporan/LaporanPage.jsx` (3.511 baris) — ditahan
+2. **V2-1 TTD Basah** — backlog (Sprint 24)
+3. **BUG-001** investigasi (500 rabP12) — prioritas terpisah
 
 ### Referensi
-- Plan: `.agent-pm/plans/V2-4-refactor-modular.md`
-- TODO.md V2-4
+- Plan V2-4: `.agent-pm/plans/V2-4-refactor-modular.md` (local, di-exclude dari repo)
+- BUG-001: `.agent-pm/working/BUG.md`
