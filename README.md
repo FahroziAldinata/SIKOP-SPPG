@@ -1,6 +1,6 @@
-# SPPG Management System
+# SIKOP SPPG
 
-SPPG Management System adalah sistem manajemen operasional Satuan Pelayanan Pemenuhan Gizi (SPPG) yang mendukung pelaksanaan program **Makan Bergizi Gratis (MBG)**. Sistem mencakup pengelolaan data penerima manfaat, perencanaan menu dan gizi, pembelian serta pembayaran bahan, akuntansi keuangan, pelaporan, dan approval alur kerja antar peran.
+SIKOP SPPG adalah sistem manajemen operasional Satuan Pelayanan Pemenuhan Gizi (SPPG) yang mendukung pelaksanaan program **Makan Bergizi Gratis (MBG)**. Sistem mencakup pengelolaan data penerima manfaat, perencanaan menu dan gizi, pembelian serta pembayaran bahan, akuntansi keuangan, pelaporan, dan approval alur kerja antar peran.
 
 ## Fitur / Modul
 
