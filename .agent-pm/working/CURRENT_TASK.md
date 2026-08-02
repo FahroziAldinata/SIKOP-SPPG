@@ -1,16 +1,18 @@
 # CURRENT TASK — 2026-08-02
 
-## Status: CYCLE_END — menunggu TASK_SELECTION
+## Status: SELESAI ✅ — V2-4 Batch 2 (approved Rozi, menunggu commit + archive)
 
-### Selesai sesi ini
-- **V2-4 Batch 1**: `backend/src/routes/akuntan.js` (4.637 baris) → folder `routes/akuntan/` 9 file (index, _helpers, 7 sub-router). Verifikasi struktural PASS (60/60 route identik, node --check 9/9, no circular dep), behavioral smoke PASS (7 sub-router + LPA/SPTJ/BAPSD 200, auth negative 401/404/400 pas). Ditemukan BUG-001 (500 rabP12, suspected pre-existing). Commit `12557a0` (repo lama) — ter-include di initial release repo baru.
-- **Release V1.0.0**: 5 dokumen (README, CHANGELOG, LICENSE, docs/ARCHITECTURE, docs/SETUP) + `backend/.env.example` + `frontend/.env.example` + sanitasi seed + rename `.hermes`→`.agent-pm`. Commit `15febb9` (repo lama) → repo baru `c017282` "Initial release v1.0.0" + tag `v1.0.0`.
+### V2-4 Batch 2: Refactor LaporanPage.jsx akuntan (3.511 → 1.517 baris)
+- **BUILD** [OpenCode deepseek-v4-flash-free]: 19 komponen di `frontend/src/components/akuntan/laporan/` + parent jadi orchestrator.
+- **VERIFICATION** [OpenCode]: PASS — body komponen VERBATIM, logika parent identik, props cocok, build PASS.
+- **CLEANUP dead import** [AGY gemini-3.6-flash-medium]: Table + DatePicker import dihapus → 1.517 baris. Verified OpenCode.
+- **USER TEST**: Rozi approved 2026-08-02 (tanpa laporan bug).
+- **Temuan minor dicatat**: komentar hilang (kosmetik), bug pre-existing `justify:` invalid CSS (NeracaSaldoTable.jsx:12, Lpd2mBuktiSection.jsx:142) — di luar scope, belum diperbaiki.
 
-### Next Step (menunggu keputusan Rozi)
-1. **V2-4 Batch 2**: `frontend/src/pages/akuntan/laporan/LaporanPage.jsx` (3.511 baris) — ditahan
-2. **V2-1 TTD Basah** — backlog (Sprint 24)
-3. **BUG-001** investigasi (500 rabP12) — prioritas terpisah
+### Next Step
+- FINALIZE: commit + push via AGY → DOCUMENTATION_ARCHIVE → CYCLE_END
+- Backlog berikut: V2-4 batch 3 (laporan.js 2.934, aslap.js 2.916, gizi.js 2.757) — menunggu TASK_SELECTION
 
 ### Referensi
-- Plan V2-4: `.agent-pm/plans/V2-4-refactor-modular.md` (local, di-exclude dari repo)
-- BUG-001: `.agent-pm/working/BUG.md`
+- Prompt: `.agent-pm/prompts/oc-v2-4-batch2-{investigasi,build,verifikasi}.txt`
+- Plan: `.agent-pm/plans/V2-4-refactor-modular.md`
