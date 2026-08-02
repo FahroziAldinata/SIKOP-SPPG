@@ -3,9 +3,26 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useApi } from '../../../hooks/useApi';
 import { useToast } from '../../../context/ToastContext';
 import { useAuth } from '../../../context/AuthContext';
-import { Table } from '../../../components/Table';
 import { Skeleton } from '../../../components/Skeleton';
-import { DatePicker } from '../../../components/DatePicker';
+import { ReportFilterBar } from '../../../components/akuntan/laporan/ReportFilterBar';
+import { ReportActionButtons } from '../../../components/akuntan/laporan/ReportActionButtons';
+import { BkuTable } from '../../../components/akuntan/laporan/BkuTable';
+import { BpTable } from '../../../components/akuntan/laporan/BpTable';
+import { NeracaSaldoTable } from '../../../components/akuntan/laporan/NeracaSaldoTable';
+import { StockBarangTable } from '../../../components/akuntan/laporan/StockBarangTable';
+import { KebutuhanBelanjaTable } from '../../../components/akuntan/laporan/KebutuhanBelanjaTable';
+import { PerPeriodeTable } from '../../../components/akuntan/laporan/PerPeriodeTable';
+import { PerBulanTable } from '../../../components/akuntan/laporan/PerBulanTable';
+import { LaporanHarianSection } from '../../../components/akuntan/laporan/LaporanHarianSection';
+import { LraTable } from '../../../components/akuntan/laporan/LraTable';
+import { Lpd2mBuktiSection } from '../../../components/akuntan/laporan/Lpd2mBuktiSection';
+import { Lpd2mTable } from '../../../components/akuntan/laporan/Lpd2mTable';
+import { BttSection } from '../../../components/akuntan/laporan/BttSection';
+import { BapsdSection } from '../../../components/akuntan/laporan/BapsdSection';
+import { SptjSection } from '../../../components/akuntan/laporan/SptjSection';
+import { LbbpSection } from '../../../components/akuntan/laporan/LbbpSection';
+import { BkkSection } from '../../../components/akuntan/laporan/BkkSection';
+import { PdfPreviewModal } from '../../../components/akuntan/laporan/PdfPreviewModal';
 
 export const LaporanPage = () => {
     const { request } = useApi();
@@ -1273,860 +1290,95 @@ export const LaporanPage = () => {
                 gap: '16px',
                 alignItems: 'flex-end'
             }}>
-                {/* Pilihan Jenis Laporan */}
-                <div style={{ flex: '1 1 200px' }}>
-                    <label style={{
-                        textTransform: 'uppercase',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        letterSpacing: '0.07em',
-                        color: 'var(--text-muted)',
-                        display: 'block',
-                        marginBottom: '6px'
-                    }}>
-                        Jenis Laporan
-                    </label>
-                    <select
-                        value={jenisLaporan}
-                        onChange={handleReportChange}
-                        className="form-field"
-                    >
-                        {isKepala ? (
-                            <>
-                                <option value="LPD2M">LPD2M (Laporan Perkembangan Dana 2 Mingguan)</option>
-                                <option value="BKU">Buku Kas Umum (BKU)</option>
-                                <option value="LRA">LRA (Laporan Realisasi Anggaran)</option>
-                                <option value="BAPSD">BAPSD (Berita Acara Pengalihan Sisa Dana)</option>
-                                <option value="STOCK_BARANG">Stock Barang (Persediaan)</option>
-                                <option value="LBBP">LBBP (Buku Belanja Bahan Pokok)</option>
-                                <option value="BKK">BKK (Buku Kas Kecil)</option>
-                            </>
-                        ) : (
-                            <>
-                                <option value="BKU">Buku Kas Umum (BKU)</option>
-                                <option value="BP_KAS">BP - Kas</option>
-                                <option value="BP_BAHAN_BAKU">BP - Bahan Baku</option>
-                                <option value="BP_OPERASIONAL">BP - Operasional</option>
-                                <option value="BP_FASILITAS">BP - Insentif Fasilitas</option>
-                                <option value="NERACA_SALDO">Neraca Saldo</option>
-                                <option value="STOCK_BARANG">Stock Barang (Persediaan)</option>
-                                <option value="BELANJA_BAHAN">Kebutuhan Belanja Bahan</option>
-                                <option value="PER_PERIODE">Laporan Per Periode (Pagu vs Realisasi)</option>
-                                <option value="PER_BULAN">Laporan Kas Bulanan</option>
-                                <option value="LR">LR (Laporan Resume Penerimaan-Pengeluaran)</option>
-                                <option value="HARIAN">Laporan Harian</option>
-                                <option value="LRA">LRA (Laporan Realisasi Anggaran)</option>
-                                <option value="LPD2M">LPD2M (Laporan Perkembangan Dana 2 Mingguan)</option>
-                                <option value="BTT_OPERASIONAL">BTT - Operasional</option>
-                                <option value="BTT_SEWA">BTT - Sewa</option>
-                                <option value="SPTJ">SPTJ (Surat Pernyataan Tanggung Jawab)</option>
-                                <option value="BAPSD">BAPSD (Berita Acara Pengalihan Sisa Dana)</option>
-                                <option value="LBBP">LBBP (Buku Belanja Bahan Pokok)</option>
-                                <option value="BKK">BKK (Buku Kas Kecil)</option>
-                            </>
-                        )}
-                    </select>
-                </div>
+                <ReportFilterBar
+                    periods={periods}
+                    periodeId={periodeId}
+                    setPeriodeId={setPeriodeId}
+                    selectedPeriodeIds={selectedPeriodeIds}
+                    setSelectedPeriodeIds={setSelectedPeriodeIds}
+                    jenisLaporan={jenisLaporan}
+                    handleReportChange={handleReportChange}
+                    isKepala={isKepala}
+                    stockTanggal={stockTanggal}
+                    setStockTanggal={setStockTanggal}
+                    setIsStockTanggalManual={setIsStockTanggalManual}
+                    belanjaTanggalMulai={belanjaTanggalMulai}
+                    setBelanjaTanggalMulai={setBelanjaTanggalMulai}
+                    belanjaTanggalSelesai={belanjaTanggalSelesai}
+                    setBelanjaTanggalSelesai={setBelanjaTanggalSelesai}
+                    handlePeriodChangeForBelanja={handlePeriodChangeForBelanja}
+                    harianTanggal={harianTanggal}
+                    setHarianTanggal={setHarianTanggal}
+                    bapsdNomorDokumen={bapsdNomorDokumen}
+                    setBapsdNomorDokumen={setBapsdNomorDokumen}
+                />
 
-                {/* Pilihan Periode */}
-                {jenisLaporan === 'LRA' || jenisLaporan === 'LPD2M' ? (
-                    <div style={{ flex: '1 1 300px' }}>
-                        <label style={{
-                            textTransform: 'uppercase',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            letterSpacing: '0.07em',
-                            color: 'var(--text-muted)',
-                            display: 'block',
-                            marginBottom: '6px'
-                        }}>
-                            Pilih Periode (Multi-Select)
-                        </label>
-                        <div style={{
-                            maxHeight: '120px',
-                            overflowY: 'auto',
-                            border: '1px solid var(--border)',
-                            borderRadius: 'var(--radius-sm)',
-                            padding: '8px 12px',
-                            backgroundColor: 'var(--bg)'
-                        }}>
-                            {periods.map(p => {
-                                const isChecked = selectedPeriodeIds.includes(p.id);
-                                return (
-                                    <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer', marginBottom: '4px' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={isChecked}
-                                            onChange={e => {
-                                                if (e.target.checked) {
-                                                    setSelectedPeriodeIds([...selectedPeriodeIds, p.id]);
-                                                } else {
-                                                    setSelectedPeriodeIds(selectedPeriodeIds.filter(id => id !== p.id));
-                                                }
-                                            }}
-                                        />
-                                        {p.tanggalMulai} - {p.tanggalSelesai} ({p.status})
-                                    </label>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ) : (
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label style={{
-                            textTransform: 'uppercase',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            letterSpacing: '0.07em',
-                            color: 'var(--text-muted)',
-                            display: 'block',
-                            marginBottom: '6px'
-                        }}>
-                            Periode
-                        </label>
-                        <select
-                            value={periodeId}
-                            onChange={e => {
-                                const selectedId = e.target.value;
-                                setIsStockTanggalManual(false);
-                                if (jenisLaporan === 'BELANJA_BAHAN') {
-                                    handlePeriodChangeForBelanja(selectedId);
-                                } else {
-                                    setPeriodeId(selectedId);
-                                }
-                            }}
-                            className="form-field"
-                        >
-                            {periods.map(p => (
-                                <option key={p.id} value={p.id}>
-                                    {p.tanggalMulai} - {p.tanggalSelesai}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
-
-
-                {jenisLaporan === 'STOCK_BARANG' && (
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label style={{
-                            textTransform: 'uppercase',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            letterSpacing: '0.07em',
-                            color: 'var(--text-muted)',
-                            display: 'block',
-                            marginBottom: '6px'
-                        }}>
-                            Tanggal Cutoff Stock (Default: Tanggal Akhir Periode)
-                        </label>
-                        <DatePicker
-                            value={stockTanggal}
-                            onChange={(val) => {
-                                setStockTanggal(val);
-                                setIsStockTanggalManual(true);
-                            }}
-                            required
-                        />
-                    </div>
-                )}
-
-                {/* Belanja Bahan-specific Date Pickers */}
-                {jenisLaporan === 'BELANJA_BAHAN' && (
-                    <>
-                        <div style={{ flex: '1 1 180px' }}>
-                            <label style={{
-                                textTransform: 'uppercase',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                letterSpacing: '0.07em',
-                                color: 'var(--text-muted)',
-                                display: 'block',
-                                marginBottom: '6px'
-                            }}>
-                                Tanggal Mulai
-                            </label>
-                            <DatePicker
-                                value={belanjaTanggalMulai}
-                                onChange={setBelanjaTanggalMulai}
-                                defaultFocusMonth={belanjaTanggalMulai}
-                                required
-                            />
-                        </div>
-                        <div style={{ flex: '1 1 180px' }}>
-                            <label style={{
-                                textTransform: 'uppercase',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                letterSpacing: '0.07em',
-                                color: 'var(--text-muted)',
-                                display: 'block',
-                                marginBottom: '6px'
-                            }}>
-                                Tanggal Selesai
-                            </label>
-                            <DatePicker
-                                value={belanjaTanggalSelesai}
-                                onChange={setBelanjaTanggalSelesai}
-                                defaultFocusMonth={belanjaTanggalSelesai}
-                                required
-                            />
-                        </div>
-                    </>
-                )}
-
-                {/* Laporan Harian-specific Date Picker */}
-                {jenisLaporan === 'HARIAN' && (
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label style={{
-                            textTransform: 'uppercase',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            letterSpacing: '0.07em',
-                            color: 'var(--text-muted)',
-                            display: 'block',
-                            marginBottom: '6px'
-                        }}>
-                            Tanggal
-                        </label>
-                        <DatePicker
-                            value={harianTanggal}
-                            onChange={setHarianTanggal}
-                            required
-                        />
-                    </div>
-                )}
-
-                {/* Buttons depending on report type */}
-                <div style={{ flex: '0 0 auto', display: 'flex', gap: '8px' }}>
-                    {jenisLaporan === 'LRA' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadLra}
-                                disabled={lraLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: lraLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: lraLoading ? 0.65 : 1
-                                }}
-                            >
-                                {lraLoading ? 'Memuat…' : 'Tampilkan LRA'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewLraPdf}
-                                disabled={lraPdfLoading || selectedPeriodeIds.length < 2}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: (lraPdfLoading || selectedPeriodeIds.length < 2) ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: (lraPdfLoading || selectedPeriodeIds.length < 2) ? 0.65 : 1
-                                }}
-                            >
-                                {lraPdfLoading ? 'Membuat PDF…' : '📄 Preview PDF LRA'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={exportLraExcel}
-                                disabled={lraExcelLoading || selectedPeriodeIds.length < 2}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: '#217346',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: (lraExcelLoading || selectedPeriodeIds.length < 2) ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: (lraExcelLoading || selectedPeriodeIds.length < 2) ? 0.65 : 1
-                                }}
-                            >
-                                {lraExcelLoading ? 'Mengekspor…' : '📊 Export Excel LRA'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'LPD2M' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadLpd2m}
-                                disabled={lpd2mLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: lpd2mLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: lpd2mLoading ? 0.65 : 1
-                                }}
-                            >
-                                {lpd2mLoading ? 'Memuat…' : 'Tampilkan LPD2M'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewLpd2mPdf}
-                                disabled={lpd2mPdfLoading || !selectedPeriodeIds.length}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: (lpd2mPdfLoading || !selectedPeriodeIds.length) ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: (lpd2mPdfLoading || !selectedPeriodeIds.length) ? 0.65 : 1
-                                }}
-                            >
-                                {lpd2mPdfLoading ? 'Membuat PDF…' : '📄 Preview PDF LPD2M'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'BKU' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={previewBkuPdf}
-                                disabled={pdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: pdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: pdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {pdfLoading ? 'Membuat PDF…' : '📄 Preview PDF'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewCatatanPdf}
-                                disabled={pdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: pdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: pdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {pdfLoading ? 'Membuat PDF…' : '📄 Preview Catatan Pengeluaran'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={exportBkuExcel}
-                                disabled={bkuExcelLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: '#217346',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: bkuExcelLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: bkuExcelLoading ? 0.65 : 1
-                                }}
-                            >
-                                {bkuExcelLoading ? 'Mengekspor…' : '📊 Export Excel BKU'}
-                            </button>
-                        </>
-                    )}
-                    {(jenisLaporan === 'BP_KAS' || jenisLaporan === 'BP_BAHAN_BAKU' || jenisLaporan === 'BP_OPERASIONAL' || jenisLaporan === 'BP_FASILITAS') && (
-                        <button
-                            type="button"
-                            onClick={previewBpPdf}
-                            disabled={pdfLoading || !bpData}
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: 'var(--bg-elevated)',
-                                color: 'var(--text)',
-                                border: '1px solid var(--border)',
-                                borderRadius: 'var(--radius-sm)',
-                                cursor: (pdfLoading || !bpData) ? 'not-allowed' : 'pointer',
-                                fontWeight: '600',
-                                fontSize: '14px',
-                                opacity: (pdfLoading || !bpData) ? 0.65 : 1
-                            }}
-                        >
-                            {pdfLoading ? 'Membuat PDF…' : '📄 Preview PDF BP'}
-                        </button>
-                    )}
-                    {jenisLaporan === 'STOCK_BARANG' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={() => loadStockBarang(periodeId, stockTanggal)}
-                                className="btn-secondary"
-                                style={{
-                                    padding: '10px 20px',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Refresh
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewStockBarangPdf}
-                                disabled={pdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: pdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: pdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {pdfLoading ? 'Membuat PDF...' : '\uD83D\uDCC4 Preview PDF Stock Barang'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={exportStockExcel}
-                                disabled={stockExcelLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: '#217346',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: stockExcelLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: stockExcelLoading ? 0.65 : 1
-                                }}
-                            >
-                                {stockExcelLoading ? 'Mengekspor…' : '📊 Export Excel Stock'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'BELANJA_BAHAN' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadKebutuhanBelanja}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Tampilkan Laporan
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewBelanjaPdf}
-                                disabled={pdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: pdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: pdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {pdfLoading ? 'Membuat PDF...' : '\uD83D\uDCC4 Preview PDF'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'PER_PERIODE' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadLaporanPerPeriode}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Tampilkan Laporan
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewPerPeriodePdf}
-                                disabled={pdfLoading || !perPeriodeData}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: (pdfLoading || !perPeriodeData) ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: (pdfLoading || !perPeriodeData) ? 0.65 : 1
-                                }}
-                            >
-                                {pdfLoading ? 'Membuat PDF...' : '\uD83D\uDCC4 Preview PDF'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'PER_BULAN' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadLaporanPerBulan}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Tampilkan Laporan
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewPerBulanPdf}
-                                disabled={pdfLoading || !perBulanData}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: (pdfLoading || !perBulanData) ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: (pdfLoading || !perBulanData) ? 0.65 : 1
-                                }}
-                            >
-                                {pdfLoading ? 'Membuat PDF...' : '\uD83D\uDCC4 Preview PDF'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'BTT_OPERASIONAL' || jenisLaporan === 'BTT_SEWA' ? (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadBttData}
-                                disabled={bttLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: bttLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: bttLoading ? 0.65 : 1
-                                }}
-                            >
-                                {bttLoading ? 'Memuat...' : 'Tampilkan Data BTT'}
-                            </button>
-                            {bttData && (
-                                <button
-                                    type="button"
-                                    onClick={previewBttPdf}
-                                    disabled={bttPdfLoading}
-                                    style={{
-                                        padding: '10px 20px',
-                                        backgroundColor: 'var(--bg-elevated)',
-                                        color: 'var(--text)',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: 'var(--radius-sm)',
-                                        cursor: bttPdfLoading ? 'not-allowed' : 'pointer',
-                                        fontWeight: '600',
-                                        fontSize: '14px',
-                                        opacity: bttPdfLoading ? 0.65 : 1
-                                    }}
-                                >
-                                    {bttPdfLoading ? 'Membuat PDF...' : '\uD83D\uDCC4 Preview PDF BTT'}
-                                </button>
-                            )}
-                        </>
-                    ) : null}
-                    {jenisLaporan === 'LR' && (
-                        <button
-                            type="button"
-                            onClick={previewLrPdf}
-                            disabled={lrLoading}
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: 'var(--bg-elevated)',
-                                color: 'var(--text)',
-                                border: '1px solid var(--border)',
-                                borderRadius: 'var(--radius-sm)',
-                                cursor: lrLoading ? 'not-allowed' : 'pointer',
-                                fontWeight: '600',
-                                fontSize: '14px',
-                                opacity: lrLoading ? 0.65 : 1
-                            }}
-                        >
-                            {lrLoading ? 'Membuat PDF…' : '\uD83D\uDCC4 Preview PDF LR'}
-                        </button>
-                    )}
-                    {jenisLaporan === 'HARIAN' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadLaporanHarian}
-                                disabled={harianLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: harianLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: harianLoading ? 0.65 : 1
-                                }}
-                            >
-                                {harianLoading ? 'Memuat…' : 'Tampilkan Laporan'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewHarianPdf}
-                                disabled={harianPdfLoading || !harianData}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: (harianPdfLoading || !harianData) ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: (harianPdfLoading || !harianData) ? 0.65 : 1
-                                }}
-                            >
-                                {harianPdfLoading ? 'Membuat PDF…' : '📄 Preview PDF'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'BAPSD' && (
-                        <>
-                            <div style={{ flex: '1 1 200px' }}>
-                                <label style={{
-                                    textTransform: 'uppercase',
-                                    fontSize: '11px',
-                                    fontWeight: 700,
-                                    letterSpacing: '0.07em',
-                                    color: 'var(--text-muted)',
-                                    display: 'block',
-                                    marginBottom: '6px'
-                                }}>
-                                    Nomor Dokumen
-                                </label>
-                                <input
-                                    type="text"
-                                    className="form-field"
-                                    placeholder="Contoh: 001/BAPSD/2026"
-                                    value={bapsdNomorDokumen}
-                                    onChange={e => setBapsdNomorDokumen(e.target.value)}
-                                />
-                            </div>
-                            <button
-                                type="button"
-                                onClick={loadBapsd}
-                                disabled={bapsdLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: bapsdLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: bapsdLoading ? 0.65 : 1
-                                }}
-                            >
-                                {bapsdLoading ? 'Memuat…' : 'Tampilkan BAPSD'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewBapsdPdf}
-                                disabled={bapsdPdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: bapsdPdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: bapsdPdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {bapsdPdfLoading ? 'Membuat PDF…' : '📄 Preview PDF BAPSD'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'SPTJ' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadSptj}
-                                disabled={sptjLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: sptjLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: sptjLoading ? 0.65 : 1
-                                }}
-                            >
-                                {sptjLoading ? 'Memuat…' : 'Tampilkan SPTJ'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewSptjPdf}
-                                disabled={sptjPdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: sptjPdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: sptjPdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {sptjPdfLoading ? 'Membuat PDF…' : '📄 Preview PDF SPTJ'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'LBBP' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadLbbp}
-                                disabled={lbbpLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: lbbpLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: lbbpLoading ? 0.65 : 1
-                                }}
-                            >
-                                {lbbpLoading ? 'Memuat…' : 'Tampilkan LBBP'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewLbbpPdf}
-                                disabled={lbbpPdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: lbbpPdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: lbbpPdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {lbbpPdfLoading ? 'Membuat PDF…' : '📄 Preview PDF LBBP'}
-                            </button>
-                        </>
-                    )}
-                    {jenisLaporan === 'BKK' && (
-                        <>
-                            <button
-                                type="button"
-                                onClick={loadBkk}
-                                disabled={bkkLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: bkkLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: bkkLoading ? 0.65 : 1
-                                }}
-                            >
-                                {bkkLoading ? 'Memuat…' : 'Tampilkan BKK'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={previewBkkPdf}
-                                disabled={bkkPdfLoading}
-                                style={{
-                                    padding: '10px 20px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: bkkPdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    opacity: bkkPdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {bkkPdfLoading ? 'Membuat PDF…' : '📄 Preview PDF BKK'}
-                            </button>
-                        </>
-                    )}
-                </div>
+                <ReportActionButtons
+                    handleReportChange={handleReportChange}
+                    jenisLaporan={jenisLaporan}
+                    loadLra={loadLra}
+                    lraLoading={lraLoading}
+                    previewLraPdf={previewLraPdf}
+                    lraPdfLoading={lraPdfLoading}
+                    exportLraExcel={exportLraExcel}
+                    lraExcelLoading={lraExcelLoading}
+                    loadLpd2m={loadLpd2m}
+                    lpd2mLoading={lpd2mLoading}
+                    previewLpd2mPdf={previewLpd2mPdf}
+                    lpd2mPdfLoading={lpd2mPdfLoading}
+                    previewBkuPdf={previewBkuPdf}
+                    previewCatatanPdf={previewCatatanPdf}
+                    pdfLoading={pdfLoading}
+                    exportBkuExcel={exportBkuExcel}
+                    bkuExcelLoading={bkuExcelLoading}
+                    previewBpPdf={previewBpPdf}
+                    bpData={bpData}
+                    loadStockBarang={loadStockBarang}
+                    stockTanggal={stockTanggal}
+                    previewStockBarangPdf={previewStockBarangPdf}
+                    exportStockExcel={exportStockExcel}
+                    stockExcelLoading={stockExcelLoading}
+                    loadKebutuhanBelanja={loadKebutuhanBelanja}
+                    previewBelanjaPdf={previewBelanjaPdf}
+                    loadLaporanPerPeriode={loadLaporanPerPeriode}
+                    perPeriodeData={perPeriodeData}
+                    previewPerPeriodePdf={previewPerPeriodePdf}
+                    loadLaporanPerBulan={loadLaporanPerBulan}
+                    perBulanData={perBulanData}
+                    previewPerBulanPdf={previewPerBulanPdf}
+                    loadBttData={loadBttData}
+                    bttLoading={bttLoading}
+                    previewBttPdf={previewBttPdf}
+                    bttPdfLoading={bttPdfLoading}
+                    bttData={bttData}
+                    previewLrPdf={previewLrPdf}
+                    lrLoading={lrLoading}
+                    loadLaporanHarian={loadLaporanHarian}
+                    harianLoading={harianLoading}
+                    previewHarianPdf={previewHarianPdf}
+                    harianPdfLoading={harianPdfLoading}
+                    harianData={harianData}
+                    loadBapsd={loadBapsd}
+                    bapsdLoading={bapsdLoading}
+                    previewBapsdPdf={previewBapsdPdf}
+                    bapsdPdfLoading={bapsdPdfLoading}
+                    bapsdNomorDokumen={bapsdNomorDokumen}
+                    setBapsdNomorDokumen={setBapsdNomorDokumen}
+                    loadSptj={loadSptj}
+                    sptjLoading={sptjLoading}
+                    previewSptjPdf={previewSptjPdf}
+                    sptjPdfLoading={sptjPdfLoading}
+                    loadLbbp={loadLbbp}
+                    lbbpLoading={lbbpLoading}
+                    previewLbbpPdf={previewLbbpPdf}
+                    lbbpPdfLoading={lbbpPdfLoading}
+                    loadBkk={loadBkk}
+                    bkkLoading={bkkLoading}
+                    previewBkkPdf={previewBkkPdf}
+                    bkkPdfLoading={bkkPdfLoading}
+                    selectedPeriodeIds={selectedPeriodeIds}
+                    periodeId={periodeId}
+                />
             </div>
 
             {/* Loading Skeleton */}
@@ -2142,524 +1394,42 @@ export const LaporanPage = () => {
 
             {/* Render 1. BKU Table */}
             {!loading && jenisLaporan === 'BKU' && (
-                <Table
-                    columns={[
-                        { key: 'tanggal', header: 'Tanggal', align: 'center' },
-                        { key: 'noBukti', header: 'No Bukti', align: 'center' },
-                        { key: 'uraian', header: 'Uraian' },
-                        {
-                            key: 'debet',
-                            header: 'Debet',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                    {Number(v) > 0 ? `Rp${Number(v).toLocaleString('id-ID')}` : '—'}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'kredit',
-                            header: 'Kredit',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                    {Number(v) > 0 ? `Rp${Number(v).toLocaleString('id-ID')}` : '—'}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'saldoBerjalan',
-                            header: 'Saldo Berjalan',
-                            align: 'center',
-                            render: (v) => (
-                                <strong style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
-                                    Rp{Number(v).toLocaleString('id-ID')}
-                                </strong>
-                            )
-                        }
-                    ]}
-                    data={reportData}
-                    emptyText="Tidak ada data untuk laporan terpilih pada periode ini."
-                />
+                <BkuTable reportData={reportData} />
             )}
 
             {/* Render 2. Buku Pembantu (4 subtypes) */}
             {!loading && (jenisLaporan === 'BP_KAS' || jenisLaporan === 'BP_BAHAN_BAKU' || jenisLaporan === 'BP_OPERASIONAL' || jenisLaporan === 'BP_FASILITAS') && (
-                bpData ? (
-                    <div>
-                        {/* Summary header */}
-                        <div style={{
-                            display: 'flex', gap: '24px', flexWrap: 'wrap',
-                            marginBottom: '16px', padding: '16px',
-                            background: 'var(--bg-elevated)', border: '1px solid var(--border)',
-                            borderRadius: 'var(--radius-md)', fontSize: '14px'
-                        }}>
-                            <div><span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Akun:</span> {bpData.namaAkun}</div>
-                            <div><span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Saldo Awal:</span> Rp{Number(bpData.saldoAwal).toLocaleString('id-ID')}</div>
-                            <div><span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Saldo Akhir:</span> <strong>Rp{Number(bpData.saldoAkhir).toLocaleString('id-ID')}</strong></div>
-                        </div>
-                        <Table
-                            columns={[
-                                { key: 'tanggal', header: 'Tanggal', align: 'center' },
-                                { key: 'noBukti', header: 'No Bukti', align: 'center' },
-                                { key: 'uraian', header: 'Uraian' },
-                                {
-                                    key: 'debet',
-                                    header: 'Debet',
-                                    align: 'center',
-                                    render: (v) => (
-                                        <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--color-success)' }}>
-                                            {Number(v) > 0 ? `Rp${Number(v).toLocaleString('id-ID')}` : '—'}
-                                        </span>
-                                    )
-                                },
-                                {
-                                    key: 'kredit',
-                                    header: 'Kredit',
-                                    align: 'center',
-                                    render: (v) => (
-                                        <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--color-danger)' }}>
-                                            {Number(v) > 0 ? `Rp${Number(v).toLocaleString('id-ID')}` : '—'}
-                                        </span>
-                                    )
-                                },
-                                {
-                                    key: 'saldoBerjalan',
-                                    header: 'Saldo',
-                                    align: 'center',
-                                    render: (v) => (
-                                        <strong style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                            Rp{Number(v).toLocaleString('id-ID')}
-                                        </strong>
-                                    )
-                                },
-                                ...(jenisLaporan !== 'BP_KAS' ? [{
-                                    key: 'sumberKas',
-                                    header: 'Keterangan',
-                                    align: 'center',
-                                    render: (v) => <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{v || '—'}</span>
-                                }] : [])
-                            ]}
-                            data={bpData.data || []}
-                            emptyText="Tidak ada transaksi pada buku pembantu ini."
-                        />
-                    </div>
-                ) : (
-                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                        Tidak ada data. Pastikan setup lembaga dan akun sudah terkonfigurasi.
-                    </div>
-                )
+                <BpTable bpData={bpData} jenisLaporan={jenisLaporan} />
             )}
 
             {/* Render Neraca Saldo */}
             {!loading && jenisLaporan === 'NERACA_SALDO' && (
-                neracaData ? (
-                    <div>
-                        {/* Verification badge & PDF Button */}
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justify: 'space-between',
-                            gap: '12px',
-                            marginBottom: '16px',
-                            flexWrap: 'wrap'
-                        }}>
-                            <div style={{
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                padding: '10px 16px',
-                                borderRadius: 'var(--radius-sm)',
-                                fontSize: '13px',
-                                fontWeight: 600,
-                                background: neracaData.verifikasi.danaBiayaCocok
-                                    ? 'rgba(34,197,94,0.12)'
-                                    : 'rgba(239,68,68,0.12)',
-                                border: `1px solid ${neracaData.verifikasi.danaBiayaCocok ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
-                                color: neracaData.verifikasi.danaBiayaCocok ? '#16a34a' : '#dc2626',
-                            }}>
-                                {neracaData.verifikasi.pesan}
-                            </div>
-                            <button
-                                type="button"
-                                onClick={previewNeracaSaldoPdf}
-                                disabled={pdfLoading}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    color: 'var(--text)',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: pdfLoading ? 'not-allowed' : 'pointer',
-                                    fontWeight: '600',
-                                    fontSize: '13px',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    opacity: pdfLoading ? 0.65 : 1
-                                }}
-                            >
-                                {pdfLoading ? 'Membuat PDF...' : '📄 Preview PDF'}
-                            </button>
-                        </div>
-                        <Table
-                            columns={[
-                                { key: 'kode', header: 'Kode', render: (v) => <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{v}</span> },
-                                { key: 'nama', header: 'Nama Akun' },
-                                {
-                                    key: 'tipe', header: 'Tipe',
-                                    render: (v) => {
-                                        const color = { KAS: '#0ea5e9', DANA: '#8b5cf6', BIAYA: '#f97316', PAJAK: '#64748b' }[v] || 'inherit';
-                                        return <span style={{ color, fontWeight: 600, fontSize: '12px' }}>{v}</span>;
-                                    }
-                                },
-                                {
-                                    key: 'saldoAwal', header: 'Saldo Awal', align: 'center',
-                                    render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Number(v) !== 0 ? `Rp${Number(v).toLocaleString('id-ID')}` : '—'}</span>
-                                },
-                                {
-                                    key: 'totalDebet', header: 'Total Debet', align: 'center',
-                                    render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums', color: Number(v) > 0 ? 'var(--color-success)' : 'inherit' }}>{Number(v) > 0 ? `Rp${Number(v).toLocaleString('id-ID')}` : '—'}</span>
-                                },
-                                {
-                                    key: 'totalKredit', header: 'Total Kredit', align: 'center',
-                                    render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums', color: Number(v) > 0 ? 'var(--color-danger)' : 'inherit' }}>{Number(v) > 0 ? `Rp${Number(v).toLocaleString('id-ID')}` : '—'}</span>
-                                },
-                                {
-                                    key: 'saldoAkhir', header: 'Saldo Akhir', align: 'center',
-                                    render: (v) => <strong style={{ fontVariantNumeric: 'tabular-nums' }}>Rp{Number(v).toLocaleString('id-ID')}</strong>
-                                },
-                            ]}
-                            data={neracaData.akun || []}
-                            emptyText="Tidak ada data akun untuk periode ini."
-                        />
-                    </div>
-                ) : (
-                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
-                        Tidak ada data. Pastikan setup lembaga sudah terkonfigurasi.
-                    </div>
-                )
+                <NeracaSaldoTable neracaData={neracaData} previewNeracaSaldoPdf={previewNeracaSaldoPdf} pdfLoading={pdfLoading} />
             )}
 
             {/* Render 3. Stock Barang Table */}
             {!loading && jenisLaporan === 'STOCK_BARANG' && (
-                <Table
-                    columns={[
-                        { key: 'nama', header: 'Nama Bahan' },
-                        { key: 'satuan', header: 'Satuan' },
-                        {
-                            key: 'saldoAwalQty',
-                            header: 'Saldo Awal',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                    {Number(v).toLocaleString('id-ID')}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'totalMasukQty',
-                            header: 'Total Masuk',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ color: 'var(--color-success)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
-                                    {Number(v).toLocaleString('id-ID')}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'totalKeluarQty',
-                            header: 'Total Keluar',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ color: 'var(--color-danger)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
-                                    {Number(v).toLocaleString('id-ID')}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'saldoAkhirQty',
-                            header: 'Saldo Akhir',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
-                                    {Number(v).toLocaleString('id-ID')}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'hargaBeliTerakhir',
-                            header: 'Harga Beli Terakhir',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                    Rp{Number(v).toLocaleString('id-ID')}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'nilaiStock',
-                            header: 'Nilai Stock',
-                            align: 'center',
-                            render: (v) => (
-                                <strong style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
-                                    Rp{Number(v).toLocaleString('id-ID')}
-                                </strong>
-                            )
-                        }
-                    ]}
-                    data={stockData}
-                    emptyText="Tidak ada data stock barang untuk periode dan tanggal terpilih."
-                />
+                <StockBarangTable stockData={stockData} />
             )}
 
             {/* Render 4. Kebutuhan Belanja Bahan Table */}
-            {!loading && jenisLaporan === 'BELANJA_BAHAN' && belanjaData !== null && (
-                <Table
-                    columns={[
-                        { key: 'nama', header: 'Nama Bahan Pokok' },
-                        { key: 'satuan', header: 'Satuan' },
-                        {
-                            key: 'totalBeratKotorGr',
-                            header: 'Berat Kotor (kg)',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                    {(Number(v) / 1000).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'totalBeratBersihGr',
-                            header: 'Berat Bersih (kg)',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                    {(Number(v) / 1000).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'totalEstimasiBiaya',
-                            header: 'Estimasi Biaya',
-                            align: 'center',
-                            render: (v) => (
-                                <strong style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
-                                    Rp{Number(v).toLocaleString('id-ID')}
-                                </strong>
-                            )
-                        }
-                    ]}
-                    data={belanjaData}
-                    emptyText="Tidak ada data kebutuhan belanja bahan untuk periode dan tanggal terpilih."
-                />
-            )}
-            {!loading && jenisLaporan === 'BELANJA_BAHAN' && belanjaData === null && (
-                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    Silakan tentukan rentang tanggal dan klik "Tampilkan Laporan".
-                </p>
+            {!loading && jenisLaporan === 'BELANJA_BAHAN' && (
+                <KebutuhanBelanjaTable belanjaData={belanjaData} />
             )}
 
             {/* Render 5. Laporan Per Periode Table */}
-            {!loading && jenisLaporan === 'PER_PERIODE' && perPeriodeData !== null && (
-                <div>
-                    <Table
-                        columns={[
-                            { key: 'kategori', header: 'Kategori Pos Anggaran' },
-                            {
-                                key: 'rab',
-                                header: 'Anggaran (RAB)',
-                                align: 'center',
-                                render: (v) => (
-                                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                        Rp{v.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
-                                    </span>
-                                )
-                            },
-                            {
-                                key: 'aktual',
-                                header: 'Realisasi (Aktual)',
-                                align: 'center',
-                                render: (v, row) => (
-                                    <span style={{ color: row.isEstimasi ? 'var(--color-primary)' : 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-                                        Rp{v.toLocaleString('id-ID', { maximumFractionDigits: 0 })}{row.isEstimasi ? ' (estimasi)' : ''}
-                                    </span>
-                                )
-                            },
-                            {
-                                key: 'selisih',
-                                header: 'Selisih (Sisa)',
-                                align: 'center',
-                                render: (v) => (
-                                    <strong style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
-                                        Rp{v.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
-                                    </strong>
-                                )
-                            }
-                        ]}
-                        data={[
-                            {
-                                kategori: 'Bahan Makanan (Pendidikan)',
-                                rab: perPeriodeData.bahanMakanan.pendidikan.rab,
-                                aktual: perPeriodeData.bahanMakanan.pendidikan.aktual,
-                                selisih: perPeriodeData.bahanMakanan.pendidikan.selisih,
-                                isEstimasi: true
-                            },
-                            {
-                                kategori: 'Bahan Makanan (Posyandu)',
-                                rab: perPeriodeData.bahanMakanan.posyandu.rab,
-                                aktual: perPeriodeData.bahanMakanan.posyandu.aktual,
-                                selisih: perPeriodeData.bahanMakanan.posyandu.selisih,
-                                isEstimasi: true
-                            },
-                            {
-                                kategori: 'Biaya Operasional',
-                                rab: perPeriodeData.operasional.rab,
-                                aktual: perPeriodeData.operasional.aktual,
-                                selisih: perPeriodeData.operasional.selisih,
-                                isEstimasi: false
-                            },
-                            {
-                                kategori: 'Biaya Insentif Fasilitas',
-                                rab: perPeriodeData.insentifFasilitas.rab,
-                                aktual: perPeriodeData.insentifFasilitas.aktual,
-                                selisih: perPeriodeData.insentifFasilitas.selisih,
-                                isEstimasi: false
-                            }
-                        ]}
-                    />
-                    <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '12px' }}>
-                        * Catatan: Realisasi Bahan Makanan untuk Pendidikan &amp; Posyandu dihitung menggunakan metode alokasi proporsional berdasarkan rasio RAB (PROPORSIONAL_RAB).
-                    </p>
-                </div>
-            )}
-            {!loading && jenisLaporan === 'PER_PERIODE' && perPeriodeData === null && (
-                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    Silakan klik tombol "Tampilkan Laporan" untuk memuat data.
-                </p>
+            {!loading && jenisLaporan === 'PER_PERIODE' && (
+                <PerPeriodeTable perPeriodeData={perPeriodeData} />
             )}
 
             {/* Render 6. Laporan Per Bulan Table */}
-            {!loading && jenisLaporan === 'PER_BULAN' && perBulanData !== null && (
-                <Table
-                    columns={[
-                        {
-                            key: 'month',
-                            header: 'Bulan',
-                            render: (_, row) => formatIndoMonth(row.year, row.month)
-                        },
-                        {
-                            key: 'totalMasuk',
-                            header: 'Total Masuk',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ color: 'var(--color-success)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
-                                    Rp{v.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'totalKeluar',
-                            header: 'Total Keluar',
-                            align: 'center',
-                            render: (v) => (
-                                <span style={{ color: 'var(--color-danger)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>
-                                    Rp{v.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
-                                </span>
-                            )
-                        },
-                        {
-                            key: 'key',
-                            header: 'Saldo Bersih',
-                            align: 'center',
-                            render: (_, row) => {
-                                const saldoBersih = row.totalMasuk - row.totalKeluar;
-                                return (
-                                    <strong style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
-                                        Rp{saldoBersih.toLocaleString('id-ID', { maximumFractionDigits: 0 })}
-                                    </strong>
-                                );
-                            }
-                        }
-                    ]}
-                    data={perBulanData}
-                    emptyText="Tidak ada data kas bulanan untuk periode terpilih."
-                />
-            )}
-            {!loading && jenisLaporan === 'PER_BULAN' && perBulanData === null && (
-                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    Silakan klik tombol "Tampilkan Laporan" untuk memuat data.
-                </p>
+            {!loading && jenisLaporan === 'PER_BULAN' && (
+                <PerBulanTable perBulanData={perBulanData} formatIndoMonth={formatIndoMonth} />
             )}
 
             {/* Render 7. Laporan Harian */}
-            {!harianLoading && jenisLaporan === 'HARIAN' && harianData && (
-                <div>
-                    <div style={{ marginBottom: '20px', padding: '16px', backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-                        <p style={{ margin: '4px 0' }}><strong>Menu:</strong> {harianData.menuDescription || '\u2014'}</p>
-                        <p style={{ margin: '4px 0' }}><strong>Total Penerima:</strong> {harianData.totalPenerima} orang</p>
-                    </div>
-
-                    <h4 style={{ marginBottom: '8px' }}>Penerima Manfaat</h4>
-                    <Table
-                        columns={[
-                            { key: 'kategori', header: 'Kategori' },
-                            { key: 'lakiLaki', header: 'Laki-laki', align: 'center' },
-                            { key: 'perempuan', header: 'Perempuan', align: 'center' },
-                            { key: 'total', header: 'Total', align: 'center' }
-                        ]}
-                        data={harianData.penerimaManfaat}
-                        emptyText="Tidak ada data penerima manfaat untuk hari ini."
-                    />
-
-                    <h4 style={{ marginTop: '24px', marginBottom: '8px' }}>Belanja</h4>
-                    {harianData.belanja.length === 0 ? (
-                        <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>Tidak ada belanja untuk tanggal ini.</p>
-                    ) : (
-                        harianData.belanja.map(po => (
-                            <div key={po.poId} style={{ marginBottom: '16px', padding: '12px', backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-                                <p style={{ margin: '4px 0', fontWeight: 600 }}>
-                                    Supplier: {po.supplier} | Status: {po.status} | Total: Rp{po.totalBelanja.toLocaleString('id-ID')}
-                                </p>
-                                <Table
-                                    columns={[
-                                        { key: 'bahan', header: 'Bahan' },
-                                        { key: 'qty', header: 'Qty', align: 'center', render: (v) => Number(v).toLocaleString('id-ID', { minimumFractionDigits: 2 }) },
-                                        { key: 'satuan', header: 'Satuan' },
-                                        { key: 'hargaSatuan', header: 'Harga', align: 'center', render: (v) => `Rp${Number(v).toLocaleString('id-ID')}` },
-                                        { key: 'subtotal', header: 'Subtotal', align: 'center', render: (v) => `Rp${Number(v).toLocaleString('id-ID')}` }
-                                    ]}
-                                    data={po.items}
-                                />
-                            </div>
-                        ))
-                    )}
-
-                    <h4 style={{ marginTop: '24px', marginBottom: '8px' }}>Biaya</h4>
-                    <Table
-                        columns={[
-                            { key: 'nomorBukti', header: 'No Bukti' },
-                            { key: 'uraian', header: 'Uraian' },
-                            { key: 'akunDanaBiaya', header: 'Akun Biaya' },
-                            { key: 'nominal', header: 'Nominal', align: 'center', render: (v) => `Rp${Number(v).toLocaleString('id-ID')}` }
-                        ]}
-                        data={harianData.biaya}
-                        emptyText="Tidak ada biaya untuk tanggal ini."
-                    />
-
-                    <div style={{ marginTop: '20px', padding: '16px', backgroundColor: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                        <p style={{ margin: '4px 0' }}><strong>Total Belanja:</strong> Rp{harianData.totalBelanja.toLocaleString('id-ID')}</p>
-                        <p style={{ margin: '4px 0' }}><strong>Total Biaya Keluar:</strong> Rp{harianData.totalBiayaKeluar.toLocaleString('id-ID')}</p>
-                        <p style={{ margin: '4px 0', fontWeight: 700 }}>
-                            <strong>Grand Total:</strong> Rp{(harianData.totalBelanja + harianData.totalBiayaKeluar).toLocaleString('id-ID')}
-                        </p>
-                    </div>
-                </div>
-            )}
-            {!harianLoading && jenisLaporan === 'HARIAN' && !harianData && (
-                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    Pilih tanggal dan klik &quot;Tampilkan Laporan&quot; untuk memuat data.
-                </p>
+            {!harianLoading && jenisLaporan === 'HARIAN' && (
+                <LaporanHarianSection harianData={harianData} />
             )}
 
             {!loading && jenisLaporan === 'LR' && (
@@ -2669,618 +1439,56 @@ export const LaporanPage = () => {
             )}
 
             {/* Render 10. LRA Multi-Periode */}
-            {!lraLoading && jenisLaporan === 'LRA' && lraData && (() => {
-                const katMap = {
-                    BAHAN_MAKANAN: 'Bahan Makanan',
-                    OPERASIONAL: 'Operasional',
-                    INSENTIF_FASILITAS: 'Insentif / Fasilitas'
-                };
-                const categories = ['BAHAN_MAKANAN', 'OPERASIONAL', 'INSENTIF_FASILITAS'];
-                const byKat = Object.fromEntries(lraData.kategoriSummary.map(r => [r.kategori, r]));
-                const totalRow = byKat['TOTAL'] || lraData.kategoriSummary.find(r => r.isTotal) || {};
-
-                return (
-                    <>
-                        <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)', boxShadow: 'var(--shadow)' }}>
-                            <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '13px' }}>
-                                <thead>
-                                    <tr style={{ backgroundColor: 'var(--table-header-bg)' }}>
-                                        <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'left' }}></th>
-                                        {categories.map(kat => (
-                                            <th key={kat} colSpan={3} style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>
-                                                {katMap[kat]}
-                                            </th>
-                                        ))}
-                                        <th colSpan={3} style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center', borderLeft: '2px solid var(--border)' }}>
-                                            Total Keseluruhan
-                                        </th>
-                                    </tr>
-                                    <tr style={{ backgroundColor: 'var(--table-header-bg)' }}>
-                                        <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}></th>
-                                        {categories.map(kat => (
-                                            <React.Fragment key={kat}>
-                                                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>RAB</th>
-                                                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center' }}>Realisasi</th>
-                                                <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center' }}>%</th>
-                                            </React.Fragment>
-                                        ))}
-                                        <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center', borderLeft: '2px solid var(--border)' }}>Total RAB</th>
-                                        <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center' }}>Total Realisasi</th>
-                                        <th style={{ padding: '12px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', textAlign: 'center' }}>% Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {lraData.periodeList.map(p => (
-                                        <tr key={p.id}>
-                                            <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: '1px solid var(--border)' }}>{p.label}</td>
-                                            {categories.map(kat => {
-                                                const row = byKat[kat] || {};
-                                                const rab = row[`rab_${p.id}`] || 0;
-                                                const aktual = row[`aktual_${p.id}`] || 0;
-                                                const persen = row[`persen_${p.id}`] || 0;
-                                                return (
-                                                    <React.Fragment key={kat}>
-                                                        <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'center', borderLeft: '1px solid var(--border)', fontVariantNumeric: 'tabular-nums' }}>
-                                                            Rp{rab.toLocaleString('id-ID')}
-                                                        </td>
-                                                        <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
-                                                            Rp{aktual.toLocaleString('id-ID')}
-                                                        </td>
-                                                        <td style={{
-                                                            padding: '16px 18px', fontSize: 14, borderBottom: '1px solid var(--border)', textAlign: 'center', fontVariantNumeric: 'tabular-nums', fontWeight: 600,
-                                                            color: persen >= 90 ? 'var(--color-success)' : persen >= 60 ? '#d97706' : 'var(--color-danger)'
-                                                        }}>
-                                                            {persen.toFixed(1)}%
-                                                        </td>
-                                                    </React.Fragment>
-                                                );
-                                            })}
-                                            {(() => {
-                                                const rab = totalRow[`rab_${p.id}`] || 0;
-                                                const aktual = totalRow[`aktual_${p.id}`] || 0;
-                                                const persen = totalRow[`persen_${p.id}`] || 0;
-                                                return (
-                                                    <React.Fragment>
-                                                        <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'center', borderLeft: '2px solid var(--border)', fontVariantNumeric: 'tabular-nums' }}>
-                                                            Rp{rab.toLocaleString('id-ID')}
-                                                        </td>
-                                                        <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
-                                                            Rp{aktual.toLocaleString('id-ID')}
-                                                        </td>
-                                                        <td style={{
-                                                            padding: '16px 18px', fontSize: 14, borderBottom: '1px solid var(--border)', textAlign: 'center', fontVariantNumeric: 'tabular-nums', fontWeight: 600,
-                                                            color: persen >= 90 ? 'var(--color-success)' : persen >= 60 ? '#d97706' : 'var(--color-danger)'
-                                                        }}>
-                                                            {persen.toFixed(1)}%
-                                                        </td>
-                                                    </React.Fragment>
-                                                );
-                                            })()}
-                                        </tr>
-                                    ))}
-                                    <tr style={{ fontWeight: 700, backgroundColor: 'var(--bg-elevated)' }}>
-                                        <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: 'none' }}>TOTAL</td>
-                                        {categories.map(kat => {
-                                            const row = byKat[kat] || {};
-                                            const rab = row.totalRAB || 0;
-                                            const aktual = row.totalAktual || 0;
-                                            const persen = row.totalPersen || 0;
-                                            return (
-                                                <React.Fragment key={kat}>
-                                                    <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: 'none', textAlign: 'center', borderLeft: '1px solid var(--border)', fontVariantNumeric: 'tabular-nums' }}>
-                                                        Rp{rab.toLocaleString('id-ID')}
-                                                    </td>
-                                                    <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: 'none', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
-                                                        Rp{aktual.toLocaleString('id-ID')}
-                                                    </td>
-                                                    <td style={{
-                                                        padding: '16px 18px', fontSize: 14, borderBottom: 'none', textAlign: 'center', fontVariantNumeric: 'tabular-nums', fontWeight: 600,
-                                                        color: persen >= 90 ? 'var(--color-success)' : persen >= 60 ? '#d97706' : 'var(--color-danger)'
-                                                    }}>
-                                                        {persen.toFixed(1)}%
-                                                    </td>
-                                                </React.Fragment>
-                                            );
-                                        })}
-                                        {(() => {
-                                            const rab = totalRow.totalRAB || 0;
-                                            const aktual = totalRow.totalAktual || 0;
-                                            const persen = totalRow.totalPersen || 0;
-                                            return (
-                                                <React.Fragment>
-                                                    <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: 'none', textAlign: 'center', borderLeft: '2px solid var(--border)', fontVariantNumeric: 'tabular-nums' }}>
-                                                        Rp{rab.toLocaleString('id-ID')}
-                                                    </td>
-                                                    <td style={{ padding: '16px 18px', fontSize: 14, color: 'var(--text)', borderBottom: 'none', textAlign: 'center', fontVariantNumeric: 'tabular-nums' }}>
-                                                        Rp{aktual.toLocaleString('id-ID')}
-                                                    </td>
-                                                    <td style={{
-                                                        padding: '16px 18px', fontSize: 14, borderBottom: 'none', textAlign: 'center', fontVariantNumeric: 'tabular-nums', fontWeight: 700,
-                                                        color: persen >= 90 ? 'var(--color-success)' : persen >= 60 ? '#d97706' : 'var(--color-danger)'
-                                                    }}>
-                                                        {persen.toFixed(1)}%
-                                                    </td>
-                                                </React.Fragment>
-                                            );
-                                        })()}
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        {lraData?.pendingTransfer && (
-                            <div style={{ marginTop: '12px', padding: '10px 14px', backgroundColor: '#fffbe6', border: '1px solid #ffe58f', borderRadius: '6px', fontSize: '13px', color: '#8c6b00' }}>
-                                ⚠️ <strong>Catatan:</strong> Realisasi pendapatan {lraData.ringkasan?.totalPendapatan?.realisasi === 0 ? 'Rp 0' : `Rp ${(lraData.ringkasan?.totalPendapatan?.realisasi || 0).toLocaleString('id-ID')}`} — dana BGN belum tercatat masuk (pending transfer).
-                            </div>
-                        )}
-                    </>
-                );
-            })()}
-            {!lraLoading && jenisLaporan === 'LRA' && !lraData && (
-                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    Pilih minimal 2 periode di atas dan klik "Tampilkan LRA".
-                </p>
+            {!lraLoading && jenisLaporan === 'LRA' && (
+                <LraTable lraData={lraData} />
             )}
 
             {/* Render 11. LPD2M Multi-Periode */}
             {jenisLaporan === 'LPD2M' && (
-                <div style={{
-                    marginTop: '20px',
-                    marginBottom: '20px',
-                    padding: '16px',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--bg-card, #ffffff)'
-                }}>
-                    <div style={{ marginBottom: '12px' }}>
-                        <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: 'var(--text)' }}>
-                            📎 Bukti LPD2M (Opsional — bisa kosong)
-                        </h3>
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                            Upload bukti pembayaran/transfer per periode. Saat generate PDF, berkas ini akan di-embed ke PDF lalu otomatis dihapus.
-                        </span>
-                    </div>
-
-                    {/* Form Upload Bukti */}
-                    <form onSubmit={handleUploadBukti} style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '12px',
-                        alignItems: 'flex-end',
-                        marginBottom: '16px',
-                        padding: '12px',
-                        backgroundColor: 'var(--bg, #f8fafc)',
-                        borderRadius: '6px',
-                        border: '1px dashed var(--border)'
-                    }}>
-                        {selectedPeriodeIds.length > 1 && (
-                            <div style={{ flex: '1 1 180px' }}>
-                                <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                                    Target Periode
-                                </label>
-                                <select
-                                    value={targetBuktiPeriodeId}
-                                    onChange={(e) => setTargetBuktiPeriodeId(e.target.value)}
-                                    className="form-field"
-                                    style={{ width: '100%', fontSize: '13px' }}
-                                >
-                                    {selectedPeriodeIds.map(id => {
-                                        const p = periods.find(item => item.id === id);
-                                        return (
-                                            <option key={id} value={id}>
-                                                {p ? `${p.tanggalMulai} - ${p.tanggalSelesai}` : id}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
-                            </div>
-                        )}
-                        <div style={{ flex: '1 1 200px' }}>
-                            <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                                Nama Bukti
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="Contoh: Kuitansi Pembelian / SP2D"
-                                value={namaBuktiInput}
-                                onChange={(e) => setNamaBuktiInput(e.target.value)}
-                                className="form-field"
-                                style={{ width: '100%', fontSize: '13px' }}
-                            />
-                        </div>
-                        <div style={{ flex: '1 1 150px' }}>
-                            <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                                Jenis Bukti
-                            </label>
-                            <select
-                                value={jenisBuktiInput}
-                                onChange={(e) => setJenisBuktiInput(e.target.value)}
-                                className="form-field"
-                                style={{ width: '100%', fontSize: '13px' }}
-                            >
-                                <option value="BUKTI_TRANSFER">Bukti Transfer</option>
-                                <option value="KUITANSI">Kuitansi</option>
-                                <option value="SP2D">SP2D</option>
-                                <option value="LAINNYA">Lainnya</option>
-                            </select>
-                        </div>
-                        <div style={{ flex: '1 1 200px' }}>
-                            <label style={{ fontSize: '11px', fontWeight: 700, display: 'block', marginBottom: '4px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                                Pilih File (Image / PDF)
-                            </label>
-                            <input
-                                id="input-file-bukti-lpd2m"
-                                type="file"
-                                accept="image/*,application/pdf"
-                                onChange={(e) => setFileBuktiInput(e.target.files[0] || null)}
-                                className="form-field"
-                                style={{ width: '100%', fontSize: '12px' }}
-                            />
-                        </div>
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={uploadingBukti}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'var(--btn-primary-bg, #2563eb)',
-                                    color: 'var(--btn-primary-text, #ffffff)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm, 4px)',
-                                    fontWeight: 600,
-                                    fontSize: '13px',
-                                    cursor: uploadingBukti ? 'not-allowed' : 'pointer',
-                                    opacity: uploadingBukti ? 0.7 : 1
-                                }}
-                            >
-                                {uploadingBukti ? 'Uploading…' : '📤 Upload Bukti'}
-                            </button>
-                        </div>
-                    </form>
-
-                    {/* List Bukti */}
-                    <div>
-                        <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--text)', fontWeight: 600 }}>
-                            Daftar Bukti Terupload ({buktiLpd2mList.length})
-                        </h4>
-                        {buktiLoading ? (
-                            <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>Memuat bukti…</p>
-                        ) : buktiLpd2mList.length === 0 ? (
-                            <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic', margin: 0 }}>
-                                Belum ada bukti yang diupload untuk periode ini (opsional — PDF tetap dapat digenerate tanpa lampiran).
-                            </p>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {buktiLpd2mList.map((b) => (
-                                    <div
-                                        key={b.id}
-                                        style={{
-                                            display: 'flex',
-                                            justify: 'space-between',
-                                            alignItems: 'center',
-                                            padding: '8px 12px',
-                                            backgroundColor: 'var(--bg, #f1f5f9)',
-                                            borderRadius: '4px',
-                                            fontSize: '13px'
-                                        }}
-                                    >
-                                        <div>
-                                            <span style={{ fontWeight: 600, marginRight: '8px' }}>{b.namaBukti}</span>
-                                            <span style={{
-                                                fontSize: '11px',
-                                                padding: '2px 6px',
-                                                backgroundColor: 'var(--border, #cbd5e1)',
-                                                borderRadius: '4px',
-                                                marginRight: '8px'
-                                            }}>
-                                                {b.jenis}
-                                            </span>
-                                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                                                {new Date(b.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleDeleteBukti(b.id)}
-                                            style={{
-                                                padding: '4px 8px',
-                                                backgroundColor: '#ef4444',
-                                                color: '#fff',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                fontSize: '12px',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            🗑️ Hapus
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {!lpd2mLoading && jenisLaporan === 'LPD2M' && lpd2mData && (
-                <Table
-                    columns={[
-                        { key: 'periodeLabel', header: 'Periode' },
-                        {
-                            key: 'saldoAwal', header: 'Saldo Awal', align: 'center',
-                            render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>Rp{Number(v).toLocaleString('id-ID')}</span>
-                        },
-                        {
-                            key: 'penerimaan', header: 'Penerimaan', align: 'center',
-                            render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--color-success)' }}>Rp{Number(v).toLocaleString('id-ID')}</span>
-                        },
-                        {
-                            key: 'pengeluaran', header: 'Pengeluaran', align: 'center',
-                            render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums', color: 'var(--color-danger)' }}>Rp{Number(v).toLocaleString('id-ID')}</span>
-                        },
-                        {
-                            key: 'saldoAkhir', header: 'Saldo Akhir', align: 'center',
-                            render: (v) => <strong style={{ fontVariantNumeric: 'tabular-nums' }}>Rp{Number(v).toLocaleString('id-ID')}</strong>
-                        },
-                        {
-                            key: 'totalRAB', header: 'Pagu (RAB)', align: 'center',
-                            render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>Rp{Number(v).toLocaleString('id-ID')}</span>
-                        },
-                        {
-                            key: 'totalRealisasi', header: 'Realisasi', align: 'center',
-                            render: (v) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>Rp{Number(v).toLocaleString('id-ID')}</span>
-                        },
-                        {
-                            key: 'persenPenyerapan', header: '% Penyerapan', align: 'center',
-                            render: (v) => (
-                                <strong style={{
-                                    fontVariantNumeric: 'tabular-nums',
-                                    color: v >= 90 ? 'var(--color-success)' : v >= 60 ? '#d97706' : 'var(--color-danger)'
-                                }}>
-                                    {Number(v).toFixed(1)}%
-                                </strong>
-                            )
-                        }
-                    ]}
-                    data={lpd2mData.periodeData || []}
-                    emptyText="Tidak ada data perkembangan dana untuk periode terpilih."
+                <Lpd2mBuktiSection
+                    selectedPeriodeIds={selectedPeriodeIds}
+                    periods={periods}
+                    targetBuktiPeriodeId={targetBuktiPeriodeId}
+                    setTargetBuktiPeriodeId={setTargetBuktiPeriodeId}
+                    namaBuktiInput={namaBuktiInput}
+                    setNamaBuktiInput={setNamaBuktiInput}
+                    jenisBuktiInput={jenisBuktiInput}
+                    setJenisBuktiInput={setJenisBuktiInput}
+                    setFileBuktiInput={setFileBuktiInput}
+                    uploadingBukti={uploadingBukti}
+                    buktiLpd2mList={buktiLpd2mList}
+                    buktiLoading={buktiLoading}
+                    handleUploadBukti={handleUploadBukti}
+                    handleDeleteBukti={handleDeleteBukti}
                 />
             )}
-            {!lpd2mLoading && jenisLaporan === 'LPD2M' && lpd2mData?.pendingTransfer && (
-                <div style={{ marginTop: '12px', padding: '10px 14px', backgroundColor: '#fffbe6', border: '1px solid #ffe58f', borderRadius: '6px', fontSize: '13px', color: '#8c6b00' }}>
-                    ⚠️ <strong>Catatan:</strong> Realisasi penerimaan dana belum tercatat masuk di jurnal transaksi (pending transfer).
-                </div>
-            )}
-            {!lpd2mLoading && jenisLaporan === 'LPD2M' && !lpd2mData && (
-                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    Pilih periode di atas dan klik "Tampilkan LPD2M".
-                </p>
+
+            {!lpd2mLoading && jenisLaporan === 'LPD2M' && (
+                <Lpd2mTable lpd2mData={lpd2mData} />
             )}
 
             {/* Render 12. BTT */}
-            {!bttLoading && (jenisLaporan === 'BTT_OPERASIONAL' || jenisLaporan === 'BTT_SEWA') && bttData && (
-                <div style={{ padding: '16px', border: '1px solid var(--border)', borderRadius: '8px' }}>
-                    <h4>BUKTI TANDA TERIMA</h4>
-                    <p>Nomor: {bttData.nomorDokumen}</p>
-                    <p>Nominal: Rp {Number(bttData.nominal).toLocaleString('id-ID')}</p>
-                    <p>Terbilang: {bttData.terbilang}</p>
-                    <p>Keperluan: {bttData.keperluan}</p>
-                    <p>Penerima: {bttData.mitraNama}</p>
-                </div>
-            )}
-            {!bttLoading && (jenisLaporan === 'BTT_OPERASIONAL' || jenisLaporan === 'BTT_SEWA') && !bttData && (
-                <p style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>
-                    Klik "Tampilkan Data BTT" untuk memuat data.
-                </p>
+            {!bttLoading && (jenisLaporan === 'BTT_OPERASIONAL' || jenisLaporan === 'BTT_SEWA') && (
+                <BttSection bttData={bttData} />
             )}
 
             {/* Render BAPSD */}
             {!loading && jenisLaporan === 'BAPSD' && (
-                bapsdData ? (
-                    <div style={{
-                        padding: '24px',
-                        backgroundColor: 'var(--bg-elevated)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 'var(--radius-md)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px'
-                    }}>
-                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Berita Acara Pengalihan Sisa Dana (BAPSD)</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', fontSize: '13px' }}>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Nomor Dokumen:</span> <strong>{bapsdData.nomorDokumen || '—'}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Periode:</span> <strong>{bapsdData.periodeLabel}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Lembaga:</span> <strong>{bapsdData.namaLembaga}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Sisa Dana:</span> <strong style={{ color: 'var(--color-primary)' }}>Rp{Number(bapsdData.sisaDana || 0).toLocaleString('id-ID')}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Pejabat:</span> <strong>{bapsdData.namaPejabat}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Akuntan:</span> <strong>{bapsdData.namaAkuntan}</strong></div>
-                        </div>
-                    </div>
-                ) : (
-                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        Tekan "Tampilkan BAPSD" untuk memuat data.
-                    </div>
-                )
+                <BapsdSection bapsdData={bapsdData} />
             )}
 
             {/* Render SPTJ */}
             {!loading && jenisLaporan === 'SPTJ' && (
-                sptjData ? (
-                    <div style={{
-                        padding: '24px',
-                        backgroundColor: 'var(--bg-elevated)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 'var(--radius-md)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '12px'
-                    }}>
-                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Surat Pernyataan Tanggung Jawab (SPTJ)</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', fontSize: '13px' }}>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Lembaga:</span> <strong>{sptjData.namaLembaga}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Pejabat:</span> <strong>{sptjData.namaPejabat} ({sptjData.jabatan})</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Jumlah Penerimaan:</span> <strong>Rp{Number(sptjData.jumlahPenerimaan || 0).toLocaleString('id-ID')}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Jumlah Pengeluaran:</span> <strong>Rp{Number(sptjData.jumlahPengeluaran || 0).toLocaleString('id-ID')}</strong></div>
-                            <div><span style={{ color: 'var(--text-muted)' }}>Sisa Dana:</span> <strong style={{ color: 'var(--color-primary)' }}>Rp{Number(sptjData.sisaDana || 0).toLocaleString('id-ID')}</strong></div>
-                        </div>
-                    </div>
-                ) : (
-                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                        Tekan "Tampilkan SPTJ" untuk memuat data.
-                    </div>
-                )
+                <SptjSection sptjData={sptjData} />
             )}
 
             {/* Render LBBP */}
             {!loading && jenisLaporan === 'LBBP' && (
                 lbbpData ? (
-                    <div>
-                        {/* Summary card */}
-                        <div style={{
-                            padding: '16px 24px',
-                            backgroundColor: 'var(--bg-elevated)',
-                            border: '1px solid var(--border)',
-                            borderRadius: 'var(--radius-md)',
-                            marginBottom: '16px',
-                            display: 'flex',
-                            gap: '32px',
-                            flexWrap: 'wrap',
-                            fontSize: '14px'
-                        }}>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Periode:</span>{' '}
-                                {lbbpData.periodeLabel}
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Lembaga:</span>{' '}
-                                {lbbpData.lembaga?.namaLembaga || '—'}
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Total Belanja:</span>{' '}
-                                <strong style={{ color: 'var(--color-primary)' }}>
-                                    Rp{Number(lbbpData.grandTotal || 0).toLocaleString('id-ID')}
-                                </strong>
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Jumlah PO Terealisasi:</span>{' '}
-                                {lbbpData.grupTanggal?.reduce((s, g) => s + g.rows.length, 0) || 0} item
-                            </div>
-                        </div>
-
-                        {/* Table per tanggal */}
-                        {lbbpData.grupTanggal && lbbpData.grupTanggal.length > 0 ? (
-                            lbbpData.grupTanggal.map((grup, gi) => {
-                                const subtotalGrup = grup.rows.reduce((s, r) => s + Number(r.subtotal || 0), 0);
-                                const tglFormatted = (() => {
-                                    try {
-                                        return new Date(grup.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-                                    } catch { return grup.tanggal; }
-                                })();
-                                return (
-                                    <div key={gi} style={{ marginBottom: '24px' }}>
-                                        <div style={{
-                                            fontWeight: 700,
-                                            fontSize: '13px',
-                                            color: 'var(--text)',
-                                            padding: '8px 12px',
-                                            backgroundColor: 'var(--bg-elevated)',
-                                            border: '1px solid var(--border)',
-                                            borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
-                                            borderBottom: 'none'
-                                        }}>
-                                            📅 {tglFormatted}
-                                        </div>
-                                        <Table
-                                            columns={[
-                                                { key: 'no', header: 'No', align: 'center', render: (_, __, idx) => idx + 1 },
-                                                { key: 'noPO', header: 'No. PO', align: 'center' },
-                                                { key: 'supplier', header: 'Supplier' },
-                                                { key: 'namaBahan', header: 'Nama Bahan' },
-                                                { key: 'satuan', header: 'Satuan', align: 'center' },
-                                                {
-                                                    key: 'qty',
-                                                    header: 'Qty',
-                                                    align: 'right',
-                                                    render: (v) => Number(v).toLocaleString('id-ID', { maximumFractionDigits: 3 })
-                                                },
-                                                {
-                                                    key: 'hargaSatuan',
-                                                    header: 'Harga Satuan',
-                                                    align: 'right',
-                                                    render: (v) => `Rp${Number(v).toLocaleString('id-ID')}`
-                                                },
-                                                {
-                                                    key: 'subtotal',
-                                                    header: 'Subtotal',
-                                                    align: 'right',
-                                                    render: (v) => <strong>Rp{Number(v).toLocaleString('id-ID')}</strong>
-                                                },
-                                                {
-                                                    key: 'status',
-                                                    header: 'Status',
-                                                    align: 'center',
-                                                    render: (v) => (
-                                                        <span style={{
-                                                            padding: '2px 8px',
-                                                            borderRadius: '4px',
-                                                            fontSize: '11px',
-                                                            fontWeight: 700,
-                                                            backgroundColor: v === 'DITERIMA' ? '#dcfce7' : '#fef9c3',
-                                                            color: v === 'DITERIMA' ? '#15803d' : '#854d0e'
-                                                        }}>
-                                                            {v}
-                                                        </span>
-                                                    )
-                                                }
-                                            ]}
-                                            data={grup.rows}
-                                            emptyText="Tidak ada item."
-                                        />
-                                        <div style={{
-                                            textAlign: 'right',
-                                            padding: '8px 16px',
-                                            fontSize: '13px',
-                                            fontWeight: 700,
-                                            backgroundColor: 'var(--bg-elevated)',
-                                            border: '1px solid var(--border)',
-                                            borderTop: 'none',
-                                            borderRadius: '0 0 var(--radius-sm) var(--radius-sm)'
-                                        }}>
-                                            Subtotal {tglFormatted}:{' '}
-                                            <span style={{ color: 'var(--color-primary)' }}>
-                                                Rp{subtotalGrup.toLocaleString('id-ID')}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-                                Tidak ada data belanja bahan pokok yang terealisasi pada periode ini.
-                            </div>
-                        )}
-
-                        {/* Grand Total */}
-                        {lbbpData.grupTanggal && lbbpData.grupTanggal.length > 0 && (
-                            <div style={{
-                                textAlign: 'right',
-                                padding: '12px 20px',
-                                fontSize: '15px',
-                                fontWeight: 700,
-                                backgroundColor: '#1e3a5f',
-                                color: '#fff',
-                                borderRadius: 'var(--radius-md)',
-                                marginTop: '8px'
-                            }}>
-                                TOTAL KESELURUHAN:{' '}
-                                Rp{Number(lbbpData.grandTotal || 0).toLocaleString('id-ID')}
-                            </div>
-                        )}
-                    </div>
+                    <LbbpSection lbbpData={lbbpData} />
                 ) : (
                     lbbpLoading ? null : (
-                        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                            Tekan &quot;Tampilkan LBBP&quot; untuk memuat data.
-                        </div>
+                        <LbbpSection lbbpData={lbbpData} />
                     )
                 )
             )}
@@ -3288,224 +1496,22 @@ export const LaporanPage = () => {
             {/* Render BKK */}
             {!loading && jenisLaporan === 'BKK' && (
                 bkkData ? (
-                    <div>
-                        {/* Summary card */}
-                        <div style={{
-                            padding: '16px 24px',
-                            backgroundColor: 'var(--bg-elevated)',
-                            border: '1px solid var(--border)',
-                            borderRadius: 'var(--radius-md)',
-                            marginBottom: '16px',
-                            display: 'flex',
-                            gap: '32px',
-                            flexWrap: 'wrap',
-                            fontSize: '14px'
-                        }}>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Periode:</span>{' '}
-                                {bkkData.periodeLabel}
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Lembaga:</span>{' '}
-                                {bkkData.lembaga?.namaLembaga || '—'}
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Saldo Awal:</span>{' '}
-                                <strong>Rp{Number(bkkData.saldoAwal || 0).toLocaleString('id-ID')}</strong>
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Total Penerimaan:</span>{' '}
-                                <strong style={{ color: '#15803d' }}>Rp{Number(bkkData.totalPenerimaan || 0).toLocaleString('id-ID')}</strong>
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Total Pengeluaran:</span>{' '}
-                                <strong style={{ color: '#dc2626' }}>Rp{Number(bkkData.totalPengeluaran || 0).toLocaleString('id-ID')}</strong>
-                            </div>
-                            <div>
-                                <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Saldo Akhir:</span>{' '}
-                                <strong style={{ color: 'var(--color-primary)' }}>Rp{Number(bkkData.saldoAkhir || 0).toLocaleString('id-ID')}</strong>
-                            </div>
-                        </div>
-
-                        {/* BKK Table */}
-                        <Table
-                            columns={[
-                                { key: 'no', header: 'No', align: 'center', render: (_, __, idx) => idx + 1 },
-                                {
-                                    key: 'tanggal',
-                                    header: 'Tanggal',
-                                    align: 'center',
-                                    render: (v) => {
-                                        try { return new Date(v).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }); }
-                                        catch { return v; }
-                                    }
-                                },
-                                { key: 'noBukti', header: 'No. Bukti', align: 'center' },
-                                { key: 'uraian', header: 'Uraian' },
-                                {
-                                    key: 'jenisPengeluaran',
-                                    header: 'Jenis Pengeluaran',
-                                    align: 'center',
-                                    render: (v) => (
-                                        <span style={{
-                                            padding: '2px 8px',
-                                            borderRadius: '4px',
-                                            fontSize: '11px',
-                                            fontWeight: 700,
-                                            backgroundColor: v === 'Pengisian Kas' ? '#dcfce7' :
-                                                v === 'Transport' ? '#dbeafe' :
-                                                v === 'ATK' ? '#fef9c3' :
-                                                v === 'Konsumsi' ? '#fce7f3' :
-                                                v === 'Pemeliharaan' ? '#ffedd5' :
-                                                '#e8edf5',
-                                            color: v === 'Pengisian Kas' ? '#15803d' :
-                                                v === 'Transport' ? '#1d4ed8' :
-                                                v === 'ATK' ? '#854d0e' :
-                                                v === 'Konsumsi' ? '#9d174d' :
-                                                v === 'Pemeliharaan' ? '#c2410c' :
-                                                '#1e3a5f'
-                                        }}>
-                                            {v}
-                                        </span>
-                                    )
-                                },
-                                {
-                                    key: 'penerimaan',
-                                    header: 'Penerimaan',
-                                    align: 'right',
-                                    render: (v) => Number(v) > 0
-                                        ? <strong style={{ color: '#15803d' }}>Rp{Number(v).toLocaleString('id-ID')}</strong>
-                                        : <span style={{ color: 'var(--text-muted)' }}>—</span>
-                                },
-                                {
-                                    key: 'pengeluaran',
-                                    header: 'Pengeluaran',
-                                    align: 'right',
-                                    render: (v) => Number(v) > 0
-                                        ? <strong style={{ color: '#dc2626' }}>Rp{Number(v).toLocaleString('id-ID')}</strong>
-                                        : <span style={{ color: 'var(--text-muted)' }}>—</span>
-                                },
-                                {
-                                    key: 'saldo',
-                                    header: 'Saldo',
-                                    align: 'right',
-                                    render: (v) => <strong>Rp{Number(v).toLocaleString('id-ID')}</strong>
-                                }
-                            ]}
-                            data={bkkData.rows}
-                            emptyText="Tidak ada transaksi kas kecil pada periode ini."
-                        />
-
-                        {/* Grand Total */}
-                        {bkkData.rows && bkkData.rows.length > 0 && (
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'flex-end',
-                                gap: '24px',
-                                padding: '12px 20px',
-                                fontSize: '14px',
-                                fontWeight: 700,
-                                backgroundColor: '#1e3a5f',
-                                color: '#fff',
-                                borderRadius: 'var(--radius-md)',
-                                marginTop: '8px',
-                                flexWrap: 'wrap'
-                            }}>
-                                <span>Total Penerimaan: Rp{Number(bkkData.totalPenerimaan || 0).toLocaleString('id-ID')}</span>
-                                <span>Total Pengeluaran: Rp{Number(bkkData.totalPengeluaran || 0).toLocaleString('id-ID')}</span>
-                                <span>Saldo Akhir: Rp{Number(bkkData.saldoAkhir || 0).toLocaleString('id-ID')}</span>
-                            </div>
-                        )}
-                    </div>
+                    <BkkSection bkkData={bkkData} />
                 ) : (
                     bkkLoading ? null : (
-                        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                            Tekan &quot;Tampilkan BKK&quot; untuk memuat data.
-                        </div>
+                        <BkkSection bkkData={bkkData} />
                     )
                 )
             )}
 
             {/* PDF Preview Modal */}
-            {isPdfModalOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 10000,
-                }}>
-                    <div style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 'var(--radius-md)',
-                        padding: '24px',
-                        width: '85%',
-                        maxWidth: '1000px',
-                        height: '85vh',
-                        boxShadow: 'var(--shadow-hover)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '16px'
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: 'var(--text)' }}>
-                                {pdfModalTitle}
-                            </h3>
-                            <button 
-                                onClick={() => {
-                                    setIsPdfModalOpen(false);
-                                    if (pdfUrl) {
-                                        URL.revokeObjectURL(pdfUrl);
-                                        setPdfUrl('');
-                                    }
-                                }} 
-                                style={{
-                                    border: 'none',
-                                    background: 'transparent',
-                                    color: 'var(--text-muted)',
-                                    fontSize: '24px',
-                                    cursor: 'pointer',
-                                    padding: '0 8px'
-                                }}
-                            >
-                                &times;
-                            </button>
-                        </div>
-                        <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
-                            <iframe src={pdfUrl} width="100%" height="100%" style={{ border: 'none' }} title="PDF Preview" />
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                            <button 
-                                onClick={() => {
-                                    setIsPdfModalOpen(false);
-                                    if (pdfUrl) {
-                                        URL.revokeObjectURL(pdfUrl);
-                                        setPdfUrl('');
-                                    }
-                                }} 
-                                className="btn-secondary"
-                                style={{
-                                    padding: '10px 20px',
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    fontWeight: 600,
-                                    backgroundColor: 'transparent',
-                                    color: 'var(--text)'
-                                }}
-                            >
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <PdfPreviewModal
+                isPdfModalOpen={isPdfModalOpen}
+                pdfModalTitle={pdfModalTitle}
+                pdfUrl={pdfUrl}
+                setIsPdfModalOpen={setIsPdfModalOpen}
+                setPdfUrl={setPdfUrl}
+            />
         </div>
     );
 };
