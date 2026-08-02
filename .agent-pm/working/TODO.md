@@ -17,17 +17,29 @@
 - **V2-1: TTD Basah (upload gambar per user) — SEMUA ROLE** ← NEXT
 - V2-2: Image handling (upload → report → auto-delete by period)
 - V2-3: Perbaikan minor UX (jika ada)
-- **V2-4: Refactor file ribuan baris — design modular** (2026-08-02): pecah file >800 baris jadi komponen/modul per domain. BE: routes akuntan.js (4637), laporan.js (2934), aslap.js (2916), gizi.js (2757). FE: LaporanPage akuntan (3511), MenuHarianPage (2088), LaporanPage aslap (2031), + 9 file lain 800-1500.
-  - ✅ **Batch 1** (2026-08-02): akuntan.js → `routes/akuntan/` 9 file — verified PASS, commit `12557a0` (ter-include initial release)
-  - ✅ **Batch 2** (2026-08-02): `frontend/src/pages/akuntan/laporan/LaporanPage.jsx` 3.511 → 1.517 baris — 19 komponen di `components/akuntan/laporan/`, verified PASS, approved Rozi. Commit `57570b2` + `e475d34`.
-  - ✅ **Batch 3** (2026-08-02): backend SELESAI 3/3 — laporan.js → `routes/laporan/` 19 file (`108be87`), aslap.js → `routes/aslap/` 12 file (`5f640f7`), gizi.js → `routes/gizi/` 17 file (`9bf3b2c`). Semua verified PASS + approved Rozi.
-  - 🔄 **Batch 4a** (2026-08-02): FE `MenuHarianPage.jsx` gizi 2.088 → 991 baris — 13 komponen `components/gizi/menuHarian/`, verified PASS, menunggu Rozi test
-  - ⏳ **Batch 4b**: FE `LaporanPage.jsx` aslap (2.031)
-  - ⏳ **Batch 5**: FE AkuntanPoPage (1.457) + PenerimaManfaatPage (1.443) + RabHarianPage (1.216)
-  - ⏳ **Batch 6**: 6 file lain (800-1.100)
+- **V2-4: Refactor file ribuan baris — design modular** (2026-08-02): pecah file >800 baris jadi komponen/modul per domain.
+  - ✅ **Batch 1** (2026-08-02): akuntan.js → `routes/akuntan/` 9 file — commit `12557a0`
+  - ✅ **Batch 2** (2026-08-02): FE LaporanPage.jsx akuntan 3.511 → 1.517 baris — 19 komponen. Commits `57570b2`, `e475d34`, `c7e6134`, `f94694b`
+  - ✅ **Batch 3** (2026-08-02): backend 3/3 — laporan.js → 19 file (`108be87`), aslap.js → 12 file (`5f640f7`), gizi.js → 17 file (`9bf3b2c`)
+  - ✅ **Batch 4a** (2026-08-02): FE MenuHarianPage gizi 2.088 → 991 baris — 13 komponen. Commit `baceb85`
+  - ✅ **Cycle gabungan FE** (2026-08-02, keputusan Rozi: 1 cycle bertahap, approval akhir): 8/11 file selesai + verified + committed:
+    - LaporanPage aslap 2.031 → 351 (`fd1906c`)
+    - AkuntanPoPage 1.457 → 418 (`4b6f420`)
+    - PenerimaManfaatPage 1.443 → 746 (`7eede38`)
+    - RabHarianPage 1.216 → 533 (`a865413`)
+    - LaporanGiziPage 1.096 → 492 (`27f4683`)
+    - JurnalTransaksiPage 1.056 → 454 (`bb5fa15`)
+    - SekolahPage 1.017 → 431 (`f231e9d`)
+    - ApprovalPage 878 → 289 (`3a5e9da`)
+    - Working state (`41bf661`)
+  - ⏳ **Sisa cycle gabungan**: PeriodeSetupPage (835) + SaldoAwalBarangPage (812) — investigasi siap, BUILD AGY → VERIFY OpenCode → commit
 
 ## Backlog Infra (2026-08-02)
-- ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup; jarang pakai 2 device bersamaan. Job cron `sync-hermes` (05fd5c684e88) di-pause.
+- ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup. Job cron `sync-hermes` (05fd5c684e88) di-pause.
+
+## BUG (2026-08-02)
+- ✅ **BUG-002** SELESAI: 500 /gizi/master-menu-list — schema drift MasterMenuMingguan, migration `20260802220000_add_minggu_ke_master_menu`, commit `77a5e19`
+- ⏳ **BUG-001** open: 500 /akuntan/rab-p12/harian + /rekap — investigasi terpisah (pre-existing suspected)
 
 ---
 Model sesi: [Hermes oc/deepseek-v4-flash-free] (lihat knowledge/10-model-strategy.md)
