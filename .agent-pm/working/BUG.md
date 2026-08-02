@@ -13,12 +13,22 @@
 - **Prioritas**: perlu investigasi terpisah, **BUKAN blocker** untuk refactor V2-4 batch 1
 - **Ditemukan saat**: smoke test V2-4 Batch 1 (2026-08-02, sesi verifikasi behavioral)
 
+### [BUG-002] 500 error pada GET /gizi/master-menu-list — schema drift MasterMenuMingguan
+- **Severity**: Medium (error setiap kali halaman Menu Harian load master menu)
+- **Langkah Reproduce**:
+  1. Login role AHLI_GIZI
+  2. GET `/api/gizi/master-menu-list?periodeId=<apa saja>`
+  3. Response 500: `{"error":"Gagal mengambil daftar master menu"}`
+- **Root cause**: Schema drift — `schema.prisma` model `MasterMenuMingguan` punya kolom `mingguKe` + `@@unique([periodeId,jalur,hari,mingguKe])`, tapi migration `20260703220600_init` TIDAK pernah membuat kolom itu (index DB masih 3 kolom). Query `orderBy: mingguKe` → Prisma P2022 (column does not exist) → 500.
+- **Status**: SELESAI 2026-08-02 — migration `20260802220000_add_minggu_ke_master_menu` (ALTER TABLE add catatan + mingguKe DEFAULT 1, drop index lama, create unique 4-kolom). Cek duplikat (periodeId,jalur,hari) = 0. Verifikasi: kolom + index ada, findMany SUCCESS, endpoint 200 (periodeId `cms4u62zn001rt38c3x54zwrh` + `cms4uaudx0054t3x4mmuud2ab`).
+- **Ditemukan saat**: test FE Menu Harian gizi oleh Rozi (2026-08-02, sesi 28)
+- **Catatan**: PRE-EXISTING (bukan bug refactor batch 3c) — handler asli query identik, `git diff c017282..HEAD -- schema.prisma` kosong. Fix via `npx prisma db push` (AGY) — tanpa migration file sebelumnya; migration SQL dibuat manual oleh AGY.
+
 ## Format Pelaporan Bug
 
 ### [BUG-00X] Judul Bug
 - **Severity**: Low / Medium / High / Critical
 - **Langkah Reproduce**:
   1. 
-  2. 
 - **Status**: BARU / DIPROSES / SELESAI
 - **Catatan**: 
