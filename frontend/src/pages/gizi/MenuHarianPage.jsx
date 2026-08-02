@@ -1,14 +1,22 @@
-// frontend/src/pages/gizi/MenuHarianList.jsx
+// frontend/src/pages/gizi/MenuHarianPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { DatePicker } from '../../components/DatePicker';
 import Dropdown from '../../components/Dropdown';
-import { NumberInput } from '../../components/NumberInput';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { Table, renderStatus, renderDate } from '../../components/Table';
-import { FieldButton } from '../../components/FieldButton';
-import { Trash2 } from 'lucide-react';
+import { Table, renderDate } from '../../components/Table';
+import {
+    fieldLabel,
+    buttonStyle,
+    formatDate,
+    getTanggalMusnah,
+    getBahanName,
+    getBahanLabel
+} from '../../components/gizi/menuHarian/helpers';
+import { MenuHarianWorkspace } from '../../components/gizi/menuHarian/MenuHarianWorkspace';
+import { MasterMenuSetup } from '../../components/gizi/menuHarian/MasterMenuSetup';
+import { MenuHarianForm } from '../../components/gizi/menuHarian/MenuHarianForm';
+import { RiwayatMenu } from '../../components/gizi/menuHarian/RiwayatMenu';
 
 export const MenuHarianPage = () => {
     const { request } = useApi();
@@ -305,7 +313,6 @@ export const MenuHarianPage = () => {
         }
     };
 
-
     const [activeBlokByMenu, setActiveBlokByMenu] = useState({});
     const [activeTabByBlok, setActiveTabByBlok] = useState({});
     const [selectedMenuItemByBlok, setSelectedMenuItemByBlok] = useState({});
@@ -327,26 +334,6 @@ export const MenuHarianPage = () => {
 
     const activePeriod = periods.find(p => p.id === periodeId);
     const isEditableMenu = (menu) => menu?.status === 'DRAFT' || menu?.status === 'DITOLAK';
-    const formatDate = (val) => val ? new Date(val).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '-';
-    const getTanggalMusnah = (dateStr) => {
-        if (!dateStr) return '-';
-        const dateParts = dateStr.split('T')[0].split('-');
-        if (dateParts.length === 3) {
-            const year = parseInt(dateParts[0], 10);
-            const month = parseInt(dateParts[1], 10) - 1;
-            const day = parseInt(dateParts[2], 10);
-            if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
-                const d = new Date(year, month, day + 3);
-                return formatDate(d);
-            }
-        }
-        const d = new Date(dateStr);
-        if (isNaN(d.getTime())) return '-';
-        d.setDate(d.getDate() + 3);
-        return formatDate(d);
-    };
-    const getBahanName = (bahan) => bahan.bahanPokok?.nama || bahanPokokList.find(bp => bp.id === bahan.bahanPokokId)?.nama || bahan.bahanPokokId;
-    const getBahanLabel = (bp) => `${bp.nama} (${bp.satuan})`;
 
     const getBlokTotalHarga = (blokId) => {
         const itemsInBlok = menuItemsByBlok[blokId] || [];
@@ -359,32 +346,6 @@ export const MenuHarianPage = () => {
         }
         return Math.round(total * 100) / 100;
     };
-
-    const fieldLabel = (text) => (
-        <label style={{
-            textTransform: 'uppercase',
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.07em',
-            color: 'var(--text-muted)',
-            display: 'block',
-            marginBottom: 6
-        }}>
-            {text}
-        </label>
-    );
-
-    const buttonStyle = (variant = 'primary', disabled = false) => ({
-        padding: '10px 14px',
-        border: variant === 'primary' ? 'none' : '1px solid var(--border)',
-        borderRadius: 'var(--radius-sm)',
-        backgroundColor: disabled ? 'var(--bg-muted)' : (variant === 'primary' ? 'var(--btn-primary-bg)' : 'var(--bg)'),
-        color: disabled ? 'var(--text-muted)' : (variant === 'primary' ? 'var(--btn-primary-text)' : 'var(--text)'),
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        fontWeight: 700,
-        fontSize: 14,
-        whiteSpace: 'nowrap'
-    });
 
     const masterMenuColumns = [
         { key: 'tanggal', header: 'Tanggal', render: renderDate },
@@ -809,771 +770,6 @@ export const MenuHarianPage = () => {
         return { label: 'Menu terisi', color: 'var(--color-success)' };
     };
 
-    const renderBahanPanel = (blok, editable) => {
-        const selectedId = selectedMenuItemByBlok[blok.id];
-        const item = (menuItemsByBlok[blok.id] || []).find(menuItem => menuItem.id === selectedId);
-        if (!item) {
-            return <div style={{ padding: 16, color: 'var(--text-muted)', borderTop: '1px solid var(--border)' }}>Klik card menu item untuk mengisi bahan.</div>;
-        }
-        const bahanRows = bahanByMenuItem[item.id] || [];
-        const form = bahanForm[item.id] || {};
-
-        return (
-            <div style={{ marginTop: 18, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 12 }}>
-                    <div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Tabel bahan</div>
-                        <strong>{item.namaMenu}</strong>
-                    </div>
-                    <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{item.komponen ? KOMPONEN_LABEL[item.komponen] : 'Tanpa komponen'}</span>
-                </div>
-                <div style={{ overflowX: 'auto', position: 'relative' }}>
-                    <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr>
-                                {['Bahan', 'Bersih', 'Hitung/Porsi', 'URT', 'BDD', 'Harga', 'Basis', 'Total'].map(label => (
-                                    <th key={label} style={{ textAlign: 'left', padding: '10px 8px', fontSize: 11, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }}>{label}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bahanRows.map(bahan => (
-                                <React.Fragment key={bahan.id}>
-                                <tr>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>{getBahanName(bahan)}</td>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>{bahan.beratBersihGr}</td>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>{bahan.jumlahHitungan !== null && bahan.jumlahHitungan !== undefined ? Number(bahan.jumlahHitungan).toString() : '-'}</td>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>{bahan.beratURT || '-'}</td>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>{bahan.bddPersen}</td>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <span>Rp{Number(bahan.hargaSatuan || 0).toLocaleString('id-ID')}</span>
-                                            {bahan.isFallback && (
-                                                <span 
-                                                    title="Harga dari periode sebelumnya, belum diupdate Mitra" 
-                                                    style={{ 
-                                                        color: '#d97706', 
-                                                        cursor: 'help',
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        fontSize: 14
-                                                    }}
-                                                >
-                                                    ⚠️
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>{bahan.beratSatuanGr}</td>
-                                    <td style={{ padding: '10px 8px', borderBottom: '1px solid var(--border)' }}>Rp{Number(bahan.totalHargaBahan || 0).toLocaleString('id-ID')}</td>
-                                </tr>
-                                <tr>
-                                  <td colSpan={8} style={{ padding: '2px 8px 10px', borderBottom: '1px solid var(--border)', fontSize: 11, color: '#6b7280' }}>
-                                    Energi: {bahan.energiKkal || 0} kkal &nbsp;|&nbsp; Protein: {bahan.proteinGr || 0} g &nbsp;|&nbsp; Lemak: {bahan.lemakGr || 0} g &nbsp;|&nbsp; Karbo: {bahan.karbohidratGr || 0} g &nbsp;|&nbsp; Serat: {bahan.seratGr || 0} g
-                                  </td>
-                                </tr>
-                                </React.Fragment>
-                            ))}
-                            {editable && (
-                                <>
-                                <tr>
-                                    <td>
-                                        <Dropdown
-                                            style={{ minWidth: 180 }}
-                                            value={form.bahanPokokId ?? bahanPokokList[0]?.id ?? ''}
-                                            onChange={val => setBahanField(item.id, 'bahanPokokId', val)}
-                                            options={bahanPokokList.length === 0 ? [{ value: '', label: '-- Bahan Pokok kosong --' }] : bahanPokokList.map(bp => ({ value: bp.id, label: getBahanLabel(bp) }))}
-                                        />
-                                    </td>
-                                    <td><input className="form-field" type="number" style={{ minWidth: 70 }} value={form.beratBersihGr || ''} onChange={e => setBahanField(item.id, 'beratBersihGr', e.target.value)} /></td>
-                                    <td>
-                                        <input 
-                                            className="form-field" 
-                                            type="number" 
-                                            step="0.01"
-                                            style={{ minWidth: 90 }} 
-                                            placeholder="Unit/Porsi" 
-                                            title="Jumlah per porsi (opsional, isi kalau bahan dihitung per unit — misal butir/buah)"
-                                            value={form.jumlahHitungan || ''} 
-                                            onChange={e => setBahanField(item.id, 'jumlahHitungan', e.target.value)} 
-                                        />
-                                    </td>
-                                    <td><input className="form-field" style={{ minWidth: 70 }} value={form.beratURT || ''} onChange={e => setBahanField(item.id, 'beratURT', e.target.value)} /></td>
-                                    <td><input className="form-field" type="number" style={{ minWidth: 60 }} value={form.bddPersen || ''} onChange={e => setBahanField(item.id, 'bddPersen', e.target.value)} /></td>
-                                    <td><input className="form-field" style={{ minWidth: 80, backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }} disabled placeholder="Auto" value="" /></td>
-                                    <td><input className="form-field" type="number" style={{ minWidth: 70 }} value={form.beratSatuanGr || ''} onChange={e => setBahanField(item.id, 'beratSatuanGr', e.target.value)} /></td>
-                                    <td style={{ color: 'var(--text-muted)' }}>-</td>
-                                    <td><button type="button" onClick={() => addBahan(item.id)} style={buttonStyle('primary')}>Tambah</button></td>
-                                </tr>
-                                <tr>
-                                  <td colSpan={8} style={{ padding: '2px 8px 10px', borderBottom: '1px solid var(--border)' }}>
-                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                                      <label style={{ fontSize: 11, color: '#6b7280' }}>Energi: <input className="form-field" type="number" style={{ width: 70 }} value={form.energiKkal || ''} onChange={e => setBahanField(item.id, 'energiKkal', e.target.value)} /></label>
-                                      <label style={{ fontSize: 11, color: '#6b7280' }}>Protein: <input className="form-field" type="number" style={{ width: 60 }} value={form.proteinGr || ''} onChange={e => setBahanField(item.id, 'proteinGr', e.target.value)} /></label>
-                                      <label style={{ fontSize: 11, color: '#6b7280' }}>Lemak: <input className="form-field" type="number" style={{ width: 60 }} value={form.lemakGr || ''} onChange={e => setBahanField(item.id, 'lemakGr', e.target.value)} /></label>
-                                      <label style={{ fontSize: 11, color: '#6b7280' }}>Karbo: <input className="form-field" type="number" style={{ width: 60 }} value={form.karbohidratGr || ''} onChange={e => setBahanField(item.id, 'karbohidratGr', e.target.value)} /></label>
-                                      <label style={{ fontSize: 11, color: '#6b7280' }}>Serat: <input className="form-field" type="number" style={{ width: 60 }} value={form.seratGr || ''} onChange={e => setBahanField(item.id, 'seratGr', e.target.value)} /></label>
-                                    </div>
-                                  </td>
-                                </tr>
-                                </>
-                            )}
-                        </tbody>
-                    </table>
-                    <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 30, background: 'linear-gradient(to right, transparent, rgba(0,0,0,0.05))', pointerEvents: 'none' }} />
-                </div>
-            </div>
-        );
-    };
-
-    const renderMenuTab = (blok, editable, menu) => {
-        const menuItems = menuItemsByBlok[blok.id] || [];
-        const tanpaKomponen = menuItems.filter(item => !item.komponen);
-
-        const toggleComponent = (komponen, isCurrentlyExpanded) => {
-            setExpandedComponents(prev => ({
-                ...prev,
-                [`${blok.id}-${komponen}`]: !isCurrentlyExpanded
-            }));
-        };
-
-        return (
-            <>
-                {editable && (
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
-                        <button
-                            type="button"
-                            onClick={() => applyMasterMenu(blok, menu)}
-                            style={buttonStyle('secondary')}
-                        >
-                            📋 Isi dari Master
-                        </button>
-                    </div>
-                )}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 16 }}>
-                    {KOMPONEN_OPTIONS.map(komponen => {
-                        const komponenItems = menuItems.filter(item => item.komponen === komponen);
-                        const isEmpty = komponenItems.length === 0;
-                        const isExpanded = expandedComponents[`${blok.id}-${komponen}`] !== undefined
-                            ? expandedComponents[`${blok.id}-${komponen}`]
-                            : !isEmpty;
-
-                        return (
-                            <div
-                                key={komponen}
-                                style={{
-                                    border: '1px solid var(--border)',
-                                    borderRadius: 'var(--radius-md)',
-                                    backgroundColor: 'var(--bg)',
-                                    overflow: 'hidden',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignSelf: 'start'
-                                }}
-                            >
-                                <div
-                                    onClick={() => toggleComponent(komponen, isExpanded)}
-                                    style={{
-                                        padding: '10px 12px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        cursor: 'pointer',
-                                        backgroundColor: 'var(--bg-elevated)',
-                                        userSelect: 'none',
-                                        borderBottom: isExpanded ? '1px solid var(--border)' : 'none'
-                                    }}
-                                >
-                                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>
-                                        {KOMPONEN_LABEL[komponen]}
-                                    </span>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        {isEmpty && (
-                                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Kosong</span>
-                                        )}
-                                        <span style={{
-                                            fontSize: 12,
-                                            color: 'var(--text-muted)',
-                                            transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                                            transition: 'transform 0.2s ease',
-                                            display: 'inline-block'
-                                        }}>
-                                            ▸
-                                        </span>
-                                    </div>
-                                </div>
-                                <div
-                                    style={{
-                                        maxHeight: isExpanded ? '500px' : '0px',
-                                        transition: 'max-height 0.3s ease',
-                                        overflow: 'hidden'
-                                    }}
-                                >
-                                    <div style={{ padding: 12 }}>
-                                        {isEmpty ? (
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>Belum ada menu.</span>
-                                                {editable && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setKomponenInput(prev => ({ ...prev, [blok.id]: komponen }));
-                                                            toast.info(`Komponen ${KOMPONEN_LABEL[komponen]} dipilih. Silakan isi nama menu pada form di bawah.`);
-                                                        }}
-                                                        style={{
-                                                            padding: '4px 10px',
-                                                            border: '1px solid var(--border)',
-                                                            borderRadius: 'var(--radius-sm)',
-                                                            backgroundColor: 'var(--bg-elevated)',
-                                                            color: 'var(--text)',
-                                                            fontSize: 12,
-                                                            fontWeight: 600,
-                                                            cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        + Tambah
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div style={{ display: 'grid', gap: 8 }}>
-                                                {komponenItems.map(item => (
-                                                    <button
-                                                        key={item.id}
-                                                        type="button"
-                                                        onClick={() => setSelectedMenuItemByBlok(prev => ({ ...prev, [blok.id]: item.id }))}
-                                                        style={{
-                                                            textAlign: 'left',
-                                                            padding: 10,
-                                                            border: selectedMenuItemByBlok[blok.id] === item.id ? '1px solid var(--btn-primary-bg)' : '1px solid var(--border)',
-                                                            borderRadius: 'var(--radius-sm)',
-                                                            backgroundColor: selectedMenuItemByBlok[blok.id] === item.id ? 'rgba(59,130,246,0.08)' : 'var(--bg)',
-                                                            color: 'var(--text)',
-                                                            cursor: 'pointer'
-                                                        }}
-                                                    >
-                                                        <strong>{item.namaMenu}</strong>
-                                                        <div style={{ marginTop: 4, fontSize: 12, color: 'var(--text-muted)' }}>{(bahanByMenuItem[item.id] || []).length} bahan</div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {tanpaKomponen.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
-                        {tanpaKomponen.map(item => (
-                            <button key={item.id} type="button" onClick={() => setSelectedMenuItemByBlok(prev => ({ ...prev, [blok.id]: item.id }))} style={buttonStyle('secondary')}>
-                                {item.namaMenu} - Tanpa komponen
-                            </button>
-                        ))}
-                    </div>
-                )}
-
-                {editable && (
-                    <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: 'minmax(220px, 1fr) 220px auto', gap: 10, alignItems: 'end' }}>
-                        <div>
-                            {fieldLabel('Nama menu')}
-                            <input className="form-field" placeholder="Contoh: Ayam Kecap" value={namaMenuInput[blok.id] || ''} onChange={e => setNamaMenuInput(prev => ({ ...prev, [blok.id]: e.target.value }))} />
-                        </div>
-                        <div>
-                            {fieldLabel('Komponen')}
-                            <Dropdown value={komponenInput[blok.id] || ''} onChange={val => setKomponenInput(prev => ({ ...prev, [blok.id]: val }))} options={[{ value: '', label: '-- Komponen (opsional) --' }, ...KOMPONEN_OPTIONS.map(k => ({ value: k, label: KOMPONEN_LABEL[k] }))]} />
-                        </div>
-                        <button type="button" onClick={() => addMenuItem(blok.id)} style={buttonStyle('primary')}>Tambah Menu</button>
-                    </div>
-                )}
-
-                {renderBahanPanel(blok, editable)}
-            </>
-        );
-    };
-
-    const renderAlergiTab = (blok, editable) => {
-        const existingAlergiList = alergiByBlok[blok.id] || [];
-        const existingTotal = existingAlergiList.reduce((sum, item) => sum + Number(item.jumlahSiswa || 0), 0);
-        const inputJumlahRaw = alergiForm[blok.id]?.jumlahSiswa;
-        const inputJumlah = (inputJumlahRaw === '' || inputJumlahRaw === undefined || isNaN(Number(inputJumlahRaw))) ? 0 : Number(inputJumlahRaw);
-        const totalAlergiRealtime = existingTotal + inputJumlah;
-        const totalPenerima = blok.totalPenerima !== undefined ? blok.totalPenerima : 0;
-        const isOverload = totalAlergiRealtime > totalPenerima;
-
-        return (
-            <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8, padding: '10px 14px', backgroundColor: isOverload ? 'rgba(239, 68, 68, 0.08)' : 'var(--bg)', border: `1px solid ${isOverload ? 'var(--color-danger)' : 'var(--border)'}`, borderRadius: 'var(--radius-sm)' }}>
-                    <div style={{ fontSize: 13, color: 'var(--text)' }}>
-                        Penerima Manfaat Blok: <strong>{totalPenerima} siswa</strong>
-                        <span style={{ margin: '0 12px', color: 'var(--border)' }}>|</span>
-                        Total Alergi (Real-time): <strong style={{ color: isOverload ? 'var(--color-danger)' : 'var(--text)' }}>{totalAlergiRealtime} siswa</strong>
-                    </div>
-                    {isOverload && (
-                        <div style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            padding: '4px 10px',
-                            borderRadius: 'var(--radius-sm)',
-                            backgroundColor: 'var(--color-danger)',
-                            color: '#ffffff',
-                            fontWeight: 700,
-                            fontSize: 12
-                        }}>
-                            ⚠️ Warning: Total alergi ({totalAlergiRealtime}) melebihi jumlah penerima ({totalPenerima})!
-                        </div>
-                    )}
-                </div>
-
-                <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
-                    {existingAlergiList.length === 0 ? (
-                        <div style={{ color: 'var(--text-muted)' }}>Belum ada catatan alergi.</div>
-                    ) : existingAlergiList.map(item => (
-                        <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', padding: 12, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                            <div>
-                                <strong>{item.jenisAlergi}</strong> - {item.jumlahSiswa} siswa
-                                {item.bahanPengganti ? <span style={{ color: 'var(--text-muted)' }}> - Pengganti: {item.bahanPengganti}</span> : null}
-                            </div>
-                            {editable && <FieldButton onPress={() => deleteAlergi(blok.id, item.id)}><Trash2 size={14} className="text-red-600" /></FieldButton>}
-                        </div>
-                    ))}
-                </div>
-                {editable && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 160px 1fr auto', gap: 10, alignItems: 'end' }}>
-                        <div>{fieldLabel('Jenis alergi')}<input className="form-field" value={alergiForm[blok.id]?.jenisAlergi || ''} onChange={e => setAlergiField(blok.id, 'jenisAlergi', e.target.value)} /></div>
-                        <div>{fieldLabel('Jumlah siswa')}<NumberInput className="form-field" value={alergiForm[blok.id]?.jumlahSiswa === '' || alergiForm[blok.id]?.jumlahSiswa === undefined ? '' : Number(alergiForm[blok.id]?.jumlahSiswa)} onChange={val => setAlergiField(blok.id, 'jumlahSiswa', val)} /></div>
-                        <div>{fieldLabel('Bahan pengganti')}<input className="form-field" value={alergiForm[blok.id]?.bahanPengganti || ''} onChange={e => setAlergiField(blok.id, 'bahanPengganti', e.target.value)} /></div>
-                        <button type="button" onClick={() => addAlergi(blok.id)} style={buttonStyle('primary')}>Tambah</button>
-                    </div>
-                )}
-            </div>
-        );
-    };
-
-    const renderOrganoleptikTab = (blok, editable) => {
-        const current = organoleptikByBlok[blok.id];
-        if (current) {
-            return (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
-                    {[
-                        ['Rasa', current.rasa],
-                        ['Aroma', current.aroma],
-                        ['Tekstur', current.tekstur],
-                        ['Suhu Saji', current.suhuSaji],
-                        ['Jumlah Ompreng', current.jumlahOmpreng],
-                        ['Tanggal Uji', current.ujiPadaTanggal ? formatDate(current.ujiPadaTanggal) : '-'],
-                        ['Tanggal Musnah', current.tanggalMusnah ? formatDate(current.tanggalMusnah) : '-']
-                    ].map(([label, value]) => (
-                        <div key={label} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: 12 }}>
-                            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{label}</div>
-                            <strong>{value || '-'}</strong>
-                        </div>
-                    ))}
-                    {current.catatan && <div style={{ gridColumn: '1 / -1', color: 'var(--text-muted)' }}>{current.catatan}</div>}
-                </div>
-            );
-        }
-
-        if (!editable) return <div style={{ color: 'var(--text-muted)' }}>Belum ada uji organoleptik.</div>;
-
-        const formState = organoleptikForm[blok.id] || {};
-        const computedTanggalMusnah = formState.ujiPadaTanggal ? getTanggalMusnah(formState.ujiPadaTanggal) : '-';
-
-        return (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr)) auto', gap: 10, alignItems: 'end' }}>
-                {[
-                    ['rasa', 'Rasa', 'text'],
-                    ['aroma', 'Aroma', 'text'],
-                    ['tekstur', 'Tekstur', 'text'],
-                    ['suhuSaji', 'Suhu Saji', 'text'],
-                    ['jumlahOmpreng', 'Jumlah Ompreng', 'number'],
-                    ['catatan', 'Catatan', 'text']
-                ].map(([field, label, type]) => (
-                    <div key={field}>{fieldLabel(label)}<input className="form-field" type={type} value={formState[field] || ''} onChange={e => setOrganoleptikField(blok.id, field, e.target.value)} /></div>
-                ))}
-                <div>
-                    {fieldLabel('Tgl Uji')}
-                    <DatePicker value={formState.ujiPadaTanggal || ''} onChange={val => setOrganoleptikField(blok.id, 'ujiPadaTanggal', val)} />
-                </div>
-                <div>
-                    {fieldLabel('Tanggal Musnah')}
-                    <input className="form-field" type="text" value={computedTanggalMusnah} readOnly style={{ backgroundColor: 'var(--bg-muted)', color: 'var(--text-muted)' }} />
-                </div>
-                <button type="button" onClick={() => addOrganoleptik(blok.id)} style={buttonStyle('primary')}>Simpan Uji</button>
-            </div>
-        );
-    };
-
-    const renderPengiriman = (menu, editable) => {
-        const form = pengirimanForm[menu.id] || {};
-        const aktifKendaraan = kendaraanList.filter(k => k.aktif === true);
-
-        return (
-            <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 16, marginTop: 18 }}>
-                <h4 style={{ margin: '0 0 12px 0', color: 'var(--text)' }}>Pengiriman Hari Ini</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: editable ? 16 : 0 }}>
-                    {(pengirimanByMenu[menu.id] || []).length === 0 ? (
-                        <div style={{ color: 'var(--text-muted)' }}>Belum ada pengiriman.</div>
-                    ) : (pengirimanByMenu[menu.id] || []).map(p => (
-                        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', padding: 10, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                            <div>
-                                <strong>{(p.kategoriPenerima || []).map(k => k.nama).join(', ') || '-'}</strong>
-                                <span style={{ color: 'var(--text-muted)', marginLeft: 8 }}>({p.kendaraan?.namaKendaraan || '-'})</span>
-                                {p.catatan && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>Catatan: {p.catatan}</div>}
-                            </div>
-                            {editable && (
-                                <div style={{ display: 'flex', gap: 8 }}>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => handleStartEditPengiriman(menu.id, p)}
-                                        style={{
-                                            padding: '4px 8px',
-                                            fontSize: 12,
-                                            fontWeight: 600,
-                                            border: '1px solid var(--border)',
-                                            borderRadius: 'var(--radius-sm)',
-                                            backgroundColor: 'var(--bg-elevated)',
-                                            color: 'var(--text)',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                    <FieldButton onPress={() => deletePengiriman(p.id)}><Trash2 size={14} className="text-red-600" /></FieldButton>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-                {editable && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-                        <div style={{ fontWeight: 600, fontSize: 13 }}>
-                            {form.id ? 'Edit Data Pengiriman' : 'Tambah Data Pengiriman'}
-                        </div>
-                        
-                        <div>
-                            {fieldLabel('Kategori Penerima (Pilih minimal 1)')}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px 12px', border: '1px solid var(--border)', padding: 12, borderRadius: 'var(--radius-sm)', maxHeight: 150, overflowY: 'auto', backgroundColor: 'var(--bg)' }}>
-                                {kategoriList.map(k => {
-                                    const isChecked = (form.kategoriIds || []).includes(k.id);
-                                    return (
-                                        <label key={k.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', color: 'var(--text)' }}>
-                                            <input 
-                                                type="checkbox" 
-                                                checked={isChecked}
-                                                onChange={e => {
-                                                    const nextIds = e.target.checked
-                                                        ? [...(form.kategoriIds || []), k.id]
-                                                        : (form.kategoriIds || []).filter(id => id !== k.id);
-                                                    setPengirimanForm(prev => ({
-                                                        ...prev,
-                                                        [menu.id]: {
-                                                            ...(prev[menu.id] || {}),
-                                                            kategoriIds: nextIds
-                                                        }
-                                                    }));
-                                                }}
-                                            />
-                                            {k.nama}
-                                        </label>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 12 }}>
-                            <div>
-                                {fieldLabel('Kendaraan')}
-                                <Dropdown value={form.kendaraanId || ''} onChange={val => setPengirimanForm(prev => ({ ...prev, [menu.id]: { ...(prev[menu.id] || {}), kendaraanId: val } }))} options={[{ value: '', label: '-- Pilih --' }, ...aktifKendaraan.map(k => ({ value: k.id, label: k.namaKendaraan }))]} />
-                            </div>
-                            <div>
-                                {fieldLabel('Catatan')}
-                                <input className="form-field" value={form.catatan || ''} onChange={e => setPengirimanForm(prev => ({ ...prev, [menu.id]: { ...(prev[menu.id] || {}), catatan: e.target.value } }))} />
-                            </div>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 4 }}>
-                            {form.id && (
-                                <button 
-                                    type="button" 
-                                    onClick={() => {
-                                        setPengirimanForm(prev => ({
-                                            ...prev,
-                                            [menu.id]: { id: '', kategoriIds: [], kendaraanId: '', catatan: '' }
-                                        }));
-                                    }}
-                                    style={buttonStyle('secondary')}
-                                >
-                                    Batal Edit
-                                </button>
-                            )}
-                            <button type="button" onClick={() => addPengiriman(menu.id)} style={buttonStyle('primary')}>
-                                {form.id ? 'Simpan Perubahan' : 'Tambah Pengiriman'}
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    };
-
-    const renderBlokWorkspace = (menu, editable) => {
-        const activeBlokId = activeBlokByMenu[menu.id] || menu.blok[0]?.id || '';
-        const activeBlok = menu.blok.find(blok => blok.id === activeBlokId);
-
-        const totalBlok = activeBlok ? getBlokTotalHarga(activeBlok.id) : 0;
-        const jenisPorsi = activeBlok?.kelompokUmurMenu?.kategoriPenerima?.[0]?.jenisPorsi;
-        const batasMaksimal = jenisPorsi ? (batasHargaMap[jenisPorsi] || 0) : 0;
-        const isOverBatas = batasMaksimal > 0 && totalBlok > batasMaksimal;
-        const badgeColor = isOverBatas ? 'var(--color-danger)' : 'var(--color-success)';
-
-        return (
-            <div style={{ display: 'grid', gridTemplateColumns: '260px minmax(0, 1fr)', gap: 18, alignItems: 'start' }}>
-                <aside style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', backgroundColor: 'var(--bg-elevated)' }}>
-                    <div style={{ padding: 14, borderBottom: '1px solid var(--border)', fontWeight: 700 }}>Kelompok Umur</div>
-                    {menu.blok.length === 0 ? (
-                        <div style={{ padding: 14, color: 'var(--text-muted)' }}>Belum ada blok.</div>
-                    ) : menu.blok.map(blok => {
-                        const status = getBlokStatus(blok);
-                        const active = blok.id === activeBlokId;
-                        const blokTotal = getBlokTotalHarga(blok.id);
-
-                        if (!active) {
-                            return (
-                                <button
-                                    key={blok.id}
-                                    type="button"
-                                    onClick={() => setActiveBlokByMenu(prev => ({ ...prev, [menu.id]: blok.id }))}
-                                    style={{
-                                        width: '100%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        padding: '10px 14px',
-                                        border: 'none',
-                                        borderBottom: '1px solid var(--border)',
-                                        backgroundColor: 'transparent',
-                                        color: 'var(--text)',
-                                        cursor: 'pointer',
-                                        fontSize: 13
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                        <span style={{ fontWeight: 600 }}>{blok.kelompokUmurMenu?.nama || blok.kelompokUmurMenuId}</span>
-                                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: status.color, flexShrink: 0 }} title={status.label} />
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Rp{blokTotal.toLocaleString('id-ID')}</span>
-                                        {editable && (
-                                            <span
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    deleteBlok(blok.id);
-                                                }}
-                                                style={{ color: 'var(--color-danger)', display: 'inline-flex', padding: 2 }}
-                                            >
-                                                <Trash2 size={12} />
-                                            </span>
-                                        )}
-                                    </div>
-                                </button>
-                            );
-                        }
-
-                        return (
-                            <div key={blok.id} style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'rgba(59,130,246,0.06)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, padding: '12px 14px 6px 14px', alignItems: 'center' }}>
-                                    <strong style={{ color: 'var(--text)', fontSize: 14 }}>{blok.kelompokUmurMenu?.nama || blok.kelompokUmurMenuId}</strong>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4, backgroundColor: 'rgba(59,130,246,0.1)', color: 'var(--btn-primary-bg)' }}>
-                                            Rp{blokTotal.toLocaleString('id-ID')}
-                                        </span>
-                                        {editable && (
-                                            <span
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    deleteBlok(blok.id);
-                                                }}
-                                                style={{ color: 'var(--color-danger)', cursor: 'pointer' }}
-                                            >
-                                                <Trash2 size={14} />
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                                <div style={{ padding: '0 14px 12px 14px', fontSize: 12, color: status.color }}>
-                                    {status.label}
-                                </div>
-                            </div>
-                        );
-                    })}
-                    {editable && (
-                        <div style={{ padding: 14, display: 'grid', gap: 8 }}>
-                            <Dropdown value={selectedKelompokUmurId} onChange={setSelectedKelompokUmurId} options={kelompokUmur.map(k => ({ value: k.id, label: k.nama }))} />
-                            <button type="button" onClick={() => addBlok(menu.id)} style={buttonStyle('primary')}>Tambah Blok</button>
-                        </div>
-                    )}
-                </aside>
-
-                <main style={{ minWidth: 0, border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 18, backgroundColor: 'var(--bg-elevated)' }}>
-                    {!activeBlok ? (
-                        <div style={{ color: 'var(--text-muted)' }}>Pilih atau tambah kelompok umur terlebih dahulu.</div>
-                    ) : (
-                        <>
-                            <div style={{
-                                position: 'sticky',
-                                top: 72,
-                                zIndex: 3,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                gap: '12px 24px',
-                                flexWrap: 'wrap',
-                                alignItems: 'center',
-                                paddingBottom: 14,
-                                marginBottom: 14,
-                                borderBottom: '1px solid var(--border)',
-                                backgroundColor: 'var(--bg-elevated)'
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                                    <div>
-                                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Blok aktif</div>
-                                        <h4 style={{ margin: 0, color: 'var(--text)' }}>{activeBlok.kelompokUmurMenu?.nama || activeBlok.kelompokUmurMenuId}</h4>
-                                    </div>
-                                    {batasMaksimal > 0 && (
-                                        <div style={{
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            padding: '4px 10px',
-                                            borderRadius: 'var(--radius-sm)',
-                                            backgroundColor: isOverBatas ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                            color: badgeColor,
-                                            fontWeight: 700,
-                                            fontSize: 13,
-                                            border: `1px solid ${isOverBatas ? 'var(--color-danger)' : 'var(--color-success)'}`,
-                                            whiteSpace: 'nowrap'
-                                        }}>
-                                            Total: Rp{totalBlok.toLocaleString('id-ID')} / Rp{batasMaksimal.toLocaleString('id-ID')}
-                                        </div>
-                                    )}
-                                </div>
-                                {(() => {
-                                    const gizi = sumGizi(menuItemsByBlok, activeBlokId);
-                                    const target = targetGiziByBlok[activeBlokId];
-                                    return (
-                                        <div style={{ marginTop: 12, padding: 12, background: 'linear-gradient(to right, #eff6ff, #fff)', borderRadius: 8, border: '1px solid #bfdbfe', width: '100%' }}>
-                                            <div style={{ fontSize: 13, fontWeight: 700, color: '#1e40af', marginBottom: 8 }}>📊 Total Gizi Blok Ini</div>
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 4, fontSize: 12 }}>
-                                                <div style={{ fontWeight: 600, color: '#6b7280' }}>Komponen</div>
-                                                <div style={{ fontWeight: 600, color: '#6b7280', textAlign: 'right' }}>Realisasi</div>
-                                                <div style={{ fontWeight: 600, color: '#6b7280', textAlign: 'right' }}>Target</div>
-                                                <div style={{ fontWeight: 600, color: '#6b7280', textAlign: 'right' }}>Gap</div>
-                                                {[
-                                                    { label: 'Energi', key: 'energiKkal', satuan: 'kkal', targetKey: 'targetEnergi' },
-                                                    { label: 'Protein', key: 'proteinGr', satuan: 'g', targetKey: 'targetProtein' },
-                                                    { label: 'Lemak', key: 'lemakGr', satuan: 'g', targetKey: 'targetLemak' },
-                                                    { label: 'Karbo', key: 'karbohidratGr', satuan: 'g', targetKey: 'targetKarbohidrat' },
-                                                    { label: 'Serat', key: 'seratGr', satuan: 'g', targetKey: 'targetSerat' },
-                                                ].map(k => {
-                                                    const real = Math.round(gizi[k.key] || 0);
-                                                    const tgt = target ? Math.round(target[k.targetKey] || 0) : null;
-                                                    const gap = tgt !== null ? real - tgt : null;
-                                                    let gapColor = '#9ca3af';
-                                                    let gapIcon = '-';
-                                                    if (gap !== null && gap > 0) { gapColor = '#d97706'; gapIcon = '+' + gap; }
-                                                    else if (gap !== null && gap < 0) { gapColor = '#dc2626'; gapIcon = gap; }
-                                                    else if (gap === 0) { gapColor = '#16a34a'; gapIcon = '0'; }
-                                                    return (
-                                                        <React.Fragment key={k.key}>
-                                                            <div style={{ color: '#374151' }}>{k.label}</div>
-                                                            <div style={{ textAlign: 'right', fontFamily: 'monospace' }}>{real} {k.satuan}</div>
-                                                            <div style={{ textAlign: 'right', fontFamily: 'monospace' }}>{tgt !== null ? tgt + ' ' + k.satuan : '-'}</div>
-                                                            <div style={{ textAlign: 'right', fontFamily: 'monospace', color: gapColor }}>{gapIcon}</div>
-                                                        </React.Fragment>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    );
-                                })()}
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                    {[
-                                        ['menu', 'Menu & Bahan'],
-                                        ['alergi', 'Alergi'],
-                                        ['organoleptik', 'Organoleptik']
-                                    ].map(([key, label]) => (
-                                        <button key={key} type="button" onClick={() => setActiveTabByBlok(prev => ({ ...prev, [activeBlok.id]: key }))} style={{ padding: '8px 12px', border: (activeTabByBlok[activeBlok.id] || 'menu') === key ? '1px solid var(--btn-primary-bg)' : '1px solid var(--border)', borderRadius: 'var(--radius-sm)', backgroundColor: (activeTabByBlok[activeBlok.id] || 'menu') === key ? 'rgba(59,130,246,0.08)' : 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
-                                            {label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            {(activeTabByBlok[activeBlok.id] || 'menu') === 'menu' && renderMenuTab(activeBlok, editable, menu)}
-                            {activeTabByBlok[activeBlok.id] === 'alergi' && renderAlergiTab(activeBlok, editable)}
-                            {activeTabByBlok[activeBlok.id] === 'organoleptik' && renderOrganoleptikTab(activeBlok, editable)}
-                        </>
-                    )}
-                </main>
-            </div>
-        );
-    };
-
-    const renderMenuHarianWorkspace = (menu) => {
-        const editable = isEditableMenu(menu);
-        const isDetailExpanded = expandedMenus[menu.id] !== undefined ? expandedMenus[menu.id] : true;
-
-        return (
-            <section key={menu.id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)', boxShadow: 'var(--shadow)', overflow: 'hidden', marginBottom: 24 }}>
-                <div style={{ position: 'sticky', top: 0, zIndex: 5, display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', padding: '16px 18px', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg-elevated)' }}>
-                    <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center' }}>
-                        <span
-                            onClick={() => setExpandedMenus(prev => ({ ...prev, [menu.id]: !isDetailExpanded }))}
-                            style={{
-                                fontSize: 16,
-                                cursor: 'pointer',
-                                userSelect: 'none',
-                                color: 'var(--text-muted)',
-                                transform: isDetailExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                                transition: 'transform 0.2s ease',
-                                display: 'inline-block',
-                                paddingRight: 6
-                            }}
-                        >
-                            ▸
-                        </span>
-                        <div>{fieldLabel('Periode')}<strong>{activePeriod ? `${activePeriod.tanggalMulai.split('T')[0]} - ${activePeriod.tanggalSelesai.split('T')[0]}` : '-'}</strong></div>
-                        <div>{fieldLabel('Tanggal')}<strong>{formatDate(menu.tanggal)}</strong></div>
-                        <div>{fieldLabel('Status')}{renderStatus(menu.status)}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 10 }}>
-                        <button type="button" disabled={!editable} onClick={() => toast.success('Draft tersimpan melalui setiap aksi tambah/simpan.')} style={buttonStyle('secondary', !editable)}>Simpan Draft</button>
-                        <button type="button" disabled={!editable} onClick={() => triggerAjukanMenu(menu.id)} style={buttonStyle('primary', !editable)}>Ajukan</button>
-                    </div>
-                </div>
-                <div
-                    style={{
-                        maxHeight: isDetailExpanded ? '5000px' : '0px',
-                        transition: 'max-height 0.4s ease-in-out',
-                        overflow: 'hidden'
-                    }}
-                >
-                    <div style={{ padding: 18 }}>
-                        {!editable && (
-                            <div style={{ marginBottom: 14, padding: 12, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)' }}>
-                                Mode baca saja. Menu dengan status {menu.status} tidak dapat diubah oleh Ahli Gizi.
-                            </div>
-                        )}
-                        {renderBlokWorkspace(menu, editable)}
-                        {renderPengiriman(menu, editable)}
-                    </div>
-                </div>
-            </section>
-        );
-    };
-
     const menuAktif = items.filter(item => item.status !== 'DISETUJUI');
     const menuRiwayat = items.filter(item => item.status === 'DISETUJUI');
 
@@ -1635,333 +831,30 @@ export const MenuHarianPage = () => {
                 <Table columns={masterMenuColumns} data={masterMenuList} emptyText="Belum ada histori menu disetujui untuk periode ini." scrollHeight={300} />
             </section>
 
-            {/* Section 2: Setup Master Menu (BARU) */}
-            <section style={{ border: '1px solid var(--border)', padding: 24, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)', boxShadow: 'var(--shadow)', marginBottom: 24 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <h3 style={{ margin: 0, color: 'var(--text)' }}>Setup Master Menu</h3>
-                    <button 
-                        type="button" 
-                        onClick={() => {
-                            setMasterForm({
-                                id: '',
-                                jalur: 'SISWA',
-                                hari: 'SENIN',
-                                mingguKe: 1,
-                                catatan: '',
-                                menuKarbohidrat: '',
-                                menuLaukHewani: '',
-                                menuLaukNabati: '',
-                                menuSayur: '',
-                                menuBuah: ''
-                            });
-                            setShowMasterModal(true);
-                            fetchMasterByHari('SISWA', 'SENIN', 1);
-                        }}
-                        style={buttonStyle('secondary')}
-                    >
-                        📋 Kelola Rencana Master Menu
-                    </button>
-                </div>
-                
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Minggu</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Jalur</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Hari</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Karbohidrat</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Lauk Hewani</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Lauk Nabati</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Sayur</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Buah</th>
-                                <th style={{ textAlign: 'left', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)' }}>Catatan</th>
-                                <th style={{ textAlign: 'center', padding: '12px 10px', fontSize: 13, color: 'var(--text-muted)', width: 140 }}>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {actualMasterMenuList.length === 0 ? (
-                                <tr>
-                                    <td colSpan={10} style={{ textAlign: 'center', padding: '24px 10px', color: 'var(--text-muted)' }}>
-                                        Belum ada rencana master menu. Silakan klik "Kelola Rencana Master Menu" untuk menambahkan.
-                                    </td>
-                                </tr>
-                            ) : actualMasterMenuList.map(row => (
-                                <tr key={row.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                                    <td style={{ padding: '12px 10px' }}>
-                                        <span style={{
-                                            padding: '2px 8px',
-                                            borderRadius: 4,
-                                            fontSize: 11,
-                                            fontWeight: 700,
-                                            backgroundColor: row.mingguKe === 2 ? 'rgba(168, 85, 247, 0.1)' : 'rgba(59, 130, 246, 0.1)',
-                                            color: row.mingguKe === 2 ? '#9333ea' : '#2563eb'
-                                        }}>
-                                            Minggu {row.mingguKe || 1}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '12px 10px' }}><strong>{row.jalur}</strong></td>
-                                    <td style={{ padding: '12px 10px' }}>{row.hari}</td>
-                                    <td style={{ padding: '12px 10px' }}>{row.menuKarbohidrat || '-'}</td>
-                                    <td style={{ padding: '12px 10px' }}>{row.menuLaukHewani || '-'}</td>
-                                    <td style={{ padding: '12px 10px' }}>{row.menuLaukNabati || '-'}</td>
-                                    <td style={{ padding: '12px 10px' }}>{row.menuSayur || '-'}</td>
-                                    <td style={{ padding: '12px 10px' }}>{row.menuBuah || '-'}</td>
-                                    <td style={{ padding: '12px 10px', color: row.catatan ? 'var(--text)' : 'var(--text-muted)' }}>{row.catatan || '-'}</td>
-                                    <td style={{ padding: '12px 10px', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
-                                            <button 
-                                                type="button" 
-                                                onClick={() => {
-                                                    setMasterForm({
-                                                        id: row.id,
-                                                        jalur: row.jalur,
-                                                        hari: row.hari,
-                                                        mingguKe: row.mingguKe || 1,
-                                                        catatan: row.catatan || '',
-                                                        menuKarbohidrat: row.menuKarbohidrat || '',
-                                                        menuLaukHewani: row.menuLaukHewani || '',
-                                                        menuLaukNabati: row.menuLaukNabati || '',
-                                                        menuSayur: row.menuSayur || '',
-                                                        menuBuah: row.menuBuah || ''
-                                                    });
-                                                    setShowMasterModal(true);
-                                                }}
-                                                style={{
-                                                    padding: '4px 8px',
-                                                    fontSize: 12,
-                                                    fontWeight: 600,
-                                                    border: '1px solid var(--border)',
-                                                    borderRadius: 'var(--radius-sm)',
-                                                    backgroundColor: 'var(--bg-elevated)',
-                                                    color: 'var(--text)',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button 
-                                                type="button" 
-                                                onClick={() => deleteMasterMenu(row.id)}
-                                                style={{
-                                                    padding: '4px 8px',
-                                                    fontSize: 12,
-                                                    fontWeight: 600,
-                                                    border: '1px solid #ef4444',
-                                                    borderRadius: 'var(--radius-sm)',
-                                                    backgroundColor: 'rgba(239, 68, 68, 0.05)',
-                                                    color: '#ef4444',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                Hapus
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {showMasterModal && (
-                    <div style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000
-                    }}>
-                        <div style={{
-                            backgroundColor: 'var(--bg-elevated)',
-                            borderRadius: 'var(--radius-lg)',
-                            width: '100%',
-                            maxWidth: 550,
-                            padding: 24,
-                            boxShadow: 'var(--shadow-lg)',
-                            border: '1px solid var(--border)'
-                        }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                                <h3 style={{ margin: 0, color: 'var(--text)' }}>
-                                    {masterForm.id ? 'Edit Master Menu Mingguan' : 'Tambah Master Menu Mingguan'}
-                                </h3>
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowMasterModal(false)}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        color: 'var(--text-muted)',
-                                        fontSize: 20,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    &times;
-                                </button>
-                            </div>
-                            <form onSubmit={submitMasterMenu}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
-                                    <div>
-                                        {fieldLabel('Minggu')}
-                                        <Dropdown 
-                                            value={masterForm.mingguKe} 
-                                            onChange={val => {
-                                                const mk = Number(val);
-                                                setMasterForm(prev => ({ ...prev, mingguKe: mk }));
-                                                fetchMasterByHari(masterForm.jalur, masterForm.hari, mk);
-                                            }} 
-                                            options={[
-                                                { value: 1, label: 'Minggu 1' },
-                                                { value: 2, label: 'Minggu 2' }
-                                            ]} 
-                                        />
-                                    </div>
-                                    <div>
-                                        {fieldLabel('Jalur')}
-                                        <Dropdown 
-                                            value={masterForm.jalur} 
-                                            onChange={val => {
-                                                setMasterForm(prev => ({ ...prev, jalur: val }));
-                                                fetchMasterByHari(val, masterForm.hari, masterForm.mingguKe);
-                                            }} 
-                                            options={[
-                                                { value: 'SISWA', label: 'Siswa' },
-                                                { value: 'TIGA_B', label: 'Tiga B' }
-                                            ]} 
-                                        />
-                                    </div>
-                                    <div>
-                                        {fieldLabel('Hari')}
-                                        <Dropdown 
-                                            value={masterForm.hari} 
-                                            onChange={val => {
-                                                setMasterForm(prev => ({ ...prev, hari: val }));
-                                                fetchMasterByHari(masterForm.jalur, val, masterForm.mingguKe);
-                                            }} 
-                                            options={[
-                                                { value: 'SENIN', label: 'Senin' },
-                                                { value: 'SELASA', label: 'Selasa' },
-                                                { value: 'RABU', label: 'Rabu' },
-                                                { value: 'KAMIS', label: 'Kamis' },
-                                                { value: 'JUMAT', label: 'Jumat' },
-                                                { value: 'SABTU', label: 'Sabtu' }
-                                            ]} 
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
-                                    <div>
-                                        {fieldLabel('Karbohidrat')}
-                                        <input 
-                                            className="form-field" 
-                                            value={masterForm.menuKarbohidrat} 
-                                            onChange={e => setMasterForm(prev => ({ ...prev, menuKarbohidrat: e.target.value }))} 
-                                            placeholder="Contoh: Nasi Putih"
-                                        />
-                                    </div>
-                                    <div>
-                                        {fieldLabel('Lauk Hewani')}
-                                        <input 
-                                            className="form-field" 
-                                            value={masterForm.menuLaukHewani} 
-                                            onChange={e => setMasterForm(prev => ({ ...prev, menuLaukHewani: e.target.value }))} 
-                                            placeholder="Contoh: Ayam Goreng"
-                                        />
-                                    </div>
-                                    <div>
-                                        {fieldLabel('Lauk Nabati')}
-                                        <input 
-                                            className="form-field" 
-                                            value={masterForm.menuLaukNabati} 
-                                            onChange={e => setMasterForm(prev => ({ ...prev, menuLaukNabati: e.target.value }))} 
-                                            placeholder="Contoh: Tempe Bacem"
-                                        />
-                                    </div>
-                                    <div>
-                                        {fieldLabel('Sayur')}
-                                        <input 
-                                            className="form-field" 
-                                            value={masterForm.menuSayur} 
-                                            onChange={e => setMasterForm(prev => ({ ...prev, menuSayur: e.target.value }))} 
-                                            placeholder="Contoh: Sayur Sop"
-                                        />
-                                    </div>
-                                    <div>
-                                        {fieldLabel('Buah')}
-                                        <input 
-                                            className="form-field" 
-                                            value={masterForm.menuBuah} 
-                                            onChange={e => setMasterForm(prev => ({ ...prev, menuBuah: e.target.value }))} 
-                                            placeholder="Contoh: Pisang Mas"
-                                        />
-                                    </div>
-                                    <div>
-                                        {fieldLabel('Catatan (Opsional)')}
-                                        <input 
-                                            className="form-field" 
-                                            value={masterForm.catatan} 
-                                            onChange={e => setMasterForm(prev => ({ ...prev, catatan: e.target.value }))} 
-                                            placeholder="Contoh: Menu rotasi minggu ke-2 / Catatan khusus"
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                                    {masterForm.id && (
-                                        <button 
-                                            type="button" 
-                                            onClick={() => deleteMasterMenu(masterForm.id)}
-                                            style={{ ...buttonStyle('secondary'), borderColor: 'var(--color-danger)', color: 'var(--color-danger)' }}
-                                        >
-                                            Hapus
-                                        </button>
-                                    )}
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setShowMasterModal(false)}
-                                        style={buttonStyle('secondary')}
-                                    >
-                                        Batal
-                                    </button>
-                                    <button 
-                                        type="submit" 
-                                        style={buttonStyle('primary')}
-                                    >
-                                        {masterForm.id ? 'Simpan Perubahan' : 'Tambah Master'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
-            </section>
+            {/* Section 2: Setup Master Menu */}
+            <MasterMenuSetup
+                actualMasterMenuList={actualMasterMenuList}
+                masterForm={masterForm}
+                showMasterModal={showMasterModal}
+                submitMasterMenu={submitMasterMenu}
+                deleteMasterMenu={deleteMasterMenu}
+                fetchMasterByHari={fetchMasterByHari}
+                setMasterForm={setMasterForm}
+                setShowMasterModal={setShowMasterModal}
+                fieldLabel={fieldLabel}
+                buttonStyle={buttonStyle}
+            />
 
             {/* Section 3: Input Menu Harian Aktual */}
-            <section style={{ border: '1px solid var(--border)', padding: 24, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)', boxShadow: 'var(--shadow)', marginBottom: 24 }}>
-                <h3 style={{ margin: '0 0 16px 0', color: 'var(--text)' }}>Buat / Pilih Tanggal Menu Harian Aktual</h3>
-                <form onSubmit={create} style={{ display: 'flex', gap: 12, alignItems: 'end', maxWidth: 600 }}>
-                    <div style={{ flex: 1 }}>
-                        {fieldLabel('Pilih Tanggal Menu Harian')}
-                        <DatePicker
-                            value={tanggal}
-                            onChange={setTanggal}
-                            defaultFocusMonth={activePeriod?.tanggalMulai}
-                            required
-                            isDateUnavailable={(date) => {
-                                const dateStr = date.toString();
-                                return items.some(item => item.tanggal.split('T')[0] === dateStr && item.status === 'DISETUJUI');
-                            }}
-                        />
-                    </div>
-                    <button type="submit" style={buttonStyle('primary')}>Buat Menu Harian</button>
-                </form>
-            </section>
+            <MenuHarianForm
+                tanggal={tanggal}
+                setTanggal={setTanggal}
+                create={create}
+                activePeriod={activePeriod}
+                items={items}
+                fieldLabel={fieldLabel}
+                buttonStyle={buttonStyle}
+            />
 
             <section style={{ marginBottom: 24 }}>
                 <h3 style={{ margin: '0 0 16px 0', color: 'var(--text)' }}>Input Menu Harian Aktual</h3>
@@ -1969,101 +862,111 @@ export const MenuHarianPage = () => {
                     <div style={{ padding: 32, textAlign: 'center', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', backgroundColor: 'var(--bg-elevated)' }}>
                         Belum ada menu harian aktif untuk periode ini.
                     </div>
-                ) : menuAktif.map(renderMenuHarianWorkspace)}
+                ) : menuAktif.map(menu => (
+                    <MenuHarianWorkspace
+                        key={menu.id}
+                        menu={menu}
+                        activePeriod={activePeriod}
+                        expandedMenus={expandedMenus}
+                        setExpandedMenus={setExpandedMenus}
+                        isEditableMenu={isEditableMenu}
+                        formatDate={formatDate}
+                        triggerAjukanMenu={triggerAjukanMenu}
+                        fieldLabel={fieldLabel}
+                        buttonStyle={buttonStyle}
+                        toast={toast}
+                        activeBlokByMenu={activeBlokByMenu}
+                        setActiveBlokByMenu={setActiveBlokByMenu}
+                        activeTabByBlok={activeTabByBlok}
+                        setActiveTabByBlok={setActiveTabByBlok}
+                        selectedKelompokUmurId={selectedKelompokUmurId}
+                        setSelectedKelompokUmurId={setSelectedKelompokUmurId}
+                        kelompokUmur={kelompokUmur}
+                        menuItemsByBlok={menuItemsByBlok}
+                        bahanByMenuItem={bahanByMenuItem}
+                        targetGiziByBlok={targetGiziByBlok}
+                        batasHargaMap={batasHargaMap}
+                        getBlokStatus={getBlokStatus}
+                        getBlokTotalHarga={getBlokTotalHarga}
+                        sumGizi={sumGizi}
+                        deleteBlok={deleteBlok}
+                        addBlok={addBlok}
+                        bahanForm={bahanForm}
+                        bahanPokokList={bahanPokokList}
+                        selectedMenuItemByBlok={selectedMenuItemByBlok}
+                        expandedComponents={expandedComponents}
+                        komponenInput={komponenInput}
+                        namaMenuInput={namaMenuInput}
+                        setSelectedMenuItemByBlok={setSelectedMenuItemByBlok}
+                        setKomponenInput={setKomponenInput}
+                        setNamaMenuInput={setNamaMenuInput}
+                        setExpandedComponents={setExpandedComponents}
+                        setBahanField={setBahanField}
+                        addBahan={addBahan}
+                        addMenuItem={addMenuItem}
+                        applyMasterMenu={applyMasterMenu}
+                        getBahanName={getBahanName}
+                        getBahanLabel={getBahanLabel}
+                        KOMPONEN_OPTIONS={KOMPONEN_OPTIONS}
+                        KOMPONEN_LABEL={KOMPONEN_LABEL}
+                        alergiByBlok={alergiByBlok}
+                        alergiForm={alergiForm}
+                        setAlergiField={setAlergiField}
+                        addAlergi={addAlergi}
+                        deleteAlergi={deleteAlergi}
+                        organoleptikByBlok={organoleptikByBlok}
+                        organoleptikForm={organoleptikForm}
+                        setOrganoleptikField={setOrganoleptikField}
+                        addOrganoleptik={addOrganoleptik}
+                        getTanggalMusnah={getTanggalMusnah}
+                        pengirimanByMenu={pengirimanByMenu}
+                        pengirimanForm={pengirimanForm}
+                        kendaraanList={kendaraanList}
+                        kategoriList={kategoriList}
+                        handleStartEditPengiriman={handleStartEditPengiriman}
+                        addPengiriman={addPengiriman}
+                        deletePengiriman={deletePengiriman}
+                        setPengirimanForm={setPengirimanForm}
+                    />
+                ))}
             </section>
 
             {/* Section 4: Riwayat Menu (Disetujui) */}
-            <section style={{ border: '1px solid var(--border)', padding: 24, borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)', boxShadow: 'var(--shadow)', marginBottom: 24 }}>
-                <h3 style={{ margin: '0 0 16px 0', color: 'var(--text)' }}>Riwayat Menu (Disetujui)</h3>
-                
-                {/* Filter Card */}
-                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', padding: 16, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--bg)', marginBottom: 20 }}>
-                    <div style={{ minWidth: 200, flex: 1 }}>
-                        {fieldLabel('Filter Tanggal')}
-                        <Dropdown
-                            value={riwayatTanggalFilter}
-                            onChange={setRiwayatTanggalFilter}
-                            options={riwayatTanggalOptions}
-                        />
-                    </div>
-                    <div style={{ minWidth: 200, flex: 1 }}>
-                        {fieldLabel('Filter Kelompok Umur')}
-                        <Dropdown
-                            value={riwayatKelompokUmurFilter}
-                            onChange={setRiwayatKelompokUmurFilter}
-                            options={riwayatKelompokUmurOptions}
-                        />
-                    </div>
-                </div>
-
-                {/* List of Approved Blocks */}
-                {filteredRiwayatBlocks.length === 0 ? (
-                    <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                        Tidak ada riwayat menu yang cocok dengan filter.
-                    </div>
-                ) : (
-                    <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-elevated)', padding: 16, maxHeight: 300, overflowY: 'auto' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {filteredRiwayatBlocks.map(b => {
-                            const isExpanded = expandedRiwayatMenuId === b.blokId;
-                            return (
-                                <div key={b.blokId} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg)', overflow: 'hidden' }}>
-                                    <div
-                                        onClick={() => setExpandedRiwayatMenuId(isExpanded ? null : b.blokId)}
-                                        style={{
-                                            padding: '12px 16px',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            backgroundColor: 'var(--bg-elevated)',
-                                            userSelect: 'none'
-                                        }}
-                                    >
-                                        <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-                                            <span style={{
-                                                fontSize: 14,
-                                                transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
-                                                transition: 'transform 0.2s ease',
-                                                display: 'inline-block',
-                                                color: 'var(--text-muted)'
-                                            }}>
-                                                ▸
-                                            </span>
-                                            <div>
-                                                <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{formatDate(b.tanggal)}</span>
-                                                <span style={{ marginLeft: 12, padding: '2px 8px', borderRadius: 12, fontSize: 11, backgroundColor: 'rgba(59,130,246,0.1)', color: 'var(--btn-primary-bg)', fontWeight: 700 }}>
-                                                    {b.kelompokUmurNama}
-                                                </span>
-                                            </div>
-                                            <div style={{ color: 'var(--text-muted)', fontSize: 13, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: 400 }}>
-                                                {b.menuSummary}
-                                            </div>
-                                        </div>
-                                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4, backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-success)' }}>
-                                            DISETUJUI
-                                        </span>
-                                    </div>
-                                    <div
-                                        style={{
-                                            maxHeight: isExpanded ? '2000px' : '0px',
-                                            transition: 'max-height 0.3s ease-in-out',
-                                            overflow: 'hidden'
-                                        }}
-                                    >
-                                        <div style={{ padding: 16, borderTop: '1px solid var(--border)', backgroundColor: 'var(--bg)' }}>
-                                            <div style={{ marginBottom: 14, padding: 12, border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)', fontSize: 12 }}>
-                                                Mode baca saja. Menu ini telah disetujui oleh Kepala SPPG.
-                                            </div>
-                                            {renderMenuTab(b.rawBlok, false, b.rawMenu)}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    </div>
-                )}
-            </section>
+            <RiwayatMenu
+                filteredRiwayatBlocks={filteredRiwayatBlocks}
+                riwayatTanggalFilter={riwayatTanggalFilter}
+                setRiwayatTanggalFilter={setRiwayatTanggalFilter}
+                riwayatKelompokUmurFilter={riwayatKelompokUmurFilter}
+                setRiwayatKelompokUmurFilter={setRiwayatKelompokUmurFilter}
+                riwayatTanggalOptions={riwayatTanggalOptions}
+                riwayatKelompokUmurOptions={riwayatKelompokUmurOptions}
+                expandedRiwayatMenuId={expandedRiwayatMenuId}
+                setExpandedRiwayatMenuId={setExpandedRiwayatMenuId}
+                formatDate={formatDate}
+                fieldLabel={fieldLabel}
+                buttonStyle={buttonStyle}
+                menuItemsByBlok={menuItemsByBlok}
+                bahanByMenuItem={bahanByMenuItem}
+                bahanForm={bahanForm}
+                bahanPokokList={bahanPokokList}
+                selectedMenuItemByBlok={selectedMenuItemByBlok}
+                expandedComponents={expandedComponents}
+                komponenInput={komponenInput}
+                namaMenuInput={namaMenuInput}
+                setSelectedMenuItemByBlok={setSelectedMenuItemByBlok}
+                setKomponenInput={setKomponenInput}
+                setNamaMenuInput={setNamaMenuInput}
+                setExpandedComponents={setExpandedComponents}
+                setBahanField={setBahanField}
+                addBahan={addBahan}
+                addMenuItem={addMenuItem}
+                applyMasterMenu={applyMasterMenu}
+                getBahanName={getBahanName}
+                getBahanLabel={getBahanLabel}
+                KOMPONEN_OPTIONS={KOMPONEN_OPTIONS}
+                KOMPONEN_LABEL={KOMPONEN_LABEL}
+                toast={toast}
+            />
 
             <ConfirmDialog
                 open={confirmOpen}
