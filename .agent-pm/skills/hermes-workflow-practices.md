@@ -34,6 +34,7 @@ ANALYSIS → VERIFICATION → SCOPE_CHECK → AWAITING_USER_VERIFICATION
 - **CODE_INVESTIGATION**: WAJIB spawn OpenCode CLI — investigasi kode existing
 - **PLANNING**: Auto-proceed ke BUILD tanpa approval User (efisiensi)
 - **BUILD**: OpenCode default builder; AGY (claude-sonnet-4-6 / gemini-flash-3.6-medium) hanya untuk task berat quota+approval
+  - **[UPDATE 2026-08-02 — KEPUTUSAN ROZI]: BUILD/eksekusi kode = AGY** (bukan OpenCode default). "jangan gunakan opencode untuk eksekusi, gunakan agy". COMMIT + PUSH tetap OpenCode. Lihat PROJECT_MANAGER_BEHAVIOR.md "KEPUTUSAN 2026-08-02" + GF-008.
 - **VERIFICATION**: OpenCode CLI — functional test backend + build/lint frontend
 - **SCOPE_CHECK**: Notif Telegram jika frontend → AWAITING_USER_VERIFICATION
 - **FINALIZE**: OpenCode CLI commit + push — update TODO/progress
@@ -49,6 +50,8 @@ ANALYSIS → VERIFICATION → SCOPE_CHECK → AWAITING_USER_VERIFICATION
 | Coding: features, refactor, PR, bugfix | **OpenCode** | DeepSeek-V4-Flash-Free | Default |
 | Coding: DeepSeek timeout/lambat | **OpenCode** | Nemotron-4-Ultra | Fallback (belum ditesting penuh) |
 | Coding: complex reasoning | **AGY** | Claude-Sonnet-4-6 / Gemini-Flash-3.6-Medium | Quota available + approval |
+
+> **[UPDATE 2026-08-02 — KEPUTUSAN ROZI]**: baris matrix di atas OBSOLETE — BUILD/eksekusi kode = **AGY** (gemini-3.6-flash-medium / claude-sonnet-4-6). COMMIT + PUSH = OpenCode. Detail: PROJECT_MANAGER_BEHAVIOR.md "KEPUTUSAN 2026-08-02" + GF-008.
 
 ---
 
@@ -100,6 +103,7 @@ ANALYSIS → VERIFICATION → SCOPE_CHECK → AWAITING_USER_VERIFICATION
 - AGY: panggil langsung dari bash, tanpa cmd.exe /c (pipe BROKEN — AVOID)
 - OpenCode: Same as PC (portable)
 - Default: Always use OpenCode
+  - **[UPDATE 2026-08-02 — KEPUTUSAN ROZI]: Default BUILD = AGY** (bukan OpenCode). COMMIT = OpenCode. Lihat PROJECT_MANAGER_BEHAVIOR.md "KEPUTUSAN 2026-08-02".
 
 ### Sync Rules
 - `.agent-pm/` sinkron via git remote (push setiap FINALIZE + cron 30 menit)

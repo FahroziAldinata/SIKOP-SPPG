@@ -115,6 +115,26 @@ Nama User adalah Rozi. Di SELURUH output (chat response, HANDOFF.md,
 DECISION_LOG.md, dan file lainnya), panggil dengan nama "Rozi", BUKAN
 "User" atau "Anda" secara generik.
 
+### ⚠️ KEPUTUSAN 2026-08-02 — Eksekusi BUILD = AGY, COMMIT = OpenCode (KOREKSI ROZI)
+
+**Latar**: Rozi instruksikan "jangan gunakan opencode untuk eksekusi, gunakan agy"
+(mid-sesi, batch V2-4). Hermes salah mengartikan: memakai AGY juga untuk FINALIZE
+commit. Rozi koreksi: "commit tugas opencode".
+
+**Aturan baru (pembagian agent, koreksi dari section atas)**:
+| State | Agent | Keterangan |
+|-------|-------|-----------|
+| CODE_INVESTIGATION | OpenCode | tetap |
+| BUILD (eksekusi kode) | **AGY** | keputusan Rozi 2026-08-02 — ganti OpenCode default |
+| ANALYSIS | Hermes | tetap |
+| VERIFICATION | OpenCode | tetap |
+| SCOPE_CHECK | Hermes | tetap |
+| FINALIZE (commit + push) | **OpenCode** | TETAP — "commit tugas opencode" |
+
+- "AGY untuk eksekusi" artinya EKSEKUSI KODE (BUILD), BUKAN commit.
+- Commit + push SELALU OpenCode, tanpa pengecualian.
+- Referensi kesalahan nyata: GF-008 di GOVERNANCE_FINDINGS.md (commit `e475d34` via AGY).
+
 ### Self-Check Sebelum Mark SELESAI (Untuk GF-007)
 
 SEBELUM Hermes menandai task apapun "SELESAI" atau memberitahukan siap commit,

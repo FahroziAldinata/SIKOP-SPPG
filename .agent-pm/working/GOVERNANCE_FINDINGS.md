@@ -2,7 +2,7 @@
 
 > **Ringkas**: 2026-08-02 — detail panjang dipangkas atas keputusan Rozi (efisiensi context). Esensi per temuan + pelajaran aktif dipertahankan.
 
-## Temuan Resolved (GF-001 s.d. GF-007)
+## Temuan Resolved (GF-001 s.d. GF-008)
 
 | ID | Tanggal | Kategori | Esensi | Status |
 |---|---|---|---|---|
@@ -12,6 +12,15 @@
 | GF-004 | 2026-07-26 | Structural Gap | governance/*.md wajib di-load di SESSION_START_PROTOCOL (rules aktif sebelum proses task) | RESOLVED |
 | GF-006 | 2026-07-26 | QA Gap | Review frontend WAJIB sertakan build/lint aktual verbatim — gagal jika tidak bersih | RESOLVED |
 | GF-007 | 2026-07-26 | Process Violation | Self-check wajib sebelum mark SELESAI: sudah lewat AWAITING_USER_VERIFICATION + Rozi OK eksplisit? | RESOLVED |
+| GF-008 | 2026-08-02 | Process Violation | FINALIZE commit via AGY — seharusnya OpenCode ("commit tugas opencode", koreksi Rozi) | RESOLVED |
+
+## Detail GF-008 — FINALIZE commit via AGY (koreksi Rozi 2026-08-02)
+
+- **Kategori**: Process Violation
+- **Deskripsi**: Sesi 28 (V2-4 batch 2), Rozi instruksikan "jangan gunakan opencode untuk eksekusi, gunakan agy". Hermes mengartikan "eksekusi" mencakup FINALIZE commit → memakai AGY untuk commit `57570b2` + `e475d34` + push. Padahal pembagian agent tetap: commit + push = OpenCode ("commit tugas opencode" — koreksi eksplisit Rozi).
+- **Akar masalah**: Instruksi singkat "gunakan agy" diinterpretasikan luas tanpa klarifikasi scope (BUILD vs commit). Ambiguitas "eksekusi" tidak ditanyakan.
+- **Perbaikan**: (1) PROJECT_MANAGER_BEHAVIOR.md di-update — tabel pembagian agent eksplisit: BUILD = AGY, FINALIZE commit = OpenCode; (2) knowledge/10-model-strategy.md di-update (instruksi eksplisit Rozi, override FORBIDDEN knowledge/*); (3) aturan: kalau instruksi agent ambigu (BUILD vs commit vs verifikasi), TANYA scope ke Rozi dulu.
+- **Status**: RESOLVED (dokumentasi governance selesai 2026-08-02). Commit `e475d34` tetap berlaku (sudah di-push, repo publik) — bukan untuk di-revert.
 
 ---
 

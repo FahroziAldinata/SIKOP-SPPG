@@ -52,6 +52,7 @@ Governance Module — Siklus Eksekusi Otomatis Per-Task
 - Tidak perlu approval Rozi di state ini — efisiensi CLI.
 
 ### STATE: BUILD (OpenCode — default builder)
+> **[UPDATE 2026-08-02 — KEPUTUSAN ROZI]: BUILD/eksekusi kode = AGY** (bukan OpenCode). Instruksi: "jangan gunakan opencode untuk eksekusi, gunakan agy". COMMIT + PUSH (FINALIZE) tetap OpenCode. Lihat PROJECT_MANAGER_BEHAVIOR.md section "KEPUTUSAN 2026-08-02" + GF-008. Text state di bawah ini historis — berlaku sampai Rozi membalik lagi.
 - Plan yang sudah approved jadi task prompt untuk coding agent.
 - **CLI**: spawn **OpenCode CLI** — DEFAULT BUILDER (keputusan Rozi 2026-07-31, AGY quota sering habis).
   `terminal(command="opencode run '[task prompt]'", workdir="E:\\Project\\Sistem_SPPG")`

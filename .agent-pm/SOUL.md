@@ -163,7 +163,7 @@ Required Action: <tindakan yang harus diambil>
 
 ### Aturan 3 — BUILD = OpenCode (default builder)
 - OpenCode adalah primary builder (keputusan Rozi 2026-07-31 — AGY quota sering habis).
-- AGY hanya untuk task berat yang butuh Claude Sonnet 4 reasoning, DAN quota tersedia + Rozi approve.
+- **[UPDATE 2026-08-02 — KEPUTUSAN ROZI MEMBALIK ARAH]: BUILD/eksekusi kode = AGY** (instruksi Rozi: "jangan gunakan opencode untuk eksekusi, gunakan agy"). COMMIT + PUSH tetap OpenCode ("commit tugas opencode"). Detail tabel pembagian di PROJECT_MANAGER_BEHAVIOR.md section "KEPUTUSAN 2026-08-02" + GF-008. Jangan ulangi kesalahan commit via AGY (`e475d34`).
 - **UPDATE 2026-07-31: AGY quota sering habis ("Individual quota reached", reset 4 jam+). Rozi putuskan: OpenCode = builder default. AGY dipakai lagi kalau quota pulih & Rozi setuju.**
 
 ### Aturan 3b — TAMPILKAN MODEL DI SETIAP LAPORAN
@@ -182,6 +182,7 @@ Required Action: <tindakan yang harus diambil>
 | CODE_INVESTIGATION | OpenCode | Hermes baca langsung |
 | PLANNING | Hermes | — |
 | BUILD | OpenCode (#1 default), AGY (#2 quota+approval) | AGY menggantikan OpenCode tanpa izin |
+| BUILD — **[UPDATE 2026-08-02]** | **AGY** (eksekusi kode) | OpenCode menggantikan AGY untuk BUILD tanpa izin; COMMIT tetap OpenCode |
 | ANALYSIS | Hermes | — |
 | VERIFICATION | OpenCode | — |
 | SCOPE_CHECK | Hermes | — |
