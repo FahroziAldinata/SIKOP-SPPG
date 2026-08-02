@@ -1,22 +1,23 @@
-# Handoff — 2026-08-02 — V2-4 Batch 2 + Governance Pembagian Agent Baru
+# Handoff — 2026-08-02 — Sesi 28 (akhir sesi, cycle gabungan PAUSED 8/11)
 
-## Update Sesi Ini (2026-08-02, sesi 28)
-- **V2-4 Batch 2 selesai**: LaporanPage.jsx akuntan 3.511 → 1.517 baris. 19 komponen baru di `frontend/src/components/akuntan/laporan/`. BUILD OpenCode + VERIFICATION PASS (verbatim, props cocok, build PASS) + cleanup dead import AGY. Approved Rozi. Commit `57570b2` + `e475d34`.
-- **GF-008**: commit `e475d34` dieksekusi AGY — salah, seharusnya OpenCode ("commit tugas opencode"). Didokumentasikan + perbaikan lintas file.
-- **Pembagian agent BARU (keputusan Rozi, PERMANEN)**: BUILD/eksekusi kode/FIX = AGY; COMMIT + PUSH = OpenCode; investigasi + verifikasi = OpenCode. Diselaraskan di: PROJECT_MANAGER_BEHAVIOR.md, SOUL.md, AUTOMATION_CYCLE.md, knowledge/10, skills/hermes-workflow-practices.md + skill Hermes (agy-build-verify, hermes-pm-workflow). Commit `c7e6134` "update agent-pm".
-- **DOCUMENTATION_ARCHIVE**: DOCUMENTATION.md section 2026-08-02 ditambahkan; isi plans/ + prompts/ + pre-check/ dibersihkan (folder + .gitkeep tetap).
+## Status Terakhir
+- **V2-4 refactor modular**: backend 3/3 selesai + FE 10/13 selesai. Cycle gabungan FE PAUSED di 8/11 (Rozi istirahat). HEAD `5a50282`, tree bersih, semua pushed.
+- Pembagian agent PERMANEN: BUILD/FIX = AGY (`/d/Tools_Project/agy/bin/agy.exe -p "..." --dangerously-skip-permissions`), INVESTIGASI+VERIFIKASI = OpenCode (`/d/Tools_Project/opencode/opencode run`), COMMIT+PUSH = OpenCode ALWAYS.
 
-## Keputusan Rozi (2026-08-02)
-- AGY untuk eksekusi kode (BUILD/FIX), OpenCode untuk commit + push — PERMANEN.
-- Hasil BUILD OpenCode yang sudah selesai + verified: dipakai, tidak dibuang (kasus batch 2).
+## Next Step (lanjut sesi berikutnya)
+1. BUILD `frontend/src/pages/akuntan/laporan/PeriodeSetupPage.jsx` (835) → folder `components/akuntan/periodeSetup/` — prompt siap: `.agent-pm/prompts/agy-v2-4-batch6b2-build.txt` BELUM dibuat, investigasi di `oc-v2-4-batch6b-investigasi.txt` (5-6 komponen: PeriodeListSection, PeriodeDanaFieldset, SetupLembagaFieldset, PelaporanFieldset, ClosingPeriodeModal; H4b 8 field → 16 props, risiko tinggi).
+2. BUILD `frontend/src/pages/akuntan/SaldoAwalBarangPage.jsx` (812) → `components/akuntan/saldoAwal/` (6-7 komponen: HeaderToolbar, PeriodSelectorSection, SaldoAwalSingleForm, SaldoAwalBulkForm, SaldoAwalListTable, AddBahanModal).
+3. Per file: BUILD AGY → VERIFY OpenCode (pola prompt verifikasi: `.agent-pm/prompts/oc-v2-4-batch6a*-verifikasi.txt` sebagai template) → commit per task via OpenCode.
+4. Setelah 10/11 + 11/11: update DOCUMENTATION.md + CURRENT_STATE/TODO + HANDOFF, commit "docs: archive V2-4".
 
-## Catatan Penting
-- BUG-001 (500 rabP12) masih open — investigasi terpisah, tidak tersentuh.
-- Temuan minor batch 2 (belum diperbaiki): komentar hilang ReportActionButtons (kosmetik); bug pre-existing `justify:` invalid CSS di NeracaSaldoTable.jsx:12 + Lpd2mBuktiSection.jsx:142.
-- `.agent-pm/plans/` + `prompts/` sekarang kosong (hanya .gitkeep) — prompt audit trail batch 2 sudah masuk DOCUMENTATION.md.
+## Pola yang Terbukti Sesi Ini
+- **Prompt BUILD AGY**: tulis ke `.agent-pm/prompts/agy-*.txt` → jalankan `agy.exe -p "KERJAKAN: Baca file ... dan kerjakan SEMUA instruksi. Langsung kerjakan, jangan tanya konfirmasi." --dangerously-skip-permissions --print-timeout 300s`. AGY kadang timeout tapi pekerjaan selesai — cek folder/git dulu, jangan rerun.
+- **Prompt VERIFY OpenCode**: instruksi keras "DILARANG tulis file ke Temp//tmp, gunakan process substitution <(git show HEAD:...)". OpenCode selalu coba tulis ke Temp → auto-reject → output terputus. Kalau kena, patch prompt tambah "Kalau terlanjur membuat file di Temp, ABAIKAN".
+- **Diff verifikasi**: `diff -wB <(git show HEAD:file | sed -n 'START,ENDp') <(cat komponen)` — normalize whitespace.
+- AGY gemini default; model diset di `$HOME/.gemini/antigravity-cli/settings.json`.
 
-## Backlog
-- **V2-4 Batch 3**: backend `routes/laporan.js` (2.934), `routes/aslap.js` (2.916), `routes/gizi.js` (2.757) ← NEXT (menunggu TASK_SELECTION)
-- V2-1 TTD Basah (Sprint 24)
-- V2-2 Image handling, V2-3 Perbaikan minor UX
-- BUG-001 investigasi (500 rabP12)
+## Risiko / Pitfall
+- OpenCode permission reject saat tulis ke Temp (workaround di atas).
+- AGY timeout "waiting for response" — biasanya work selesai, verifikasi dulu.
+- State files CURRENT_STATE/TODO sempat kena overwrite eksternal → ditulis ulang manual. Cek `git status` sebelum commit.
+- BUG-001 (500 rabP12) open, bukan blocker refactor.
