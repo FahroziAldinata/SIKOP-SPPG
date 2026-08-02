@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table, renderDate } from '../../components/Table';
-import { DatePicker } from '../../components/DatePicker';
-import Dropdown from '../../components/Dropdown';
-import { NumberInput } from '../../components/NumberInput';
-import { Skeleton } from '../../components/Skeleton';
+import { renderDate } from '../../components/Table';
 import { Card } from '../../components/Card';
+
+import {
+    cleanDateStr,
+    getDatesInRange,
+    getStatusStyle,
+} from '../../components/akuntan/po/statusStyles';
+import { PrintPoGabunganDocument } from '../../components/akuntan/po/PrintPoGabunganDocument';
+import { PrintPoDocument } from '../../components/akuntan/po/PrintPoDocument';
+import { PoFilterPeriode } from '../../components/akuntan/po/PoFilterPeriode';
+import { PoInputForm } from '../../components/akuntan/po/PoInputForm';
+import { PoRiwayatList } from '../../components/akuntan/po/PoRiwayatList';
+import { DetailPoModal } from '../../components/akuntan/po/DetailPoModal';
+import { AddSupplierModal } from '../../components/akuntan/po/AddSupplierModal';
+import { MultiPrintModal } from '../../components/akuntan/po/MultiPrintModal';
+import { PoPdfPreviewModal } from '../../components/akuntan/po/PoPdfPreviewModal';
 
 export const AkuntanPoPage = () => {
     const { request } = useApi();
@@ -90,22 +101,6 @@ export const AkuntanPoPage = () => {
     const [isMultiPrintModalOpen, setIsMultiPrintModalOpen] = useState(false);
     const [printGabunganData, setPrintGabunganData] = useState(null);
     const [nomorDokumenGabungan, setNomorDokumenGabungan] = useState('');
-
-    const cleanDateStr = (dStr) => dStr ? dStr.split('T')[0] : '';
-
-    const getDatesInRange = (startDateStr, endDateStr) => {
-        const dates = [];
-        if (!startDateStr || !endDateStr) return dates;
-        const [sY, sM, sD] = startDateStr.split('-').map(Number);
-        const [eY, eM, eD] = endDateStr.split('-').map(Number);
-        let current = new Date(Date.UTC(sY, sM - 1, sD));
-        const end = new Date(Date.UTC(eY, eM - 1, eD));
-        while (current <= end) {
-            dates.push(current.toISOString().split('T')[0]);
-            current.setUTCDate(current.getUTCDate() + 1);
-        }
-        return dates;
-    };
 
     // Fetch master data on mount
     useEffect(() => {
@@ -305,323 +300,32 @@ export const AkuntanPoPage = () => {
     const idLembaga = activePeriod?.setupLembaga?.id || 'ZEZ3TM0G';
     const ketuaYayasan = activePeriod?.setupLembaga?.ketuaYayasan || 'Dizhar Priatama';
 
-    // Helper to get status styling
-    const getStatusStyle = (status) => {
-        switch (status) {
-            case 'DITERIMA':
-                return { backgroundColor: 'rgba(40, 167, 69, 0.1)', color: '#28a745', border: '1px solid rgba(40, 167, 69, 0.2)' };
-            case 'DIREALISASI':
-                return { backgroundColor: 'rgba(0, 123, 255, 0.1)', color: '#007bff', border: '1px solid rgba(0, 123, 255, 0.2)' };
-            case 'DIAJUKAN':
-            default:
-                return { backgroundColor: 'rgba(253, 126, 20, 0.1)', color: '#fd7e14', border: '1px solid rgba(253, 126, 20, 0.2)' };
-        }
-    };
-
     if (isPrinting && printGabunganData) {
-        const sortedTanggalList = [...printGabunganData.tanggalList].sort();
-        const totalHargaGabungan = printGabunganData.ingredients.reduce((sum, item) => sum + Number(item.subtotal), 0);
-        const formatTanggalIndo = (tglStr) => {
-            if (!tglStr) return '';
-            const [y, m, d] = tglStr.split('-').map(Number);
-            const date = new Date(y, m - 1, d);
-            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-        };
-
         return (
-            <div style={{ padding: '25px', backgroundColor: '#fff', minHeight: '100vh', color: '#000', fontFamily: 'Courier New, monospace' }}>
-                <style>{`
-                    @media print {
-                        .no-print { display: none !important; }
-                        body { background-color: #fff; color: #000; }
-                    }
-                `}</style>
-                <div className="no-print" style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#eaeaea', display: 'flex', gap: '10px' }}>
-                    <button onClick={() => window.print()} style={{ padding: '8px 16px', fontWeight: 'bold', backgroundColor: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
-                        Cetak Sekarang (Print)
-                    </button>
-                    <button onClick={() => { setIsPrinting(false); setPrintGabunganData(null); }} style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: 'white', border: 'none', cursor: 'pointer' }}>
-                        Kembali
-                    </button>
-                </div>
-
-                {/* PO Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', paddingBottom: '10px', marginBottom: '20px' }}>
-                    <img src="/kop-po.png" alt="Logo" style={{ height: '117px', objectFit: 'contain' }} />
-                    <div style={{ marginLeft: '30px' }}>
-                        <div style={{ fontWeight: 'bold', fontSize: '20px' }}>
-                            BADAN GIZI NASIONAL <span style={{ color: 'var(--color-primary-light)' }}>(NATIONAL NUTRITION AGENCY)</span>
-                        </div>
-                        <div style={{ fontSize: '13px' }}>Gedung E Kompleks Kementrian Pertanian</div>
-                        <div style={{ fontSize: '13px', textDecoration: 'underline' }}>Jalan Harsono RM Nomor 3 Ragunan, Pasar Minggu Jakarta 12550</div>
-                    </div>
-                </div>
-
-                <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '16px', textDecoration: 'underline', marginBottom: '5px' }}>
-                    NOTA PESANAN BAHAN MAKANAN
-                </div>
-                <div style={{ textAlign: 'center', fontSize: '13px', fontWeight: 'bold', marginBottom: '15px' }}>
-                    NO {nomorDokumenGabungan || '-'}
-                </div>
-
-                <div style={{ fontSize: '13px', marginBottom: '20px' }}>
-                    <table style={{ width: '100%' }}>
-                        <tbody>
-                            <tr>
-                                <td style={{ width: '120px', verticalAlign: 'top' }}>SPPG</td>
-                                <td style={{ verticalAlign: 'top' }}>: {namaLembaga}</td>
-                            </tr>
-                            <tr>
-                                <td style={{ verticalAlign: 'top' }}>ID SPPG</td>
-                                <td style={{ verticalAlign: 'top' }}>: {idLembaga}</td>
-                            </tr>
-                            <tr>
-                                <td style={{ verticalAlign: 'top' }}>Kepada</td>
-                                <td style={{ verticalAlign: 'top' }}>: ALL CV</td>
-                            </tr>
-                            <tr>
-                                <td style={{ verticalAlign: 'top' }}>Alamat</td>
-                                <td style={{ verticalAlign: 'top' }}>: Ditempat</td>
-                            </tr>
-                            <tr>
-                                <td style={{ verticalAlign: 'top' }}>Waktu</td>
-                                <td style={{ verticalAlign: 'top' }}>: {sortedTanggalList.map(formatTanggalIndo).join(', ')}</td>
-                            </tr>
-                            <tr>
-                                <td style={{ verticalAlign: 'top' }}>PM</td>
-                                <td style={{ verticalAlign: 'top' }}>: SISWA &amp; B3</td>
-                            </tr>
-                            <tr>
-                                <td style={{ verticalAlign: 'top' }}>Menu</td>
-                                <td style={{ verticalAlign: 'top' }}>: {
-                                    sortedTanggalList.map(tgl => {
-                                        const cleanTgl = tgl.split('T')[0];
-                                        return (printGabunganData.menuByTanggal && printGabunganData.menuByTanggal[cleanTgl]) || (printGabunganData.menuByTanggal && printGabunganData.menuByTanggal[tgl]);
-                                    })
-                                    .filter(Boolean)
-                                    .join(', ') || '—'
-                                }</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <table border="1" cellPadding="5" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '25px' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: 'var(--color-primary-light)' }}>
-                            <th style={{ width: '30px' }}>No</th>
-                            <th>Uraian Jenis Bahan Makanan</th>
-                            {sortedTanggalList.flatMap(tgl => [
-                                <th key={`h-siswa-${tgl}`} style={{ textAlign: 'center', fontSize: '10px' }}>
-                                    SISWA {tgl.split('-')[2]}
-                                </th>,
-                                <th key={`h-b3-${tgl}`} style={{ textAlign: 'center', fontSize: '10px' }}>
-                                    B3 {tgl.split('-')[2]}
-                                </th>
-                            ])}
-                            <th style={{ width: '70px', textAlign: 'right' }}>QTY</th>
-                            <th style={{ width: '50px', textAlign: 'center' }}>Satuan</th>
-                            <th style={{ width: '90px', textAlign: 'right' }}>Harga Satuan</th>
-                            <th style={{ width: '100px', textAlign: 'right' }}>Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {printGabunganData.ingredients.map((item, idx) => (
-                            <tr key={item.bahanPokokId}>
-                                <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                                <td>{item.nama}</td>
-                                {sortedTanggalList.flatMap(tgl => [
-                                    <td key={`siswa-${item.bahanPokokId}-${tgl}`} style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                                        {Number(item.perTanggal[tgl]?.siswa || 0).toLocaleString('id-ID')}
-                                    </td>,
-                                    <td key={`b3-${item.bahanPokokId}-${tgl}`} style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                                        {Number(item.perTanggal[tgl]?.b3 || 0).toLocaleString('id-ID')}
-                                    </td>
-                                ])}
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{Number(item.qtyTotal).toLocaleString('id-ID')}</td>
-                                <td style={{ textAlign: 'center' }}>{item.satuan}</td>
-                                <td style={{ textAlign: 'right' }}>Rp{Number(item.hargaSatuan).toLocaleString('id-ID')}</td>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>Rp{Number(item.subtotal).toLocaleString('id-ID')}</td>
-                            </tr>
-                        ))}
-                        <tr style={{ fontWeight: 'bold', backgroundColor: 'var(--color-primary-light)' }}>
-                            <td></td>
-                            <td></td>
-                            <td colSpan={sortedTanggalList.length * 2}>Total:</td>
-                            <td style={{ textAlign: 'right' }}>
-                                {printGabunganData.ingredients.reduce((sum, item) => sum + Number(item.qtyTotal), 0).toLocaleString('id-ID')}
-                            </td>
-                            <td></td>
-                            <td></td>
-                            <td style={{ textAlign: 'right' }}>Rp{totalHargaGabungan.toLocaleString('id-ID')}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'flex-end', fontSize: '13px' }}>
-                    <div style={{ textAlign: 'center', width: '300px' }}>
-                        <div>{activePeriod?.setupLembaga?.tempatPelaporan || namaLembaga}, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-                        <div style={{ fontWeight: 'bold', marginTop: '5px' }}>Mitra SPPG {namaLembaga}</div>
-                        <div style={{ height: '70px' }}></div>
-                        <div style={{ fontWeight: 'bold' }}>
-                            ( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <PrintPoGabunganDocument
+                isPrinting={isPrinting}
+                printGabunganData={printGabunganData}
+                nomorDokumenGabungan={nomorDokumenGabungan}
+                namaLembaga={namaLembaga}
+                idLembaga={idLembaga}
+                activePeriod={activePeriod}
+                setIsPrinting={setIsPrinting}
+                setPrintGabunganData={setPrintGabunganData}
+            />
         );
     }
 
     if (isPrinting && printPoData) {
-        const totalHargaDiminta = printPoData.items.reduce((sum, item) => sum + Number(item.subtotal), 0);
-        const totalHargaRealisasi = printPoData.items.reduce((sum, item) => sum + Number(item.subtotalRealisasi || 0), 0);
-        const isRealized = printPoData.status !== 'DIAJUKAN';
-        const tempatPelaporan = printPoData?.tempatPelaporan || activePeriod?.setupLembaga?.tempatPelaporan || namaLembaga;
-        const tanggalHariIni = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-
         return (
-            <div style={{ padding: '25px', backgroundColor: '#fff', minHeight: '100vh', color: '#000', fontFamily: 'Courier New, monospace' }}>
-                <style>{`
-                    @media print {
-                        .no-print { display: none !important; }
-                        body { background-color: #fff; color: #000; }
-                    }
-                `}</style>
-                <div className="no-print" style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#eaeaea', display: 'flex', gap: '10px' }}>
-                    <button onClick={() => window.print()} style={{ padding: '8px 16px', fontWeight: 'bold', backgroundColor: '#007bff', color: 'white', border: 'none', cursor: 'pointer' }}>
-                        Cetak Sekarang (Print)
-                    </button>
-                    <button onClick={() => { setIsPrinting(false); setPrintPoData(null); }} style={{ padding: '8px 16px', backgroundColor: '#6c757d', color: 'white', border: 'none', cursor: 'pointer' }}>
-                        Kembali
-                    </button>
-                </div>
-
-                {/* PO Header */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', paddingBottom: '10px', marginBottom: '20px' }}>
-                    <img src="/kop-po.png" alt="Logo" style={{ height: '117px', objectFit: 'contain' }} />
-                    <div style={{ marginLeft: '30px' }}>
-                        <div style={{ fontWeight: 'bold', fontSize: '20px' }}>
-                            BADAN GIZI NASIONAL <span style={{ color: 'var(--color-primary-light)' }}>(NATIONAL NUTRITION AGENCY)</span>
-                        </div>
-                        <div style={{ fontSize: '13px' }}>Gedung E Kompleks Kementrian Pertanian</div>
-                        <div style={{ fontSize: '13px', textDecoration: 'underline' }}>Jalan Harsono RM Nomor 3 Ragunan, Pasar Minggu Jakarta 12550</div>
-                    </div>
-                </div>
-
-                <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '16px', textDecoration: 'underline', marginBottom: '15px' }}>
-                    NOTA PESANAN &amp; REALISASI BELANJA BAHAN MAKANAN
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '15px', fontSize: '13px', marginBottom: '20px' }}>
-                    <div>
-                        <table style={{ width: '100%' }}>
-                            <tbody>
-                                <tr>
-                                    <td style={{ width: '100px' }}>SPPG</td>
-                                    <td>: {namaLembaga}</td>
-                                </tr>
-                                <tr>
-                                    <td>ID SPPG</td>
-                                    <td>: {idLembaga}</td>
-                                </tr>
-                                <tr>
-                                    <td>Kepada</td>
-                                    <td>: {printPoData.supplier?.nama}</td>
-                                </tr>
-                                <tr>
-                                    <td>Status PO</td>
-                                    <td>: {printPoData.status}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div>
-                        <table style={{ width: '100%' }}>
-                            <tbody>
-                                <tr>
-                                    <td style={{ width: '100px' }}>Waktu</td>
-                                    <td>: {printPoData.tanggal.split('T')[0]}</td>
-                                </tr>
-                                <tr>
-                                    <td>Catatan</td>
-                                    <td>: {printPoData.catatan || '—'}</td>
-                                </tr>
-                                {printPoData.diterimaAt && (
-                                    <tr>
-                                        <td>Diterima</td>
-                                        <td>: {printPoData.diterimaAt.split('T')[0]} oleh Aslap</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <table border="1" cellPadding="5" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '25px' }}>
-                    <thead>
-                        <tr style={{ backgroundColor: 'var(--color-primary-light)' }}>
-                            <th style={{ width: '30px' }} rowspan="2">No</th>
-                            <th rowspan="2">Uraian Jenis Bahan Makanan</th>
-                            <th rowspan="2" style={{ width: '50px' }}>Satuan</th>
-                            <th colSpan="3" style={{ textAlign: 'center' }}>Rencana (PO Diminta)</th>
-                            {isRealized && <th colSpan="3" style={{ textAlign: 'center' }}>Realisasi (Belanja Aktual)</th>}
-                        </tr>
-                        <tr style={{ backgroundColor: 'var(--color-primary-light)' }}>
-                            <th style={{ width: '70px', textAlign: 'right' }}>Qty</th>
-                            <th style={{ width: '90px', textAlign: 'right' }}>Harga Satuan</th>
-                            <th style={{ width: '100px', textAlign: 'right' }}>Subtotal</th>
-                            {isRealized && (
-                                <>
-                                    <th style={{ width: '70px', textAlign: 'right' }}>Qty</th>
-                                    <th style={{ width: '90px', textAlign: 'right' }}>Harga Satuan</th>
-                                    <th style={{ width: '100px', textAlign: 'right' }}>Subtotal</th>
-                                </>
-                            )}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {printPoData.items.map((item, idx) => (
-                            <tr key={item.id}>
-                                <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                                <td>{item.bahanPokok?.nama}</td>
-                                <td style={{ textAlign: 'center' }}>{item.bahanPokok?.satuan}</td>
-                                <td style={{ textAlign: 'right' }}>{Number(item.qty).toLocaleString('id-ID')}</td>
-                                <td style={{ textAlign: 'right' }}>Rp{Number(item.hargaSatuan).toLocaleString('id-ID')}</td>
-                                <td style={{ textAlign: 'right' }}>Rp{Number(item.subtotal).toLocaleString('id-ID')}</td>
-                                {isRealized && (
-                                    <>
-                                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                            {item.qtyRealisasi !== null ? Number(item.qtyRealisasi).toLocaleString('id-ID') : '—'}
-                                        </td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            {item.hargaSatuanRealisasi !== null ? `Rp${Number(item.hargaSatuanRealisasi).toLocaleString('id-ID')}` : '—'}
-                                        </td>
-                                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                            {item.subtotalRealisasi !== null ? `Rp${Number(item.subtotalRealisasi).toLocaleString('id-ID')}` : '—'}
-                                        </td>
-                                    </>
-                                )}
-                            </tr>
-                        ))}
-                        <tr style={{ fontWeight: 'bold', backgroundColor: 'var(--color-primary-light)' }}>
-                            <td colSpan="3" style={{ textAlign: 'right' }}>Total:</td>
-                            <td colSpan="3" style={{ textAlign: 'right' }}>Rp{totalHargaDiminta.toLocaleString('id-ID')}</td>
-                            {isRealized && <td colSpan="3" style={{ textAlign: 'right' }}>Rp{totalHargaRealisasi.toLocaleString('id-ID')}</td>}
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div style={{ marginTop: '50px', display: 'flex', justifyContent: 'flex-end', fontSize: '13px' }}>
-                    <div style={{ textAlign: 'center', width: '300px' }}>
-                        <div>{tempatPelaporan}, {tanggalHariIni}</div>
-                        <div style={{ fontWeight: 'bold', marginTop: '5px' }}>Mitra SPPG {namaLembaga}</div>
-                        <div style={{ height: '70px' }}></div>
-                        <div style={{ fontWeight: 'bold' }}>
-                            ( &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; )
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <PrintPoDocument
+                isPrinting={isPrinting}
+                printPoData={printPoData}
+                activePeriod={activePeriod}
+                namaLembaga={namaLembaga}
+                idLembaga={idLembaga}
+                setIsPrinting={setIsPrinting}
+                setPrintPoData={setPrintPoData}
+            />
         );
     }
 
@@ -629,829 +333,86 @@ export const AkuntanPoPage = () => {
         <div>
             <h2 style={{ color: 'var(--text)', marginBottom: '20px' }}>Nota Pesanan (PO) &amp; Realisasi Belanja (Akuntan)</h2>
             
-            {/* Filter Periode */}
-            <div style={{
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)',
-                padding: '24px',
-                backgroundColor: 'var(--bg-elevated)',
-                boxShadow: 'var(--shadow)',
-                marginBottom: '30px',
-                width: '26%',
-                minWidth: '320px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-            }}>
-                <div>
-                    <label style={{
-                        textTransform: 'uppercase',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        letterSpacing: '0.07em',
-                        color: 'var(--text-muted)',
-                        display: 'block',
-                        marginBottom: '6px'
-                    }}>
-                        Pilih Periode
-                    </label>
-                    <Dropdown
-                        style={{ width: '100%' }}
-                        value={selectedPeriodId}
-                        onChange={setSelectedPeriodId}
-                        options={periods.map(p => ({
-                            value: p.id,
-                            label: `${p.tanggalMulai} - ${p.tanggalSelesai}`
-                        }))}
-                    />
-                </div>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setSelectedTanggalMulti([]);
-                        setIsMultiPrintModalOpen(true);
-                    }}
-                    style={{
-                        padding: '10px 16px',
-                        backgroundColor: '#6c757d',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 'var(--radius-sm)',
-                        cursor: 'pointer',
-                        fontWeight: 600,
-                        fontSize: '13px'
-                    }}
-                >
-                    Cetak PO Gabungan
-                </button>
-            </div>
+            <PoFilterPeriode
+                periods={periods}
+                selectedPeriodId={selectedPeriodId}
+                setSelectedPeriodId={setSelectedPeriodId}
+                setSelectedTanggalMulti={setSelectedTanggalMulti}
+                setIsMultiPrintModalOpen={setIsMultiPrintModalOpen}
+            />
 
-            {/* Input Form PO */}
-            <form onSubmit={handleCreatePo} style={{
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)',
-                padding: '24px',
-                backgroundColor: 'var(--bg-elevated)',
-                boxShadow: 'var(--shadow)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-                marginBottom: '30px'
-            }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--text)' }}>
-                    Inisiasi Nota Pesanan (PO) Baru
-                </h3>
+            <PoInputForm
+                handleCreatePo={handleCreatePo}
+                poDate={poDate}
+                setPoDate={setPoDate}
+                activePeriod={activePeriod}
+                supplierId={supplierId}
+                setSupplierId={setSupplierId}
+                suppliers={suppliers}
+                setIsAddSupplierOpen={setIsAddSupplierOpen}
+                menuDescription={menuDescription}
+                loading={loading}
+                kebutuhanHitungan={kebutuhanHitungan}
+                rabNotApproved={rabNotApproved}
+                poItems={poItems}
+                handleItemChange={handleItemChange}
+                catatan={catatan}
+                setCatatan={setCatatan}
+            />
 
-                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label style={{
-                            textTransform: 'uppercase',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            letterSpacing: '0.07em',
-                            color: 'var(--text-muted)',
-                            display: 'block',
-                            marginBottom: '6px'
-                        }}>
-                            Tanggal Pengiriman
-                        </label>
-                        <DatePicker
-                            value={poDate}
-                            onChange={setPoDate}
-                            defaultFocusMonth={activePeriod?.tanggalMulai}
-                            required
-                        />
-                    </div>
-                    <div style={{ flex: '1 1 200px' }}>
-                        <label style={{
-                            textTransform: 'uppercase',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            letterSpacing: '0.07em',
-                            color: 'var(--text-muted)',
-                            display: 'block',
-                            marginBottom: '6px'
-                        }}>
-                            Pilih Supplier / CV
-                        </label>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <Dropdown
-                                style={{ flex: 1 }}
-                                value={supplierId}
-                                onChange={setSupplierId}
-                                options={suppliers.map(s => ({
-                                    value: s.id,
-                                    label: s.nama
-                                }))}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setIsAddSupplierOpen(true)}
-                                style={{
-                                    padding: '8px 12px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    fontWeight: 600,
-                                    fontSize: '13px',
-                                    whiteSpace: 'nowrap'
-                                }}
-                            >
-                                + Baru
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <PoRiwayatList
+                listLoading={listLoading}
+                poList={poList}
+                renderDate={renderDate}
+                getStatusStyle={getStatusStyle}
+                setDetailPoData={setDetailPoData}
+                setPrintPoData={setPrintPoData}
+                setIsPrinting={setIsPrinting}
+                fetchPoPdf={fetchPoPdf}
+            />
 
-                {/* Info Menu Harian */}
-                {poDate && (
-                    <div style={{ border: '1px dashed var(--border)', padding: '10px', backgroundColor: 'var(--bg)', fontSize: '14px', borderRadius: 'var(--radius-sm)', color: 'var(--text)' }}>
-                        <strong>Rencana Menu Hari Ini:</strong> {menuDescription}
-                    </div>
-                )}
+            <DetailPoModal
+                detailPoData={detailPoData}
+                setDetailPoData={setDetailPoData}
+                fetchPoPdf={fetchPoPdf}
+                renderDate={renderDate}
+                getStatusStyle={getStatusStyle}
+            />
 
-                {loading && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '15px 0' }}>
-                        <Skeleton height="40px" />
-                        <Skeleton height="40px" />
-                        <Skeleton height="40px" />
-                    </div>
-                )}
+            <AddSupplierModal
+                isAddSupplierOpen={isAddSupplierOpen}
+                newSupplier={newSupplier}
+                setNewSupplier={setNewSupplier}
+                handleAddSupplier={handleAddSupplier}
+                supplierSubmitting={supplierSubmitting}
+                setIsAddSupplierOpen={setIsAddSupplierOpen}
+            />
 
-                {/* Referensi Konversi Satuan */}
-                {!loading && kebutuhanHitungan.length > 0 && (
-                    <div style={{
-                        border: '1px solid var(--color-primary-light)',
-                        backgroundColor: 'rgba(181, 224, 234, 0.15)',
-                        padding: '16px',
-                        borderRadius: 'var(--radius-sm)',
-                        marginTop: '10px'
-                    }}>
-                        <h4 style={{ margin: '0 0 10px 0', color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>
-                            📌 Referensi Konversi Satuan (Hitungan &rarr; KG)
-                        </h4>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                            {kebutuhanHitungan.map((item) => (
-                                <div key={item.bahanPokokId} style={{
-                                    backgroundColor: 'var(--bg-elevated)',
-                                    border: '1px solid var(--border)',
-                                    padding: '8px 12px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    fontSize: '13px',
-                                    color: 'var(--text)'
-                                }}>
-                                    <strong>{item.nama}</strong>: {item.permintaanAG.toLocaleString('id-ID')} {item.satuanHitungan} &rarr; <strong>{item.final}</strong> KG <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>(konversi {item.konversiPerKg}/kg)</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+            <MultiPrintModal
+                isMultiPrintModalOpen={isMultiPrintModalOpen}
+                selectedTanggalMulti={selectedTanggalMulti}
+                setSelectedTanggalMulti={setSelectedTanggalMulti}
+                nomorDokumenGabungan={nomorDokumenGabungan}
+                setNomorDokumenGabungan={setNomorDokumenGabungan}
+                periods={periods}
+                selectedPeriodId={selectedPeriodId}
+                renderDate={renderDate}
+                request={request}
+                toast={toast}
+                setPrintGabunganData={setPrintGabunganData}
+                setIsPrinting={setIsPrinting}
+                setIsMultiPrintModalOpen={setIsMultiPrintModalOpen}
+                getDatesInRange={getDatesInRange}
+                cleanDateStr={cleanDateStr}
+            />
 
-                {/* Banner Warning RAB Belum Disetujui */}
-                {rabNotApproved && (
-                    <div style={{
-                        padding: '12px 16px',
-                        backgroundColor: 'rgba(253, 126, 20, 0.1)',
-                        border: '1px solid #fd7e14',
-                        borderRadius: 'var(--radius-md)',
-                        color: '#fd7e14',
-                        marginBottom: '16px',
-                        fontWeight: 600,
-                        fontSize: '14px'
-                    }}>
-                        ⚠️ {rabNotApproved}
-                    </div>
-                )}
-
-                {/* Table Items Kebutuhan */}
-                {!loading && poItems.length > 0 && (
-                    <div style={{ marginTop: '10px' }}>
-                        <h4 style={{ margin: '0 0 10px 0', color: 'var(--text)', fontSize: '14px', fontWeight: 600 }}>Daftar Kebutuhan Bahan Makanan (Berdasarkan Porsi PM &amp; Menu)</h4>
-                        <Table
-                            columns={[
-                                { key: 'nama', header: 'Nama Bahan' },
-                                { key: 'satuan', header: 'Satuan', align: 'center' },
-                                {
-                                    key: 'qtySiswa',
-                                    header: 'Alokasi Siswa',
-                                    align: 'right',
-                                    render: (v) => (
-                                        <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                            {Number(v).toLocaleString('id-ID')}
-                                        </span>
-                                    )
-                                },
-                                {
-                                    key: 'qtyB3',
-                                    header: 'Alokasi B3',
-                                    align: 'right',
-                                    render: (v) => (
-                                        <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                            {Number(v).toLocaleString('id-ID')}
-                                        </span>
-                                    )
-                                },
-                                {
-                                    key: 'qtyTotal',
-                                    header: 'Total Qty',
-                                    width: '120px',
-                                    align: 'right',
-                                    render: (v, row, idx) => (
-                                        <input
-                                            type="number"
-                                            step="0.001"
-                                            className="form-field"
-                                            style={{ textAlign: 'right' }}
-                                            value={v}
-                                            onChange={e => handleItemChange(idx, 'qtyTotal', e.target.value)}
-                                            required
-                                        />
-                                    )
-                                },
-                                {
-                                    key: 'hargaSatuan',
-                                    header: 'Harga Satuan (Rp)',
-                                    width: '140px',
-                                    align: 'right',
-                                    render: (v, row, idx) => (
-                                        <NumberInput
-                                            className="form-field"
-                                            style={{ textAlign: 'right' }}
-                                            value={v === '' ? '' : Number(v)}
-                                            onChange={val => handleItemChange(idx, 'hargaSatuan', val)}
-                                            required
-                                        />
-                                    )
-                                },
-                                {
-                                    key: 'subtotal',
-                                    header: 'Subtotal (Rp)',
-                                    align: 'right',
-                                    render: (v) => (
-                                        <strong style={{ fontVariantNumeric: 'tabular-nums' }}>
-                                            Rp{Number(v).toLocaleString('id-ID')}
-                                        </strong>
-                                    )
-                                }
-                            ]}
-                            data={poItems}
-                        />
-                    </div>
-                )}
-
-                {poDate && poItems.length === 0 && !loading && (
-                    <div style={{ color: 'var(--color-warning)', padding: '10px', border: '1px solid rgba(245, 158, 11, 0.2)', backgroundColor: 'rgba(245, 158, 11, 0.05)', borderRadius: 'var(--radius-sm)' }}>
-                        Tidak ada rencana menu harian aktif / disetujui untuk tanggal terpilih.
-                    </div>
-                )}
-
-                <div>
-                    <label style={{
-                        textTransform: 'uppercase',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        letterSpacing: '0.07em',
-                        color: 'var(--text-muted)',
-                        display: 'block',
-                        marginBottom: '6px'
-                    }}>
-                        Catatan Tambahan (opsional)
-                    </label>
-                    <input
-                        type="text"
-                        className="form-field"
-                        placeholder="Contoh: Pengiriman pagi s.d jam 06.00"
-                        value={catatan}
-                        onChange={e => setCatatan(e.target.value)}
-                    />
-                </div>
-
-                <div style={{ marginTop: '10px' }}>
-                    <button
-                        type="submit"
-                        disabled={poItems.length === 0 || rabNotApproved !== null}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: 'var(--btn-primary-bg)',
-                            color: 'var(--btn-primary-text)',
-                            border: 'none',
-                            borderRadius: 'var(--radius-sm)',
-                            cursor: (poItems.length === 0 || rabNotApproved !== null) ? 'not-allowed' : 'pointer',
-                            fontWeight: 600,
-                            fontSize: '14px',
-                            opacity: (poItems.length === 0 || rabNotApproved !== null) ? 0.5 : 1
-                        }}
-                    >
-                        Inisiasi Nota Pesanan
-                    </button>
-                </div>
-            </form>
-
-            {/* Riwayat PO List — Grouped per Tanggal → Supplier */}
-            <h3 style={{ color: 'var(--text)', marginBottom: '15px' }}>Riwayat Nota Pesanan (PO) Terdaftar</h3>
-            {listLoading && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <Skeleton height="40px" />
-                    <Skeleton height="40px" />
-                    <Skeleton height="40px" />
-                    <Skeleton height="40px" />
-                    <Skeleton height="40px" />
-                </div>
-            )}
-            {!listLoading && poList.length === 0 && (
-                <div style={{ color: 'var(--text-muted)', padding: '20px', textAlign: 'center', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)' }}>
-                    Belum ada data Nota Pesanan (PO) untuk periode ini.
-                </div>
-            )}
-            {!listLoading && poList.length > 0 && (() => {
-                const groups = {};
-                for (const po of poList) {
-                    const key = `${po.tanggal}||${po.supplier?.id}`;
-                    if (!groups[key]) {
-                        groups[key] = { tanggal: po.tanggal, supplier: po.supplier, ros: [] };
-                    }
-                    groups[key].ros.push(po);
-                }
-                const sorted = Object.values(groups).sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-                return sorted.map(group => {
-                    const totalNilai = group.ros.reduce((s, po) => s + po.items.reduce((ss, i) => ss + Number(i.subtotal), 0), 0);
-                    const totalRealisasi = group.ros.reduce((s, po) => s + po.items.reduce((ss, i) => ss + Number(i.subtotalRealisasi || 0), 0), 0);
-                    const isAnyRealized = group.ros.some(po => po.status !== 'DIAJUKAN');
-                    const allStatuses = [...new Set(group.ros.map(po => po.status))];
-                    return (
-                        <div key={group.tanggal + group.supplier?.id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '20px', backgroundColor: 'var(--bg-elevated)', boxShadow: 'var(--shadow)' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px', borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg)' }}>
-                                <div>
-                                    <strong style={{ fontSize: '15px' }}>{renderDate(group.tanggal)}</strong>
-                                    <span style={{ color: 'var(--text-muted)', margin: '0 10px' }}>—</span>
-                                    <span>{group.supplier?.nama || '—'}</span>
-                                </div>
-                                <div style={{ display: 'flex', gap: '15px', fontSize: '13px' }}>
-                                    <span>PO: <strong>{group.ros.length}</strong></span>
-                                    <span>Nilai: <strong>Rp{totalNilai.toLocaleString('id-ID')}</strong></span>
-                                    {isAnyRealized && <span>Realisasi: <strong>Rp{totalRealisasi.toLocaleString('id-ID')}</strong></span>}
-                                    <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                                        {allStatuses.map(st => (
-                                            <span key={st} style={{ ...getStatusStyle(st), padding: '2px 8px', borderRadius: '9999px', fontSize: '10px', fontWeight: 'bold' }}>{st}</span>
-                                        ))}
-                                    </span>
-                                </div>
-                            </div>
-                            <div style={{ padding: '10px 20px 20px' }}>
-                                {group.ros.map(po => (
-                                    <div key={po.id} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginTop: '10px', overflow: 'hidden' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', backgroundColor: 'var(--bg)', fontSize: '12px', borderBottom: '1px solid var(--border)' }}>
-                                            <span>#{po.id.slice(-6)} — {po.catatan || 'tanpa catatan'}</span>
-                                            <div style={{ display: 'flex', gap: '6px' }}>
-                                                <button onClick={() => setDetailPoData(po)} style={{ padding: '3px 8px', backgroundColor: 'var(--border)', color: 'var(--text)', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius-sm)', fontSize: '11px' }}>Detail</button>
-                                                <button onClick={() => { setPrintPoData(po); setIsPrinting(true); }} style={{ padding: '3px 8px', backgroundColor: '#6c757d', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius-sm)', fontSize: '11px' }}>Cetak (Print)</button>
-                                                <button onClick={() => fetchPoPdf(po.id, po.supplier?.nama)} style={{ padding: '3px 8px', backgroundColor: '#007bff', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius-sm)', fontSize: '11px', fontWeight: 'bold' }}>Cetak PDF</button>
-                                            </div>
-                                        </div>
-                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                                            <thead>
-                                                <tr style={{ backgroundColor: '#f9f9f9', color: 'var(--text-muted)' }}>
-                                                    <th style={{ padding: '6px 10px', textAlign: 'left', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Bahan</th>
-                                                    <th style={{ padding: '6px 10px', textAlign: 'center', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Sat</th>
-                                                    <th style={{ padding: '6px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Qty</th>
-                                                    <th style={{ padding: '6px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Harga</th>
-                                                    <th style={{ padding: '6px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Subtotal</th>
-                                                    {isAnyRealized && <th style={{ padding: '6px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Qty Real</th>}
-                                                    {isAnyRealized && <th style={{ padding: '6px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>Subtotal Real</th>}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {po.items.map(item => (
-                                                    <tr key={item.id}>
-                                                        <td style={{ padding: '5px 10px', borderBottom: '1px solid var(--border)' }}>{item.bahanPokok?.nama}</td>
-                                                        <td style={{ padding: '5px 10px', textAlign: 'center', borderBottom: '1px solid var(--border)' }}>{item.bahanPokok?.satuan}</td>
-                                                        <td style={{ padding: '5px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontVariantNumeric: 'tabular-nums' }}>{Number(item.qty).toLocaleString('id-ID')}</td>
-                                                        <td style={{ padding: '5px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontVariantNumeric: 'tabular-nums' }}>Rp{Number(item.hargaSatuan).toLocaleString('id-ID')}</td>
-                                                        <td style={{ padding: '5px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontVariantNumeric: 'tabular-nums' }}>Rp{Number(item.subtotal).toLocaleString('id-ID')}</td>
-                                                        {isAnyRealized && (
-                                                            <td style={{ padding: '5px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontVariantNumeric: 'tabular-nums', fontWeight: 'bold' }}>
-                                                                {item.qtyRealisasi !== null ? Number(item.qtyRealisasi).toLocaleString('id-ID') : <span style={{ color: 'var(--text-muted)' }}>—</span>}
-                                                            </td>
-                                                        )}
-                                                        {isAnyRealized && (
-                                                            <td style={{ padding: '5px 10px', textAlign: 'right', borderBottom: '1px solid var(--border)', fontVariantNumeric: 'tabular-nums', fontWeight: 'bold' }}>
-                                                                {item.subtotalRealisasi !== null ? `Rp${Number(item.subtotalRealisasi).toLocaleString('id-ID')}` : <span style={{ color: 'var(--text-muted)' }}>—</span>}
-                                                            </td>
-                                                        )}
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    );
-                });
-            })()}
-
-            {/* Modal Detail PO */}
-            {detailPoData && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                    padding: '20px'
-                }}>
-                    <div style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        borderRadius: 'var(--radius-md)',
-                        width: '100%',
-                        maxWidth: '850px',
-                        maxHeight: '90vh',
-                        overflowY: 'auto',
-                        padding: '24px',
-                        border: '1px solid var(--border)',
-                        boxShadow: 'var(--shadow-hover)'
-                    }}>
-                        <h3 style={{ margin: '0 0 15px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>Detail PO - Tanggal {renderDate(detailPoData.tanggal)}</span>
-                            <span style={{
-                                padding: '4px 10px',
-                                borderRadius: '9999px',
-                                fontSize: '11px',
-                                fontWeight: 'bold',
-                                ...getStatusStyle(detailPoData.status)
-                            }}>{detailPoData.status}</span>
-                        </h3>
-                        
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px', fontSize: '13px' }}>
-                            <div>Supplier: <strong>{detailPoData.supplier?.nama}</strong></div>
-                            <div>Catatan: {detailPoData.catatan || '—'}</div>
-                            {detailPoData.diterimaAt && (
-                                <div style={{ gridColumn: 'span 2' }}>
-                                    Diterima oleh: <strong>{detailPoData.diterimaOleh?.nama}</strong> pada {renderDate(detailPoData.diterimaAt)}
-                                </div>
-                            )}
-                        </div>
-
-                        <Table
-                            columns={[
-                                { key: 'nama', header: 'Bahan Pokok', render: (_, r) => r.bahanPokok?.nama },
-                                { key: 'satuan', header: 'Satuan', align: 'center', render: (_, r) => r.bahanPokok?.satuan },
-                                { key: 'qty', header: 'Qty Diminta', align: 'right', render: (v) => Number(v).toLocaleString('id-ID') },
-                                { key: 'hargaSatuan', header: 'Harga Diminta', align: 'right', render: (v) => `Rp${Number(v).toLocaleString('id-ID')}` },
-                                { key: 'subtotal', header: 'Subtotal Diminta', align: 'right', render: (v) => `Rp${Number(v).toLocaleString('id-ID')}` },
-                                { 
-                                    key: 'qtyRealisasi', 
-                                    header: 'Qty Realisasi', 
-                                    align: 'right', 
-                                    render: (v) => v !== null ? Number(v).toLocaleString('id-ID') : <span style={{ color: 'var(--text-muted)' }}>—</span>
-                                },
-                                { 
-                                    key: 'hargaSatuanRealisasi', 
-                                    header: 'Harga Realisasi', 
-                                    align: 'right', 
-                                    render: (v) => v !== null ? `Rp${Number(v).toLocaleString('id-ID')}` : <span style={{ color: 'var(--text-muted)' }}>—</span>
-                                },
-                                { 
-                                    key: 'subtotalRealisasi', 
-                                    header: 'Subtotal Realisasi', 
-                                    align: 'right', 
-                                    render: (v) => v !== null ? `Rp${Number(v).toLocaleString('id-ID')}` : <span style={{ color: 'var(--text-muted)' }}>—</span>
-                                }
-                            ]}
-                            data={detailPoData.items}
-                        />
-
-                        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                            <button
-                                onClick={() => fetchPoPdf(detailPoData.id, detailPoData.supplier?.nama)}
-                                style={{ padding: '8px 16px', backgroundColor: '#007bff', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius-sm)', fontSize: '13px', fontWeight: 'bold' }}
-                            >
-                                Cetak PDF
-                            </button>
-                            <button
-                                onClick={() => setDetailPoData(null)}
-                                style={{ padding: '8px 16px', backgroundColor: 'var(--border)', color: 'var(--text)', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}
-                            >
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal Tambah Supplier */}
-            {isAddSupplierOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                    padding: '20px'
-                }}>
-                    <form onSubmit={handleAddSupplier} style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        borderRadius: 'var(--radius-md)',
-                        width: '100%',
-                        maxWidth: '450px',
-                        padding: '24px',
-                        border: '1px solid var(--border)',
-                        boxShadow: 'var(--shadow-hover)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '16px'
-                    }}>
-                        <h3 style={{ margin: '0 0 10px 0', color: 'var(--text)' }}>Tambah Supplier / CV Baru</h3>
-                        
-                        <div>
-                            <label style={{
-                                textTransform: 'uppercase',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                letterSpacing: '0.07em',
-                                color: 'var(--text-muted)',
-                                display: 'block',
-                                marginBottom: '6px'
-                            }}>
-                                Nama Supplier / CV *
-                            </label>
-                            <input
-                                type="text"
-                                className="form-field"
-                                placeholder="Contoh: CV Sembako Makmur"
-                                value={newSupplier.nama}
-                                onChange={e => setNewSupplier(prev => ({ ...prev, nama: e.target.value }))}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label style={{
-                                textTransform: 'uppercase',
-                                fontSize: '11px',
-                                fontWeight: 700,
-                                letterSpacing: '0.07em',
-                                color: 'var(--text-muted)',
-                                display: 'block',
-                                marginBottom: '6px'
-                            }}>
-                                Kontak / Telepon (opsional)
-                            </label>
-                            <input
-                                type="text"
-                                className="form-field"
-                                placeholder="Contoh: 0812345678"
-                                value={newSupplier.kontak}
-                                onChange={e => setNewSupplier(prev => ({ ...prev, kontak: e.target.value }))}
-                            />
-                        </div>
-
-                        <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setNewSupplier({ nama: '', kontak: '' });
-                                    setIsAddSupplierOpen(false);
-                                }}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'var(--border)',
-                                    color: 'var(--text)',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    borderRadius: 'var(--radius-sm)',
-                                    fontWeight: 600
-                                }}
-                            >
-                                Batal
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={supplierSubmitting}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    cursor: supplierSubmitting ? 'not-allowed' : 'pointer',
-                                    borderRadius: 'var(--radius-sm)',
-                                    fontWeight: 600,
-                                    opacity: supplierSubmitting ? 0.6 : 1
-                                }}
-                            >
-                                {supplierSubmitting ? 'Menyimpan...' : 'Simpan'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {/* Modal Cetak PO Gabungan */}
-            {isMultiPrintModalOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1000,
-                    padding: '20px'
-                }}>
-                    <div style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        borderRadius: 'var(--radius-md)',
-                        width: '100%',
-                        maxWidth: '500px',
-                        padding: '24px',
-                        border: '1px solid var(--border)',
-                        boxShadow: 'var(--shadow-hover)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '16px'
-                    }}>
-                        <h3 style={{ margin: '0 0 10px 0', color: 'var(--text)' }}>Cetak PO Gabungan Multi-Tanggal</h3>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text)' }}>Nomor Dokumen PO</label>
-                            <input
-                                type="text"
-                                placeholder="Masukkan nomor dokumen (opsional)"
-                                value={nomorDokumenGabungan}
-                                onChange={(e) => setNomorDokumenGabungan(e.target.value)}
-                                style={{
-                                    padding: '8px 12px',
-                                    borderRadius: 'var(--radius-sm)',
-                                    border: '1px solid var(--border)',
-                                    backgroundColor: 'var(--bg)',
-                                    color: 'var(--text)',
-                                    fontSize: '13px',
-                                    outline: 'none',
-                                    fontFamily: 'inherit'
-                                }}
-                            />
-                        </div>
-
-                        <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>
-                            Pilih tanggal-tanggal yang ingin digabungkan dalam cetakan PO:
-                        </p>
-                        
-                        <div style={{ maxHeight: '250px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                            {(() => {
-                                const activePeriod = periods.find(p => p.id === selectedPeriodId);
-                                if (!activePeriod) return <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Pilih periode terlebih dahulu.</span>;
-                                const dates = getDatesInRange(cleanDateStr(activePeriod.tanggalMulai), cleanDateStr(activePeriod.tanggalSelesai));
-                                return dates.map(tgl => {
-                                    const isChecked = selectedTanggalMulti.includes(tgl);
-                                    return (
-                                        <label key={tgl} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', cursor: 'pointer', color: 'var(--text)' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={isChecked}
-                                                onChange={() => {
-                                                    if (isChecked) {
-                                                        setSelectedTanggalMulti(prev => prev.filter(t => t !== tgl));
-                                                    } else {
-                                                        setSelectedTanggalMulti(prev => [...prev, tgl]);
-                                                    }
-                                                }}
-                                            />
-                                            {renderDate(tgl)}
-                                        </label>
-                                    );
-                                });
-                            })()}
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsMultiPrintModalOpen(false);
-                                    setSelectedTanggalMulti([]);
-                                    setNomorDokumenGabungan('');
-                                }}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'var(--border)',
-                                    color: 'var(--text)',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    borderRadius: 'var(--radius-sm)',
-                                    fontWeight: 600
-                                }}
-                            >
-                                Batal
-                            </button>
-                            <button
-                                type="button"
-                                disabled={selectedTanggalMulti.length === 0}
-                                onClick={async () => {
-                                    try {
-                                        const r = await request(`/mitra/po/kebutuhan?tanggal=${selectedTanggalMulti.join(',')}&periodeId=${selectedPeriodId}`);
-                                        if (r.ok) {
-                                            const data = await r.json();
-                                            setPrintGabunganData(data);
-                                            setIsPrinting(true);
-                                            setIsMultiPrintModalOpen(false);
-                                        } else {
-                                            const errData = await r.json().catch(() => ({ error: 'Gagal memuat kebutuhan bahan gabungan.' }));
-                                            toast.error(errData.error);
-                                        }
-                                    } catch (err) {
-                                        toast.error('Koneksi server gagal.');
-                                    }
-                                }}
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'var(--btn-primary-bg)',
-                                    color: 'var(--btn-primary-text)',
-                                    border: 'none',
-                                    cursor: selectedTanggalMulti.length === 0 ? 'not-allowed' : 'pointer',
-                                    borderRadius: 'var(--radius-sm)',
-                                    fontWeight: 600,
-                                    opacity: selectedTanggalMulti.length === 0 ? 0.6 : 1
-                                }}
-                            >
-                                Cetak
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* PDF Preview Modal — Nota Pesanan */}
-            {isPdfModalOpen && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 1100,
-                    padding: '20px'
-                }}>
-                    <div style={{
-                        backgroundColor: 'var(--bg-elevated)',
-                        borderRadius: 'var(--radius-md)',
-                        width: '100%',
-                        maxWidth: '900px',
-                        maxHeight: '92vh',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        padding: '24px',
-                        border: '1px solid var(--border)',
-                        boxShadow: 'var(--shadow-hover)'
-                    }}>
-                        <h3 style={{ margin: '0 0 15px 0' }}>{pdfModalTitle}</h3>
-
-                        {pdfLoading ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
-                                <Skeleton height="560px" />
-                            </div>
-                        ) : (
-                            <iframe
-                                src={pdfUrl}
-                                style={{ width: '100%', flex: 1, minHeight: '560px', border: 'none', borderRadius: 'var(--radius-sm)' }}
-                                title="Nota Pesanan PDF"
-                            />
-                        )}
-
-                        <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                            {pdfUrl && (
-                                <a
-                                    href={pdfUrl}
-                                    download={`${pdfModalTitle.replace(/[^a-zA-Z0-9_\-]/g, '_')}.pdf`}
-                                    style={{
-                                        padding: '8px 16px',
-                                        backgroundColor: '#007bff',
-                                        color: '#fff',
-                                        textDecoration: 'none',
-                                        borderRadius: 'var(--radius-sm)',
-                                        fontSize: '13px',
-                                        fontWeight: 'bold'
-                                    }}
-                                >
-                                    Download PDF
-                                </a>
-                            )}
-                            <button
-                                onClick={closePdfModal}
-                                style={{ padding: '8px 16px', backgroundColor: 'var(--border)', color: 'var(--text)', border: 'none', cursor: 'pointer', borderRadius: 'var(--radius-sm)', fontSize: '13px' }}
-                            >
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <PoPdfPreviewModal
+                isPdfModalOpen={isPdfModalOpen}
+                pdfModalTitle={pdfModalTitle}
+                pdfUrl={pdfUrl}
+                pdfLoading={pdfLoading}
+                closePdfModal={closePdfModal}
+            />
         </div>
     );
 };
