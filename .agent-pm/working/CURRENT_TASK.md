@@ -1,22 +1,33 @@
 # CURRENT TASK — 2026-08-02
 
-## Status: BUILD ✅ + VERIFICATION PASS — V2-4 Batch 4a MenuHarianPage gizi (menunggu Rozi test)
+## Status: CYCLE GABUNGAN V2-4 FE — PAUSED (Rozi istirahat). 8/11 file selesai + verified, BELUM commit
 
-### V2-4 Batch 4a: Refactor frontend MenuHarianPage gizi (2.088 → 991 baris)
-- **BUILD** [AGY gemini-3.6-flash-medium]: MenuHarianPage.jsx dipecah → `components/gizi/menuHarian/` 13 file (helpers.jsx, BahanPanel, MenuTab, AlergiTab, OrganoleptikTab, PengirimanPanel, BlokSidebar, BlokWorkspace, MenuHarianWorkspace, MasterMenuSetup, MasterMenuModal, MenuHarianForm, RiwayatMenu). Parent → orchestrator 991 baris.
-- **VERIFICATION** [OpenCode deepseek-v4-flash-free]: PASS —
-  - Semua komponen VERBATIM (hanya pembungkus + destructure props + renderX() → <Component>)
-  - 25 handler + 8 useEffect + 32 useState utuh di parent (diff normalized clean)
-  - Props cocok semua (MenuTab 26/26, BahanPanel 13/13, BlokWorkspace→3 tab lengkap, RiwayatMenu read-only editable={false})
-  - helpers.jsx 6 export konsisten; tidak ada renderX tersisa (grep kosong)
-  - npm run build PASS (4119 modul)
-  - 2 catatan minor non-behavioral: getBahanName(bahan, bahanPokokList) param eksplisit; toast?.info?.() optional chaining
-- **Zero behavioral change** — 0 temuan.
+### Mode kerja (keputusan Rozi 2026-08-02)
+- Sisa refactor FE (4b, 5, 6) = SATU cycle besar, eksekusi BERTAHAP per file (BUILD AGY → VERIFY OpenCode), TANPA approve per file.
+- APPROVAL sekali di AKHIR setelah semua file selesai + diverifikasi → lalu COMMIT.
 
-### Next Step
-- Rozi: restart FE + test halaman Menu Harian gizi (form menu, master menu, blok, alergi, organoleptik, pengiriman, riwayat, ajukan)
-- Setelah OK → FINALIZE commit (OpenCode) → cycle 4b (LaporanPage aslap 2.031)
+### Progress cycle gabungan (11 file target, 8 SELESAI + VERIFIED)
+| File | Baris | Selesai |
+|---|---|---|
+| ✅ 4b LaporanPage aslap | 2.031 → 351 | VERIFIED |
+| ✅ 5a AkuntanPoPage | 1.457 → 418 | VERIFIED |
+| ✅ 5b PenerimaManfaatPage | 1.443 → 746 | VERIFIED |
+| ✅ 5c RabHarianPage | 1.216 → 533 | VERIFIED |
+| ✅ 6a1 LaporanGiziPage | 1.096 → 492 | VERIFIED |
+| ✅ 6a2 JurnalTransaksiPage | 1.056 → 454 | VERIFIED |
+| ✅ 6a3 SekolahPage | 1.017 → 431 | VERIFIED |
+| ✅ 6b1 ApprovalPage | 878 → 289 | VERIFIED |
+| ⏳ 6b2 PeriodeSetupPage | 835 | investigasi siap |
+| ⏳ 6b3 SaldoAwalBarangPage | 812 | investigasi siap |
+
+Semua 8 verified AMAN (zero behavioral change, build PASS). BELUM commit — tunggu approval akhir.
+
+### Next Step (saat lanjut)
+1. BUILD 6b2 PeriodeSetupPage (AGY) → VERIFY (OpenCode)
+2. BUILD 6b3 SaldoAwalBarangPage (AGY) → VERIFY (OpenCode)
+3. Update working files + APPROVAL Rozi sekali → COMMIT semua (OpenCode)
 
 ### Catatan
-- CURRENT_TASK/CURRENT_STATE/TODO update (batch 3 selesai) di-commit bersama commit 4a (pola "gabung").
+- BUG-002 sudah fix + commit `77a5e19` (di sela cycle).
 - BUG-001 (500 rabP12) masih open — bukan blocker.
+- ⚠️ State files (CURRENT_STATE/TODO) sempat kena overwrite eksternal ke versi lama — akan ditulis ulang benar sebelum approval akhir.
