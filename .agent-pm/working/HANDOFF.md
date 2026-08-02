@@ -1,28 +1,22 @@
-# Handoff — 2026-08-02 — Reset Repo + Release V1.0.0
+# Handoff — 2026-08-02 — V2-4 Batch 2 + Governance Pembagian Agent Baru
 
-## Update Sesi Ini (2026-08-02, sesi 27)
-- **Validasi model**: Hermes = `oc/deepseek-v4-flash-free` via 9router (bukan nemotron-3-ultra) — knowledge/10, SOUL.md (Aturan 3b), TODO.md, DECISION_LOG diselaraskan
-- **V2-4 batch 1 selesai**: refactor akuntan.js → 9 file modular; verifikasi struktural + behavioral PASS; commit `12557a0` (repo lama, ter-include di initial release)
-- **BUG-001** ditemukan saat smoke test: 500 `GET /rab-p12/harian` + `/rab-p12/rekap` — suspected pre-existing (confidence MEDIUM, jalur kode identik original, belum dual-run) — investigasi terpisah
-- **Dokumentasi V1.0.0**: README.md, CHANGELOG.md, LICENSE (Fahrozi Aldinata), docs/ARCHITECTURE.md, docs/SETUP.md, backend/.env.example, frontend/.env.example
-- **Sanitasi seed**: 10 nilai nama asli → generik per role (Windi/Yayang dll dihapus)
-- **Rename `.hermes` → `.agent-pm`**: 16 file referensi di-update, grep verifikasi 0 match
-- **RESET REPO**: history lama dihapus (kredensial `.env.production` bocor tidak ikut); repo baru `https://github.com/FahroziAldinata/SIKOP-SPPG.git` — commit `c017282` "Initial release v1.0.0" + tag `v1.0.0`, branch `main`
+## Update Sesi Ini (2026-08-02, sesi 28)
+- **V2-4 Batch 2 selesai**: LaporanPage.jsx akuntan 3.511 → 1.517 baris. 19 komponen baru di `frontend/src/components/akuntan/laporan/`. BUILD OpenCode + VERIFICATION PASS (verbatim, props cocok, build PASS) + cleanup dead import AGY. Approved Rozi. Commit `57570b2` + `e475d34`.
+- **GF-008**: commit `e475d34` dieksekusi AGY — salah, seharusnya OpenCode ("commit tugas opencode"). Didokumentasikan + perbaikan lintas file.
+- **Pembagian agent BARU (keputusan Rozi, PERMANEN)**: BUILD/eksekusi kode/FIX = AGY; COMMIT + PUSH = OpenCode; investigasi + verifikasi = OpenCode. Diselaraskan di: PROJECT_MANAGER_BEHAVIOR.md, SOUL.md, AUTOMATION_CYCLE.md, knowledge/10, skills/hermes-workflow-practices.md + skill Hermes (agy-build-verify, hermes-pm-workflow). Commit `c7e6134` "update agent-pm".
+- **DOCUMENTATION_ARCHIVE**: DOCUMENTATION.md section 2026-08-02 ditambahkan; isi plans/ + prompts/ + pre-check/ dibersihkan (folder + .gitkeep tetap).
 
 ## Keputusan Rozi (2026-08-02)
-- Exclude `.agent-pm/plans/` + `.agent-pm/prompts/` dari repo publik (.gitignore)
-- Identity commit: `Fahrozi Aldinata <fahrozialdinata2@gmail.com>`
-- Backup `Sistem_SPPG_BACKUP_20260802` disimpan (1.4 GB)
-- Repo GitHub lama `sppg-management-system`: dihapus manual oleh Rozi (belum dihapus)
+- AGY untuk eksekusi kode (BUILD/FIX), OpenCode untuk commit + push — PERMANEN.
+- Hasil BUILD OpenCode yang sudah selesai + verified: dipakai, tidak dibuang (kasus batch 2).
 
 ## Catatan Penting
-- **Path governance: `.agent-pm/`** (bukan `.hermes`) — SESSION_START_PROTOCOL, SOUL, skill, memory sudah disesuaikan
-- Commit `12557a0` & `15febb9` TIDAK ada di repo baru (history di-reset) — referensi internal saja
-- BUG-001 belum diverifikasi dual-run head-to-head (masih suspected pre-existing)
-- `.agent-pm/plans/` + `prompts/` tidak ter-track (ignored) — prompt audit trail tetap tersimpan lokal
+- BUG-001 (500 rabP12) masih open — investigasi terpisah, tidak tersentuh.
+- Temuan minor batch 2 (belum diperbaiki): komentar hilang ReportActionButtons (kosmetik); bug pre-existing `justify:` invalid CSS di NeracaSaldoTable.jsx:12 + Lpd2mBuktiSection.jsx:142.
+- `.agent-pm/plans/` + `prompts/` sekarang kosong (hanya .gitkeep) — prompt audit trail batch 2 sudah masuk DOCUMENTATION.md.
 
 ## Backlog
-- **V2-4 Batch 2**: `frontend/src/pages/akuntan/laporan/LaporanPage.jsx` (3.511 baris) ← NEXT (ditahan, tunggu instruksi)
+- **V2-4 Batch 3**: backend `routes/laporan.js` (2.934), `routes/aslap.js` (2.916), `routes/gizi.js` (2.757) ← NEXT (menunggu TASK_SELECTION)
 - V2-1 TTD Basah (Sprint 24)
 - V2-2 Image handling, V2-3 Perbaikan minor UX
 - BUG-001 investigasi (500 rabP12)

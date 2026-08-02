@@ -171,6 +171,22 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-02
+
+### V2-4 Batch 2 — Refactor LaporanPage.jsx akuntan (3.511 → 1.517 baris)
+- **BUILD** [OpenCode deepseek-v4-flash-free]: 19 komponen baru di `frontend/src/components/akuntan/laporan/` — ReportFilterBar (238), ReportActionButtons (647), BkuTable (46), BpTable (71), NeracaSaldoTable (93), StockBarangTable (75), KebutuhanBelanjaTable (54), PerPeriodeTable (86), PerBulanTable (60), LaporanHarianSection (77), LraTable (159), Lpd2mBuktiSection (187), Lpd2mTable (63), BttSection (23), BapsdSection (31), SptjSection (30), LbbpSection (156), BkkSection (142), PdfPreviewModal (87). Parent jadi orchestrator (state + handler + routing tetap).
+- **VERIFICATION** [OpenCode]: PASS — body JSX komponen VERBATIM vs rentang baris asli (diff normalized), logika parent identik, guard conditional pindah equivalen, props cocok (20/20, 66/66, 14/14), `npm run build` PASS.
+- **CLEANUP** [AGY gemini-3.6-flash-medium]: dead import Table + DatePicker dihapus dari parent → 1.517 baris; verifikasi silang OpenCode PASS.
+- **Commit**: `57570b2` (refactor) + `e475d34` (docs archive) — ⚠️ commit dieksekusi AGY, seharusnya OpenCode (GF-008, koreksi Rozi).
+- **Temuan minor**: komentar hilang di ReportActionButtons (kosmetik); bug pre-existing `justify:` invalid CSS (NeracaSaldoTable.jsx:12, Lpd2mBuktiSection.jsx:142) — dicatat, belum diperbaiki.
+
+### Governance — Pembagian Agent Baru (keputusan Rozi 2026-08-02)
+- **BUILD/eksekusi kode/FIX = AGY** (ganti OpenCode default); **COMMIT + PUSH = OpenCode** ("commit tugas opencode"); investigasi + verifikasi = OpenCode.
+- **GF-008**: kesalahan commit via AGY `e475d34` → didokumentasikan + perbaikan governance lintas file (PROJECT_MANAGER_BEHAVIOR, SOUL, AUTOMATION_CYCLE, knowledge/10, skills).
+- **Commit**: `c7e6134` "update agent-pm".
+
+---
+
 ## Catatan Umum
 
 - **AGY**: Mode `-p` = text-only. Butuh `-i` + PTY untuk eksekusi tool. Settings di `C:\Users\Administrator\.gemini\antigravity-cli\settings.json`
