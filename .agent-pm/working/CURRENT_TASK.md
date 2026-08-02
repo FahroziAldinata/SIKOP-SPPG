@@ -1,23 +1,24 @@
 # CURRENT TASK — 2026-08-02
 
-## Status: BUILD ✅ + VERIFICATION PASS — V2-4 Batch 3b aslap.js (menunggu Rozi approve)
+## Status: BUILD ✅ + VERIFICATION PASS — V2-4 Batch 3c gizi.js (menunggu Rozi approve)
 
-### V2-4 Batch 3b: Refactor backend/src/routes/aslap.js (2.916 → 0, folder baru)
-- **BUILD** [AGY gemini-3.6-flash-medium]: aslap.js dipecah → `routes/aslap/` 12 file (index.js + _helpers.js + 10 sub-router: master, grupHari, penerimaManfaat, sekolahKelas, laporanPerKelas, laporanHarian, laporanPeriode, laporanBulanan, laporanAggregate, poApprove). AGY lapor selesai (tanpa timeout kali ini).
+### V2-4 Batch 3c: Refactor backend/src/routes/gizi.js (2.757 → 0, folder baru)
+- **BUILD** [AGY gemini-3.6-flash-medium]: gizi.js dipecah → `routes/gizi/` 17 file (index.js + _helpers.js + 15 sub-router: master, menuHarian, menuHarianBlok, menuItem, menuItemBahan, menuTargetGizi, menuOrganoleptik, alergiCatatan, kendaraan, pengiriman, masterMenu, masterTargetGizi, laporanPemenuhan, laporanRekapMenu, laporanOrganoleptik).
 - **VERIFICATION** [OpenCode deepseek-v4-flash-free]: PASS —
-  - node --check 12/12 PASS
-  - Endpoint 30 = 30 identik 1:1 (method + path + middleware)
-  - Perhatian khusus terverifikasi: /laporan/aggregate HANYA requireAuth (tanpa role) ✓; PUT /po/:id/approve ✓; array path /api/aslap/... verbatim ✓
-  - Helper di _helpers: inferJenjang, getLembaga, authMiddleware ✓; 4 helper data laporan di sub-router masing-masing ✓
+  - node --check 17/17 PASS
+  - Endpoint identik 1:1 (70 deklarasi route, middleware sama)
+  - URUTAN /master-menu/by-hari SEBELUM /master-menu/:id ✓ (smoke by-hari → 401 bukan 404)
+  - kendaraan 410 handler kendaraanMovedToMitra intact ✓ (POST/PUT/DELETE)
+  - Helper _helpers: getPenerimaBlok + getHargaBahan (signature tx pertama) ✓ — dipakai menuItemBahan + alergiCatatan
   - Import relatif +1 level benar semua (../../lib, ../../middleware, ../../templates) ✓
-  - Mount app.js:29 tidak berubah ✓
-  - Boot "Server jalan di port 3000" + log bersih, no proses sisa
-  - Smoke: periode/grup-hari/penerima-manfaat/aggregate/sekolah-kelas-detail → 401, nonexistent → 404, PUT po/1/approve → 401 ✓
+  - Body code non-comment: asli 2280 baris vs baru 2283 (beda 3 = exports helper) — zero behavioral change
+  - Mount app.js:31 tidak berubah ✓
+  - Boot "Server jalan di port 3000" + smoke: 6 endpoint 401, nonexistent 404, by-hari 401, no proses sisa ✓
 - **Zero behavioral change** — 0 temuan.
 
 ### Next Step
-- Rozi: approve task 3b → FINALIZE commit (OpenCode) → lalu cycle 3c (gizi.js)
-- 3c: `routes/gizi.js` (2.757) — investigasi siap (hasil batch3-investigasi)
+- Rozi: approve task 3c → FINALIZE commit (OpenCode) → Batch 3 SELESAI (3/3 backend)
+- Batch 4 (FE): MenuHarianPage gizi (2.088) + LaporanPage aslap (2.031) — menunggu TASK_SELECTION
 
 ### Catatan
 - BUG-001 (500 rabP12) masih open — bukan blocker.
