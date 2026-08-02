@@ -1,6 +1,6 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: V2-4 Batch 3a — backend routes/laporan.js (BUILD + VERIFICATION PASS, menunggu approve)**
+**Scope Aktif: V2-4 Batch 3b — backend routes/aslap.js (BUILD + VERIFICATION PASS, menunggu approve)**
 
 ## Sesi 28 — V2-4 Batch 2: Refactor LaporanPage.jsx modular (2026-08-02)
 - **Task dikerjakan**: LaporanPage.jsx akuntan 3.511 baris dipecah jadi 19 komponen di `frontend/src/components/akuntan/laporan/` + parent 1.517 baris. BUILD OpenCode + VERIFICATION PASS (verbatim, props cocok, build PASS) + cleanup dead import via AGY. Keputusan Rozi mid-sesi: AGY untuk eksekusi berikutnya (bukan OpenCode).
