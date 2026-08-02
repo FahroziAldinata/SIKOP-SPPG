@@ -1,54 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import Dropdown from '../../components/Dropdown';
-import { NumberInput } from '../../components/NumberInput';
-import { Skeleton } from '../../components/Skeleton';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
-
-const JENJANG_OPTIONS = ['TK', 'SD', 'SMP', 'SMA_SMK'];
-
-const getCategoryOptions = (jenjang) => {
-  switch (jenjang) {
-    case 'TK':
-      return [
-        { label: 'PAUD/TK (Porsi Kecil)', value: 'PAUD_TK' },
-        { label: 'Pendidik (Porsi Besar)', value: 'PENDIDIK' },
-        { label: 'PIC (Porsi Besar)', value: 'TENAGA_KEPENDIDIKAN' }
-      ];
-    case 'SD':
-      return [
-        { label: 'Kelas 1-3 (Porsi Kecil)', value: 'SD_1_3' },
-        { label: 'Kelas 4-6 (Porsi Besar)', value: 'SD_4_6' },
-        { label: 'Pendidik (Porsi Besar)', value: 'PENDIDIK' },
-        { label: 'PIC (Porsi Besar)', value: 'TENAGA_KEPENDIDIKAN' }
-      ];
-    case 'SMP':
-      return [
-        { label: 'Kelas 1-3 (Porsi Besar)', value: 'SMP_1_3' },
-        { label: 'Pendidik (Porsi Besar)', value: 'PENDIDIK' },
-        { label: 'PIC (Porsi Besar)', value: 'TENAGA_KEPENDIDIKAN' }
-      ];
-    case 'SMA_SMK':
-    default:
-      return [
-        { label: 'Kelas 4-6 (Porsi Besar)', value: 'SMA_SMK_4_6' },
-        { label: 'Pendidik (Porsi Besar)', value: 'PENDIDIK' },
-        { label: 'PIC (Porsi Besar)', value: 'TENAGA_KEPENDIDIKAN' }
-      ];
-  }
-};
-
-const categoryLabelMap = {
-  PAUD_TK: 'PAUD/TK (Porsi Kecil)',
-  SD_1_3: 'Kelas 1-3 (Porsi Kecil)',
-  SD_4_6: 'Kelas 4-6 (Porsi Besar)',
-  SMP_1_3: 'Kelas 1-3 (Porsi Besar)',
-  SMA_SMK_4_6: 'Kelas 4-6 (Porsi Besar)',
-  PENDIDIK: 'Pendidik (Porsi Besar)',
-  TENAGA_KEPENDIDIKAN: 'PIC (Porsi Besar)'
-};
+import { PeriodeFilterBar } from '../../components/aslap/sekolah/PeriodeFilterBar';
+import { SekolahTable } from '../../components/aslap/sekolah/SekolahTable';
+import { SekolahFormModal } from '../../components/aslap/sekolah/SekolahFormModal';
+import { KelasFormModal } from '../../components/aslap/sekolah/KelasFormModal';
 
 export const SekolahPage = () => {
   const { request } = useApi();
@@ -379,38 +336,11 @@ export const SekolahPage = () => {
       <h2 style={{ color: 'var(--text)', marginBottom: '20px' }}>Data Sekolah &amp; Rincian Kelas</h2>
 
       {/* Filter Dropdown Periode */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        marginBottom: '20px',
-        backgroundColor: 'var(--bg-elevated)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)',
-        padding: '16px 20px',
-        boxShadow: 'var(--shadow)'
-      }}>
-        <div style={{ flex: '0 0 auto' }}>
-          <label style={{
-            textTransform: 'uppercase',
-            fontSize: '11px',
-            fontWeight: 700,
-            letterSpacing: '0.07em',
-            color: 'var(--text-muted)',
-            display: 'block',
-            marginBottom: '6px'
-          }}>
-            Pilih Periode
-          </label>
-          <Dropdown
-            style={{ width: '280px' }}
-            value={selectedPeriodId}
-            onChange={handlePeriodChange}
-            options={periodeOptions}
-            placeholder="-- Pilih Periode --"
-          />
-        </div>
-      </div>
+      <PeriodeFilterBar
+        selectedPeriodId={selectedPeriodId}
+        handlePeriodChange={handlePeriodChange}
+        periodeOptions={periodeOptions}
+      />
 
       {/* Header Tabel Sekolah & Tombol Tambah */}
       <div style={{
@@ -441,568 +371,52 @@ export const SekolahPage = () => {
       </div>
 
       {/* Tabel Utama Sekolah */}
-      {loading ? (
-        <Skeleton count={5} height={40} />
-      ) : (
-        <div style={{
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-md)',
-          overflowX: 'auto',
-          backgroundColor: 'var(--bg-elevated)',
-          boxShadow: 'var(--shadow)',
-        }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'separate',
-            borderSpacing: 0,
-            boxSizing: 'border-box'
-          }}>
-            <thead>
-              <tr style={{ backgroundColor: 'var(--table-header-bg)' }}>
-                <th style={{ padding: '12px 18px', textAlign: 'center', width: '50px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)' }}></th>
-                <th style={{ padding: '12px 18px', textAlign: 'center', width: '60px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)' }}>No</th>
-                <th style={{ padding: '12px 18px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)' }}>Nama</th>
-                <th style={{ padding: '12px 18px', textAlign: 'center', width: '120px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)' }}>Jenjang</th>
-                <th style={{ padding: '12px 18px', textAlign: 'center', width: '140px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)' }}>NPSN</th>
-                <th style={{ padding: '12px 18px', textAlign: 'left', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)' }}>Alamat</th>
-                <th style={{ padding: '12px 18px', textAlign: 'center', width: '140px', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: 'var(--table-header-text)', borderBottom: '1px solid var(--border)' }}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sekolahList.length === 0 ? (
-                <tr>
-                  <td colSpan={7} style={{ padding: '40px 18px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
-                    Belum ada data sekolah.
-                  </td>
-                </tr>
-              ) : (
-                sekolahList.map((row, idx) => {
-                  const isExpanded = expandedSekolahId === row.id;
-                  return (
-                    <React.Fragment key={row.id}>
-                      <tr
-                        style={{
-                          backgroundColor: isExpanded ? 'rgba(7, 30, 73, 0.03)' : 'transparent',
-                          transition: 'background-color var(--transition-fast)'
-                        }}
-                      >
-                        <td style={{ padding: '16px 18px', textAlign: 'center', verticalAlign: 'middle', borderBottom: (isExpanded || idx < sekolahList.length - 1) ? '1px solid var(--border)' : 'none' }}>
-                          <button
-                            type="button"
-                            onClick={() => handleToggleExpand(row.id)}
-                            title={isExpanded ? "Tutup Rincian Kelas" : "Lihat Rincian Kelas"}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              cursor: 'pointer',
-                              color: 'var(--text)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: '4px',
-                              borderRadius: 'var(--radius-sm)'
-                            }}
-                          >
-                            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                          </button>
-                        </td>
-                        <td style={{ padding: '16px 18px', textAlign: 'center', verticalAlign: 'middle', fontSize: 14, borderBottom: (isExpanded || idx < sekolahList.length - 1) ? '1px solid var(--border)' : 'none' }}>
-                          {idx + 1}
-                        </td>
-                        <td style={{ padding: '16px 18px', textAlign: 'left', verticalAlign: 'middle', fontSize: 14, borderBottom: (isExpanded || idx < sekolahList.length - 1) ? '1px solid var(--border)' : 'none' }}>
-                          <strong style={{ color: 'var(--text)' }}>{row.nama}</strong>
-                        </td>
-                        <td style={{ padding: '16px 18px', textAlign: 'center', verticalAlign: 'middle', fontSize: 14, borderBottom: (isExpanded || idx < sekolahList.length - 1) ? '1px solid var(--border)' : 'none' }}>
-                          {row.jenjang}
-                        </td>
-                        <td style={{ padding: '16px 18px', textAlign: 'center', verticalAlign: 'middle', fontSize: 14, borderBottom: (isExpanded || idx < sekolahList.length - 1) ? '1px solid var(--border)' : 'none' }}>
-                          {row.npsn || '-'}
-                        </td>
-                        <td style={{ padding: '16px 18px', textAlign: 'left', verticalAlign: 'middle', fontSize: 14, borderBottom: (isExpanded || idx < sekolahList.length - 1) ? '1px solid var(--border)' : 'none' }}>
-                          {row.alamat || '-'}
-                        </td>
-                        <td style={{ padding: '16px 18px', textAlign: 'center', verticalAlign: 'middle', borderBottom: (isExpanded || idx < sekolahList.length - 1) ? '1px solid var(--border)' : 'none' }}>
-                          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                            <button
-                              onClick={() => handleOpenEditModal(row)}
-                              style={{
-                                padding: '4px 10px',
-                                backgroundColor: 'var(--btn-secondary-bg, #e5e7eb)',
-                                color: 'var(--text)',
-                                border: '1px solid var(--border)',
-                                borderRadius: 'var(--radius-sm)',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: 600
-                              }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(row.id)}
-                              style={{
-                                padding: '4px 10px',
-                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                color: 'var(--color-danger, #ef4444)',
-                                border: '1px solid rgba(239, 68, 68, 0.3)',
-                                borderRadius: 'var(--radius-sm)',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                fontWeight: 600
-                              }}
-                            >
-                              Hapus
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-
-                      {/* Sub-tabel Kelas saat row di-expand */}
-                      {isExpanded && (
-                        <tr key={`expand-row-${row.id}`}>
-                          <td colSpan={7} style={{ padding: '16px 24px', backgroundColor: 'var(--bg)', borderBottom: idx < sekolahList.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                            <div style={{
-                              backgroundColor: 'var(--bg-elevated)',
-                              border: '1px solid var(--border)',
-                              borderRadius: 'var(--radius-md)',
-                              padding: '16px 20px',
-                              boxShadow: 'var(--shadow)'
-                            }}>
-                              <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '14px'
-                              }}>
-                                <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: 'var(--text)' }}>
-                                  Detail Kelas — {row.nama}
-                                </h4>
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenAddKelasModal(row.id)}
-                                  style={{
-                                    padding: '8px 14px',
-                                    backgroundColor: 'var(--color-primary)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: 'var(--radius-sm)',
-                                    cursor: 'pointer',
-                                    fontWeight: 600,
-                                    fontSize: '13px'
-                                  }}
-                                >
-                                  + Tambah Kelas
-                                </button>
-                              </div>
-
-                              {kelasLoading && !kelasMap[row.id] ? (
-                                <Skeleton count={3} height={36} />
-                              ) : (
-                                <table style={{
-                                  width: '100%',
-                                  borderCollapse: 'collapse',
-                                  borderRadius: 'var(--radius-sm)',
-                                  overflow: 'hidden',
-                                  border: '1px solid var(--border)'
-                                }}>
-                                  <thead>
-                                    <tr style={{ backgroundColor: 'var(--table-header-bg)' }}>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: 700, textAlign: 'center', width: '60px', borderBottom: '1px solid var(--border)', color: 'var(--table-header-text)' }}>No</th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: 700, textAlign: 'left', borderBottom: '1px solid var(--border)', color: 'var(--table-header-text)' }}>Kategori Kelas</th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: 700, textAlign: 'right', width: '150px', borderBottom: '1px solid var(--border)', color: 'var(--table-header-text)' }}>Jumlah</th>
-                                      <th style={{ padding: '10px 14px', fontSize: '11px', fontWeight: 700, textAlign: 'center', width: '140px', borderBottom: '1px solid var(--border)', color: 'var(--table-header-text)' }}>Aksi</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(!kelasMap[row.id] || kelasMap[row.id].length === 0) ? (
-                                      <tr>
-                                        <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-                                          Belum ada data detail kelas untuk sekolah dan periode terpilih.
-                                        </td>
-                                      </tr>
-                                    ) : (
-                                      kelasMap[row.id].map((k, kIdx) => (
-                                        <tr key={k.id} style={{ borderBottom: kIdx < kelasMap[row.id].length - 1 ? '1px solid var(--border)' : 'none' }}>
-                                          <td style={{ padding: '10px 14px', textAlign: 'center', fontSize: '13px' }}>{kIdx + 1}</td>
-                                          <td style={{ padding: '10px 14px', fontSize: '13px', fontWeight: 600 }}>{categoryLabelMap[k.namaKelas] || k.namaKelas}</td>
-                                          <td style={{ padding: '10px 14px', textAlign: 'right', fontSize: '13px' }}>{k.jumlah} siswa</td>
-                                          <td style={{ padding: '10px 14px', textAlign: 'center' }}>
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                              <button
-                                                type="button"
-                                                onClick={() => handleOpenEditKelasModal(k, row.id)}
-                                                style={{
-                                                  padding: '4px 10px',
-                                                  backgroundColor: 'var(--btn-secondary-bg, #e5e7eb)',
-                                                  color: 'var(--text)',
-                                                  border: '1px solid var(--border)',
-                                                  borderRadius: 'var(--radius-sm)',
-                                                  cursor: 'pointer',
-                                                  fontSize: '12px',
-                                                  fontWeight: 600
-                                                }}
-                                              >
-                                                Edit
-                                              </button>
-                                              <button
-                                                type="button"
-                                                onClick={() => handleDeleteKelasClick(k.id, row.id)}
-                                                style={{
-                                                  padding: '4px 10px',
-                                                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                                  color: 'var(--color-danger, #ef4444)',
-                                                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                                                  borderRadius: 'var(--radius-sm)',
-                                                  cursor: 'pointer',
-                                                  fontSize: '12px',
-                                                  fontWeight: 600
-                                                }}
-                                              >
-                                                Hapus
-                                              </button>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      ))
-                                    )}
-                                  </tbody>
-                                </table>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <SekolahTable
+        loading={loading}
+        sekolahList={sekolahList}
+        expandedSekolahId={expandedSekolahId}
+        handleToggleExpand={handleToggleExpand}
+        handleOpenEditModal={handleOpenEditModal}
+        handleDeleteClick={handleDeleteClick}
+        handleOpenAddKelasModal={handleOpenAddKelasModal}
+        kelasLoading={kelasLoading}
+        kelasMap={kelasMap}
+        handleOpenEditKelasModal={handleOpenEditKelasModal}
+        handleDeleteKelasClick={handleDeleteKelasClick}
+      />
 
       {/* Modal Form Tambah / Edit Sekolah */}
-      {modalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000
-        }}>
-          <div style={{
-            backgroundColor: 'var(--bg-elevated)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '24px',
-            width: '90%',
-            maxWidth: '480px',
-            boxShadow: 'var(--shadow-hover)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-          }}>
-            <h4 style={{
-              margin: 0,
-              fontSize: '16px',
-              fontWeight: 700,
-              color: 'var(--text)'
-            }}>
-              {editingItem ? 'Edit Sekolah' : 'Tambah Sekolah Baru'}
-            </h4>
-
-            <form onSubmit={handleSubmitForm} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  marginBottom: '6px'
-                }}>
-                  Nama <span style={{ color: 'red' }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Nama sekolah"
-                  value={formNama}
-                  onChange={(e) => setFormNama(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'var(--bg)',
-                    color: 'var(--text)',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  marginBottom: '6px'
-                }}>
-                  Jenjang <span style={{ color: 'red' }}>*</span>
-                </label>
-                <select
-                  required
-                  value={formJenjang}
-                  onChange={(e) => setFormJenjang(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'var(--bg)',
-                    color: 'var(--text)',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <option value="">-- Pilih Jenjang --</option>
-                  {JENJANG_OPTIONS.map(j => (
-                    <option key={j} value={j}>{j}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  marginBottom: '6px'
-                }}>
-                  NPSN
-                </label>
-                <input
-                  type="text"
-                  placeholder="8 digit angka"
-                  maxLength={8}
-                  value={formNpsn}
-                  onChange={(e) => setFormNpsn(e.target.value.replace(/\D/g, ''))}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'var(--bg)',
-                    color: 'var(--text)',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  marginBottom: '6px'
-                }}>
-                  Alamat
-                </label>
-                <textarea
-                  rows={3}
-                  placeholder="Alamat lengkap sekolah"
-                  value={formAlamat}
-                  onChange={(e) => setFormAlamat(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'var(--bg)',
-                    color: 'var(--text)',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                    resize: 'vertical',
-                    fontFamily: 'inherit'
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  disabled={submitting}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: 'var(--btn-cancel-bg, #f3f4f6)',
-                    border: '1px solid var(--btn-cancel-border, #d1d5db)',
-                    color: 'var(--btn-cancel-text, #374151)',
-                    borderRadius: 'var(--radius-sm)',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 'var(--radius-sm)',
-                    cursor: submitting ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600
-                  }}
-                >
-                  {submitting ? 'Menyimpan...' : 'Simpan'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <SekolahFormModal
+        modalOpen={modalOpen}
+        editingItem={editingItem}
+        formNama={formNama}
+        formJenjang={formJenjang}
+        formNpsn={formNpsn}
+        formAlamat={formAlamat}
+        setFormNama={setFormNama}
+        setFormJenjang={setFormJenjang}
+        setFormNpsn={setFormNpsn}
+        setFormAlamat={setFormAlamat}
+        handleSubmitForm={handleSubmitForm}
+        setModalOpen={setModalOpen}
+        submitting={submitting}
+      />
 
       {/* Modal Form Tambah / Edit Kelas */}
-      {kelasModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000
-        }}>
-          <div style={{
-            backgroundColor: 'var(--bg-elevated)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '24px',
-            width: '90%',
-            maxWidth: '420px',
-            boxShadow: 'var(--shadow-hover)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-          }}>
-            <h4 style={{
-              margin: 0,
-              fontSize: '16px',
-              fontWeight: 700,
-              color: 'var(--text)'
-            }}>
-              {editingKelas ? 'Edit Detail Kelas' : 'Tambah Kelas Baru'}
-            </h4>
-
-            <form onSubmit={handleSubmitKelasForm} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  marginBottom: '6px'
-                }}>
-                  Kategori <span style={{ color: 'red' }}>*</span>
-                </label>
-                <select
-                  required
-                  value={formKelasNama}
-                  onChange={(e) => setFormKelasNama(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--border)',
-                    backgroundColor: 'var(--bg)',
-                    color: 'var(--text)',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
-                >
-                  <option value="">-- Pilih Kategori --</option>
-                  {getCategoryOptions(sekolahList.find(s => s.id === (targetSekolahId || expandedSekolahId))?.jenjang).map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--text-muted)',
-                  display: 'block',
-                  marginBottom: '6px'
-                }}>
-                  Jumlah <span style={{ color: 'red' }}>*</span>
-                </label>
-                <NumberInput
-                  required
-                  placeholder="Masukkan jumlah siswa"
-                  value={formKelasJumlah === '' ? '' : Number(formKelasJumlah)}
-                  onChange={(val) => setFormKelasJumlah(val)}
-                  style={{ width: '100%' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button
-                  type="button"
-                  onClick={() => setKelasModalOpen(false)}
-                  disabled={submitting}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: 'var(--btn-cancel-bg, #f3f4f6)',
-                    border: '1px solid var(--btn-cancel-border, #d1d5db)',
-                    color: 'var(--btn-cancel-text, #374151)',
-                    borderRadius: 'var(--radius-sm)',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600
-                  }}
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 'var(--radius-sm)',
-                    cursor: submitting ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 600
-                  }}
-                >
-                  {submitting ? 'Menyimpan...' : 'Simpan'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <KelasFormModal
+        kelasModalOpen={kelasModalOpen}
+        editingKelas={editingKelas}
+        formKelasNama={formKelasNama}
+        formKelasJumlah={formKelasJumlah}
+        setFormKelasNama={setFormKelasNama}
+        setFormKelasJumlah={setFormKelasJumlah}
+        handleSubmitKelasForm={handleSubmitKelasForm}
+        setKelasModalOpen={setKelasModalOpen}
+        targetSekolahId={targetSekolahId}
+        expandedSekolahId={expandedSekolahId}
+        sekolahList={sekolahList}
+        submitting={submitting}
+      />
 
       {/* Confirm Dialog Hapus */}
       <ConfirmDialog
