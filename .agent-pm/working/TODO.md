@@ -51,6 +51,15 @@
     - SaldoAwalBarangPage 813 → 294 (`6d26505`) — 5 komponen `components/akuntan/saldoAwal/`
   - 🏁 **V2-4 SELESAI 11/11** (2026-08-03)
 
+## V2 Infra, Docs, Finalisasi (2026-08-03) ⏸️ PAUSED (Rozi: "jangan lanjut, catat sesi")
+- ✅ **A — Vitest**: BE 62 test (7 file, supertest) + FE 3 test. `be5d967`, `6201e45`. Coverage lines 24.33%.
+- ✅ **B — CI/CD**: `.github/workflows/ci.yml` 5 job hijau (2x ci-test + 3x main). Merge `a8b6b6e` + `ba23398` + `b5af929`.
+- ✅ **C — oxlint backend**: 80 warning → 0/0, script `lint`, 30 file. `d5c7ce2`.
+- ⏳ **D** — global error handler + Pino logging
+- ⏳ **E** — validators audit + OpenAPI/Swagger
+- ⏳ **F** — smoke test semua modul
+- ⏳ **G** — AGENTS.md ×3 + CHANGELOG [2.0.0] (tag oleh Rozi)
+
 ## Backlog Infra (2026-08-02)
 - ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup. Job cron `sync-hermes` (05fd5c684e88) di-pause.
 

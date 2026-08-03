@@ -1,12 +1,14 @@
 # CURRENT TASK — 2026-08-03
 
-## Status: ✅ SELESAI — V2-3 restrukturisasi komponen FE (2026-08-03). CYCLE_END.
+## Status: ⏸️ PAUSED — V2 Infra (Bagian A-C selesai, D-G menunggu). Perintah Rozi: "jangan lanjut, catat sesi, commit bertahap, push, clean".
 
-- **Audit** (Hermes): components/ 119 file; 15 root komponen + utils.js dipakai lintas (Table 14, Dropdown 16, Skeleton 15...).
-- **Struktur final**: `components/ui/` 15 (primitif + WorkflowStepper + NotifikasiList + DashboardSummaryCards), `components/layout/` 2, domain (NominatifUpahGrid → akuntan/nominatifUpah/, GrupHariManager → aslap/penerimaManfaat/), `src/lib/utils.js`.
-- **Commit** `64feac2` (OpenCode, 120 file): build PASS, 0 sisa path lama. HEAD == origin.
-- **Arsip**: state files + DOCUMENTATION updated TAPI BELUM di-commit (perintah Rozi).
+- **A** ✅ Vitest (BE 62 test + FE 3 test PASS, coverage lines 24.33%) — `be5d967`, `6201e45`
+- **B** ✅ CI/CD GitHub Actions 5 job, 2x hijau ci-test + 3x hijau main — `a8b6b6e` merge + `ba23398` + `b5af929`
+- **C** ✅ oxlint backend 80 warning → 0/0 — `d5c7ce2`
+- HEAD: `bb0e5ef`, tree bersih, semua pushed.
 
-## Next Step
-- CYCLE_END — backlog V2 habis (V2-1 TTD, V2-2 LPD2M, V2-3 struktur, V2-4 refactor). TASK_SELECTION baru (V3?) menunggu Rozi.
-- PENDING: commit state files arsip V2-3 (Rozi yang tentukan kapan) — git status akan menunjukkan .agent-pm/ modified.
+## Next Step (saat lanjut)
+1. **Bagian D** — global Express error handler + Pino logging terpusat (ganti console.log di error handling, format response error ke FE tetap)
+2. Bagian E — validators audit + OpenAPI (zod-to-openapi + swagger-ui-express, /api-docs)
+3. Bagian F — smoke test semua modul + BUG.md baru
+4. Bagian G — AGENTS.md (root/backend/frontend) → review → commit terpisah per bagian → CHANGELOG [2.0.0] (tag v2.0.0 oleh Rozi)

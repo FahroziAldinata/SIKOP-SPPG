@@ -1,5 +1,14 @@
 # Sprint Backlog
 
+## Sprint 27 — V2 Infra, Docs, Finalisasi (2026-08-03) ⏸️ PAUSED
+1. ✅ A — Vitest testing infra (BE 62 + FE 3 test, supertest, coverage)
+2. ✅ B — CI/CD GitHub Actions (5 job, hijau 3x main)
+3. ✅ C — oxlint backend 80 warning → 0/0
+4. ⏳ D — global error handler + Pino logging (next saat lanjut)
+5. ⏳ E — validators audit + OpenAPI/Swagger
+6. ⏳ F — smoke test semua modul
+7. ⏳ G — AGENTS.md ×3 + CHANGELOG [2.0.0]
+
 ## Sprint 26 — V2-3 Restrukturisasi komponen FE ✅ (2026-08-03)
 1. ✅ V2-3 struktur komponen — ui/ (15), layout/ (2), domain, src/lib/utils. Commit `64feac2`. Zero behavioral change, build PASS.
 

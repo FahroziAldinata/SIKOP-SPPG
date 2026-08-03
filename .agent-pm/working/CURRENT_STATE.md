@@ -1,6 +1,13 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: V2-3 restrukturisasi komponen SELESAI ✅ (2026-08-03). CYCLE_END — backlog V2 habis, next: TASK_SELECTION baru (backlog V3 jika ada).**
+**Scope Aktif: V2 Infra/Docs/Finalisasi — Bagian A (test infra) ✅ B (CI/CD) ✅ C (lint) ✅. PAUSED per Rozi (2026-08-03) — next: Bagian D (error handler + Pino) saat lanjut.**
+
+## Sesi 35 (2026-08-03) — V2 Bagian A-C: SELESAI + PAUSED (perintah Rozi "jangan lanjut, catat sesi")
+- **Bagian A — Vitest**: backend `npm test` = `vitest run` (7 file, 62 test PASS, coverage lines 24.33%), FE vitest (3 test utils PASS). Konversi 6 integration test HTTP → Vitest+supertest (app export dari app.js, index.js listen). endpoints-kritis.test.js (5 endpoint Akuntan+Laporan). Fix race: `fileParallelism:false` (GF-009 — self-report AGY "62/62" keliru, verifikasi independen temukan 3 FAIL). Commits: `be5d967`, `6201e45`.
+- **Bagian B — CI/CD**: `.github/workflows/ci.yml` — 5 job: node --check, test backend (postgres service + migrate + seed + Chrome), lint FE (oxlint), lint BE, build FE. **2x hijau ci-test + 3x hijau main berturut**. Perjalanan: Chrome missing → JWT_SECRET missing (`auth.js:5` throw) → P2002 unique AnggaranHarian/MenuHarian (seed fresh vs DB lokal beda periode) → **Strategi A** deleteMany chain child→parent idempotent → hijau. Flaky 2x fail di main (kode sama) → testTimeout 20s. Merge `a8b6b6e` + `ba23398` + `b5af929`. PENDING: debug steps (issue-post) masih di ci.yml — keputusan keep/remove saat final.
+- **Bagian C — oxlint backend**: `oxlint ^1.77.0` + script `lint` (`oxlint src`). 80 warning (77 no-unused-vars + 3 no-useless-escape) → **0/0**, 30 file. `d5c7ce2`. npm test tetap 62/62.
+- Commit sesi: `d5c7ce2` (C), `bb0e5ef` (docs arsip). HEAD == origin, tree BERSIH.
+- Note CI: Node 24 (setup-node), trigger push main + PR main. probe commits (e46c289, 0a58646) + debug b5af929 di riwayat — kosmetik.
 
 ## Sesi 34 (2026-08-03) — V2-3 restrukturisasi struktur komponen FE ✅ + ARCHIVE
 - **Audit**: `frontend/src/components/` 119 file — 104 domain (akuntan/gizi/aslap/kepala) + 15 root + utils.js. 78 pemakaian komponen root lintas pages/domain.
