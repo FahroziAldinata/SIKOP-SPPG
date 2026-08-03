@@ -3,7 +3,8 @@
 ## Status Terakhir
 - **V2 Infra/Docs/Finalisasi Bagian A-G: SEMUA SELESAI + APPROVED Rozi.** Tag `v2.0.0` dibuat + pushed (`e42e051`). CYCLE_END.
 - Arsip selesai: DOCUMENTATION.md entry 2026-08-04, cleanup prompts/, state files final.
-- HEAD: setelah commit final docs+state (lihat git log terakhir). Tree bersih.
+- **Backlog V3** (Production Readiness + Fitur Lanjutan, 8 fase) ditambahkan ke TODO.md + commit `eec6b1c` — BACKLOG murni, belum dikerjakan, menunggu instruksi.
+- HEAD `eec6b1c` == origin/main, tree BERSIH.
 
 ## Task Selesai (Sesi 36)
 1. **D** `71d754e` — global error handler + Pino (227 console → logger, 63 file). Validasi runtime PASS (pino-http log aktif).
