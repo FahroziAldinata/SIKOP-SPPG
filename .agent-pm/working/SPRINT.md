@@ -1,5 +1,8 @@
 # Sprint Backlog
 
+## Sprint 25 — V2-2 LPD2M fix gambar web ✅ (2026-08-03)
+1. ✅ V2-2 LPD2M bukti gambar web 404 — fix `d383faf` (vite proxy /uploads + revert double prefix + nextElementSibling) + cleanup `e602a9c` (hapus summary duplikat). TES Rozi PASS → APPROVED.
+
 ## Sprint 24 — V2-1 TTD Basah ✅ (2026-08-03)
 1. ✅ V2-1 TTD Basah — SELESAI + APPROVED Rozi. 3 tahap (`3a4da6c`, `2a1abb0`, `81899e7`) + fix path (`acc8d6b`) + fix ukuran/center (`24f640a`). Tes HTTP 7/7 + PDF E2E PASS + verifikasi visual OK.
 

@@ -1,23 +1,25 @@
-# Handoff — 2026-08-02 — Sesi 28 (akhir sesi, cycle gabungan PAUSED 8/11)
+# Handoff — 2026-08-03 — Sesi 33 (V2-2 LPD2M fix gambar web APPROVED + ARCHIVE)
 
 ## Status Terakhir
-- **V2-4 refactor modular**: backend 3/3 selesai + FE 10/13 selesai. Cycle gabungan FE PAUSED di 8/11 (Rozi istirahat). HEAD `5a50282`, tree bersih, semua pushed.
-- Pembagian agent PERMANEN: BUILD/FIX = AGY (`/d/Tools_Project/agy/bin/agy.exe -p "..." --dangerously-skip-permissions`), INVESTIGASI+VERIFIKASI = OpenCode (`/d/Tools_Project/opencode/opencode run`), COMMIT+PUSH = OpenCode ALWAYS.
+- **V2-2 LPD2M bukti gambar web 404** FIXED + APPROVED Rozi. HEAD `e602a9c`, semua pushed, tree bersih.
+- State files disinkronkan (CURRENT_STATE/TASK/TODO/SPRINT/BUG) + entry DOCUMENTATION.md + HANDOFF ini.
+- **Scope Aktif**: CYCLE_END — next: V2-3 (TASK_SELECTION baru).
 
-## Next Step (lanjut sesi berikutnya)
-1. BUILD `frontend/src/pages/akuntan/laporan/PeriodeSetupPage.jsx` (835) → folder `components/akuntan/periodeSetup/` — prompt siap: `.agent-pm/prompts/agy-v2-4-batch6b2-build.txt` BELUM dibuat, investigasi di `oc-v2-4-batch6b-investigasi.txt` (5-6 komponen: PeriodeListSection, PeriodeDanaFieldset, SetupLembagaFieldset, PelaporanFieldset, ClosingPeriodeModal; H4b 8 field → 16 props, risiko tinggi).
-2. BUILD `frontend/src/pages/akuntan/SaldoAwalBarangPage.jsx` (812) → `components/akuntan/saldoAwal/` (6-7 komponen: HeaderToolbar, PeriodSelectorSection, SaldoAwalSingleForm, SaldoAwalBulkForm, SaldoAwalListTable, AddBahanModal).
-3. Per file: BUILD AGY → VERIFY OpenCode (pola prompt verifikasi: `.agent-pm/prompts/oc-v2-4-batch6a*-verifikasi.txt` sebagai template) → commit per task via OpenCode.
-4. Setelah 10/11 + 11/11: update DOCUMENTATION.md + CURRENT_STATE/TODO + HANDOFF, commit "docs: archive V2-4".
+## Task Selesai (Sesi 33)
+1. Investigasi V2-2: `f837cc7` double prefix + root cause vite proxy + server stale.
+2. Fix `d383faf` (3 edit, AGY build + OpenCode verify/commit/push) — vite proxy /uploads + `'/'+filePath` + `nextElementSibling`.
+3. Cleanup `e602a9c` — hapus `documentation/2026-08-03-v2-2-lpd2m-bukti-layout-summary.md` (perintah Rozi).
+4. BE dimatikan Hermes (kill PID 12308) → Rozi hidupkan → tes PASS → APPROVED.
 
-## Pola yang Terbukti Sesi Ini
-- **Prompt BUILD AGY**: tulis ke `.agent-pm/prompts/agy-*.txt` → jalankan `agy.exe -p "KERJAKAN: Baca file ... dan kerjakan SEMUA instruksi. Langsung kerjakan, jangan tanya konfirmasi." --dangerously-skip-permissions --print-timeout 300s`. AGY kadang timeout tapi pekerjaan selesai — cek folder/git dulu, jangan rerun.
-- **Prompt VERIFY OpenCode**: instruksi keras "DILARANG tulis file ke Temp//tmp, gunakan process substitution <(git show HEAD:...)". OpenCode selalu coba tulis ke Temp → auto-reject → output terputus. Kalau kena, patch prompt tambah "Kalau terlanjur membuat file di Temp, ABAIKAN".
-- **Diff verifikasi**: `diff -wB <(git show HEAD:file | sed -n 'START,ENDp') <(cat komponen)` — normalize whitespace.
-- AGY gemini default; model diset di `$HOME/.gemini/antigravity-cli/settings.json`.
+## Task Pending / Next Step
+1. **V2-3 minor UX** — TASK_SELECTION baru (belum dipilih Rozi).
+2. Prompts cleanup bagian archive — `prompts/` isi dihapus (folder + .gitkeep tetap).
+3. Catatan: `rtk-setup-guide.md` sempat dihapus di working tree lalu direstore OpenCode — cek `ls .agent-pm/knowledge/` kalau hilang lagi.
+
+## Pola yang Terbukti Sesi 33
+- **Diagnosa server stale**: bukti konkret = probe file di folder upload (git-ignored) → curl `/uploads/<file>` → 404 "Cannot GET" padahal file ADA = static mount tidak terdaftar di instance → server jalan kode sebelum pull. Pembanding `git log -S "express..." -- app.js` + start time proses (PowerShell Get-CimInstance CreationDate).
+- **Proxy/static path**: filePath DB berisi `uploads/bukti/...` → URL web `'/'+filePath` + vite proxy `/uploads` → BE static strip `/uploads` → file. JANGAN tambah `/uploads/` lagi ke filePath.
 
 ## Risiko / Pitfall
-- OpenCode permission reject saat tulis ke Temp (workaround di atas).
-- AGY timeout "waiting for response" — biasanya work selesai, verifikasi dulu.
-- State files CURRENT_STATE/TODO sempat kena overwrite eksternal → ditulis ulang manual. Cek `git status` sebelum commit.
-- BUG-001 (500 rabP12) open, bukan blocker refactor.
+- Server BE sering jalan dengan kode lama (restart manual Rozi). Verifikasi version via probe file sebelum diagnosa lompat ke path code.
+- Vite config change (proxy) kadang tidak auto-restart di Windows → restart FE manual di CLI Rozi.

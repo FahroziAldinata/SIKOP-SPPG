@@ -24,6 +24,21 @@
 - **Ditemukan saat**: test FE Menu Harian gizi oleh Rozi (2026-08-02, sesi 28)
 - **Catatan**: PRE-EXISTING (bukan bug refactor batch 3c) — handler asli query identik, `git diff c017282..HEAD -- schema.prisma` kosong. Fix via `npx prisma db push` (AGY) — tanpa migration file sebelumnya; migration SQL dibuat manual oleh AGY.
 
+### [BUG-004] 404 gambar bukti LPD2M di web (2026-08-03) — RESOLVED
+- **Gejala**: setelah upload bukti gambar, thumbnail web tampil "[Gagal Load]", padahal PDF embed berhasil.
+- **Severity**: Medium
+- **Root cause (rantai, confidence TINGGI)**:
+  1. `filePath` di DB = `uploads/bukti/<ts>-<nama>` (path.relative di bukti-lpd2m.js:61) — SUDAH berisi `uploads/`.
+  2. fix `f837cc7` menambah prefix → `src={'/uploads/'+filePath}` = `/uploads/uploads/bukti/...` → DOUBLE PREFIX → 404.
+  3. Root cause asli "gagal load": `frontend/vite.config.js` proxy hanya `/api` → URL gambar `/uploads/...` hit vite dev → 404.
+  4. Faktor pembeda saat tes: server BE (PID 12308) jalan dengan kode LAMA (sebelum pull `3a4da6c` yang menambah static `/uploads` app.js:45) — bukti probe file 404 padahal ada.
+- **Fix final** `d383faf` (AGY build, OpenCode verify+commit+push):
+  - vite.config.js tambah proxy `/uploads` → localhost:3000 (root cause)
+  - `Lpd2mBuktiSection.jsx:173` revert `'/uploads/'+` → `'/'+` (single prefix)
+  - `Lpd2mBuktiSection.jsx:186` `nextSibling` → `nextElementSibling` (fallback onError crash di DOM React)
+- **Verifikasi**: build PASS (independen OpenCode), diff scope 2 file, BE restart Rozi → thumbnail ✓ PDF ✓ → APPROVED.
+- **Status**: SELESAI 2026-08-03 — approved Rozi, committed `d383faf` + `e602a9c` (hapus summary duplikat).
+
 ## Format Pelaporan Bug
 
 ### [BUG-00X] Judul Bug

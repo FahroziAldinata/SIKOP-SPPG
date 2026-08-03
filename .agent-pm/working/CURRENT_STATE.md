@@ -1,6 +1,12 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: V2-1 TTD Basah SELESAI + APPROVED ✅ (2026-08-03). CYCLE_END — next: V2-2/V2-3 (TASK_SELECTION baru).**
+**Scope Aktif: V2-2 LPD2M bukti gambar fix SELESAI + APPROVED ✅ (2026-08-03). CYCLE_END — next: V2-3 (TASK_SELECTION baru).**
+
+## Sesi 33 (2026-08-03) — V2-2 LPD2M gambar web: FIX APPROVED ✅ + ARCHIVE
+- **Investigasi Hermes** (statis + runtime): fix `f837cc7` SALAH — double prefix `/uploads/uploads/` (filePath DB sudah berisi `uploads/`). Root cause asli: vite proxy cuma `/api` → URL gambar 404. Terbukti: probe file di `backend/uploads/` → 404 padahal ada; server BE PID 12308 start 17:39:53 = kode SEBELUM pull `3a4da6c` (static /uploads masuk 14:30) → instance RAM tanpa static mount.
+- **Fix AGY** `d383faf`: vite.config.js + proxy `/uploads` + `src={'/'+b.filePath}` (revert double) + `nextElementSibling` (onError fallback crash). Build PASS. Verify + commit + push OpenCode. `e602a9c` hapus summary V2-2 duplikat di root `documentation/` (konsolidasi di .agent-pm/documentation/DOCUMENTATION.md) — perintah Rozi.
+- **BE dimatikan Hermes** (kill PID 12308, atas instruksi Rozi) → Rozi hidupkan sendiri → tes: PDF ✓ + web thumbnail ✓ → APPROVED.
+- Plan: `.agent-pm/plans/2026-08-03-v2-2-lpd2m-gambar-fix.md`. Prompt AGY/OC di `.agent-pm/prompts/` (dibersihkan saat archive).
 
 ## Sesi 32 (2026-08-03) — BUG-001 tes HTTP penuh PASS ✅
 - Fix `b9ba07b` (13:10) < server start 15:26 → BE sudah load fix, tanpa restart. Tes OpenCode: harian 200 + rekap 200 (hariAktif GrupHari bekerja, Minggu porsi 0), negatif bersih (404 periode invalid, 400 tanggal di luar rentang). BUG-001 TUTUP TOTAL.

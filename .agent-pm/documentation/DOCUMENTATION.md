@@ -205,6 +205,13 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 - **SaldoAwalBarangPage** 813→294 (`6d26505`): 5 komponen `components/akuntan/saldoAwal/` — PeriodeSelector, SaldoAwalForm, SaldoAwalBulkForm, SaldoAwalTable, TambahBahanModal.
 - **Pola**: parent = orchestrator (state/handler/useEffect tetap), child = presentational murni (0 hooks). Zero behavioral change verified (diff normalized + build PASS).
 
+### V2-2 — LPD2M bukti gambar web fix (layout thumbnail) ✅ (2026-08-03)
+- **Konteks**: V2-2 (`100b0da`) ubah layout bukti LPD2M jadi kiri-nama/kanan-thumbnail (web + PDF). Tapi gambar web gagal load.
+- **Investigasi Hermes**: fix `f837cc7` SALAH — `src={'/uploads/'+b.filePath}` = `/uploads/uploads/bukti/...` DOUBLE PREFIX (filePath DB = `uploads/bukti/...`). Root cause asli: vite proxy hanya `/api` (file `/uploads/...` hit vite dev → 404). Beardikan: server BEHang PID 12308 start 17:39:53 = kode SEBELUM pull `3a4da6c` (static `/uploads` masuk 14:30) → instance tanpa static mount; probe file di `backend/uploads/` → 404 padahal ada.
+- **Fix** `d383faf` (AGY build, OpenCode verify+commit+push): vite.config.js + proxy `/uploads`; revert `'/'+b.filePath`; `nextElementSibling` (onError fallback crash di DOM React). Build PASS.
+- **Cleanup** `e602a9c` (perintah Rozi): hapus `documentation/2026-08-03-v2-2-lpd2m-bukti-layout-summary.md` di root (konsolidasi di file ini).
+- **Tes Rozi**: PDF ✓ + web thumbnail ✓ → APPROVED. BE dimatikan Hermes (atas instruksi Rozi), dihidupkan ulang Rozi.
+
 ---
 
 ## Catatan Umum
