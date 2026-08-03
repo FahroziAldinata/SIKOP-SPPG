@@ -13,6 +13,16 @@
 | GF-006 | 2026-07-26 | QA Gap | Review frontend WAJIB sertakan build/lint aktual verbatim — gagal jika tidak bersih | RESOLVED |
 | GF-007 | 2026-07-26 | Process Violation | Self-check wajib sebelum mark SELESAI: sudah lewat AWAITING_USER_VERIFICATION + Rozi OK eksplisit? | RESOLVED |
 | GF-008 | 2026-08-02 | Process Violation | FINALIZE commit via AGY — seharusnya OpenCode ("commit tugas opencode", koreksi Rozi) | RESOLVED |
+| GF-009 | 2026-08-03 | QA Gap | Klaim "semua test PASS" wajib verifikasi independen — self-report AI bisa keliru (race condition) | RESOLVED (aturan diadopsi) |
+
+## Detail GF-009 — Pentingnya verifikasi independen, bukan self-report (2026-08-03)
+
+- **Kategori**: QA Gap (Process / Verification)
+- **Deskripsi**: Saat setup testing infra V2 Bagian A (Vitest backend), laporan self-report awal AI mengklaim **62/62 test PASS**. Verifikasi independen (jalankan `npm test` sendiri) menemukan **3 FAIL** — `pemeriksaan-bahan.test.js` `[T7]` (PDF 200→404) & `[T8]` (nomorUrut 200→404) — yang TIDAK terlihat di run AI.
+- **Akar masalah (race condition)**: `fileParallelism` default Vitest menjalankan file test SECARA PARALEL, padahal semua integration test memakai database shared yang SAMA (Prisma) dan saling create/delete data → tabrakan antar file. File lulus saat dijalankan sendirian, gagal saat satu suite.
+- **Perbaikan**: atur `fileParallelism: false` di `backend/vitest.config.js` (file test SEKUENSIAL) → **62/62 stabil selama 2x run**.
+- **Pelajaran aktif**: Setiap klaim "semua PASS"/"selesai/berhasil" dari agent (AGY/OpenCode) WAJIB diverifikasi independen, terutama untuk test/integrasi yang menyentuh SHARED STATE (database, file system, dll.) — race condition bisa muncul hanya pada run berikutnya. Verifikasi = jalankan ulang sendiri + bukti verbatim, bukan terima laporan.
+- **Status**: RESOLVED (aturan diadopsi sebagai kebiasaan verifikasi).
 
 ## Detail GF-008 — FINALIZE commit via AGY (koreksi Rozi 2026-08-02)
 

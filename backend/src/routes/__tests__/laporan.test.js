@@ -1,53 +1,23 @@
-const assert = require("assert");
-const baseUrl = "http://localhost:3000/api";
+const request = require('supertest');
+const { app } = require('../../app');
+const { PrismaClient } = require('@prisma/client');
+const { HARI_MAP } = require('../../lib/accountingHelper');
 
-async function runTests() {
-  console.log("=== STARTING LAPORAN API INTEGRATION TESTS WITH STRICT VALUE ASSERTIONS ===");
-  console.log("Test File Path: backend/src/routes/__tests__/laporan.test.js");
+const TEST_PASSWORD = process.env.TEST_PASSWORD || 'ganti-password-ini';
 
-  // 1. Authenticate as AKUNTAN
-  const loginRes = await fetch(`${baseUrl}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username: "akuntan",
-      password: "ganti-password-ini"
-    })
-  });
-
-  const loginData = await loginRes.json();
-  assert.strictEqual(loginRes.status, 200, "Authentication response status must be 200");
-  const token = loginData.token;
-  const headers = {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`
-  };
-  console.log("Authentication successful.");
-
-  const { PrismaClient } = require("@prisma/client");
+describe('Laporan API Integration Tests', () => {
   const prismaDb = new PrismaClient();
+  let token;
+  let periode;
+  let akunKas;
+  let akunBiaya;
+  let kategori;
+  let kelompokUmur;
+  let testDate;
+  let testDateStr;
+  let targetDateStr;
+  let testMonthKey;
 
-  // Find existing Master Data to avoid creating complex structures
-  const periode = await prismaDb.periode.findFirst({
-    orderBy: { tanggalMulai: "desc" }
-  });
-  assert.ok(periode, "Must have an existing active Periode in DB");
-
-  const akunKas = await prismaDb.akun.findFirst({
-    where: { tipe: "KAS" }
-  });
-  const akunBiaya = await prismaDb.akun.findFirst({
-    where: { tipe: "BIAYA" }
-  });
-  assert.ok(akunKas && akunBiaya, "Must have KAS and BIAYA Accounts in DB");
-
-  const kelompokUmur = await prismaDb.kelompokUmurMenu.findFirst({
-    include: { kategoriPenerima: true }
-  });
-  assert.ok(kelompokUmur && kelompokUmur.kategoriPenerima.length > 0, "Must have KelompokUmurMenu linked to KategoriPenerima");
-  const kategori = kelompokUmur.kategoriPenerima[0];
-
-  // Temporary record IDs for cleanup
   let testBahanId = null;
   let testJurnalId = null;
   let testAnggaranId = null;
@@ -56,36 +26,80 @@ async function runTests() {
   let testMenuHarianBlokId = null;
   let testMenuItemId = null;
   let testMenuItemBahanId = null;
+  let testGrupHariId = null;
   let testInputPmId = null;
   let testInputPmDetailId = null;
   let testSaldoAwalBarangId = null;
   const testMutasiIds = [];
 
-  try {
-    // 2. Setup Temporary Bahan Pokok
-    console.log("Creating temporary BahanPokok...");
+  beforeAll(async () => {
+    // 1. Authenticate as AKUNTAN
+    const loginRes = await request(app)
+      .post('/api/auth/login')
+      .send({ username: 'akuntan', password: TEST_PASSWORD });
+
+    expect(loginRes.status).toBe(200);
+    token = loginRes.body.token;
+    const userId = loginRes.body.user.id;
+
+    // 2. Find Master Data
+    periode = await prismaDb.periode.findFirst({
+      where: { setupLembaga: { isNot: null } },
+      orderBy: { tanggalMulai: 'desc' }
+    }) || await prismaDb.periode.findFirst({ orderBy: { tanggalMulai: 'desc' } });
+    expect(periode).toBeTruthy();
+
+    akunKas = await prismaDb.akun.findFirst({ where: { tipe: 'KAS' } });
+    akunBiaya = await prismaDb.akun.findFirst({ where: { tipe: 'BIAYA' } });
+    expect(akunKas && akunBiaya).toBeTruthy();
+
+    kelompokUmur = await prismaDb.kelompokUmurMenu.findFirst({
+      include: { kategoriPenerima: true }
+    });
+    expect(kelompokUmur && kelompokUmur.kategoriPenerima.length > 0).toBeTruthy();
+    kategori = kelompokUmur.kategoriPenerima[0];
+
+    // Compute dates within active period
+    const pStart = new Date(periode.tanggalMulai);
+    // Find a date inside period that is not Sunday
+    testDate = new Date(pStart);
+    testDate.setUTCDate(pStart.getUTCDate() + 2);
+    if (testDate.getUTCDay() === 0) { // If Sunday, add 1 day
+      testDate.setUTCDate(testDate.getUTCDate() + 1);
+    }
+    testDateStr = testDate.toISOString().split('T')[0];
+    testMonthKey = testDateStr.substring(0, 7);
+
+    const m1Date = new Date(pStart); m1Date.setUTCDate(pStart.getUTCDate() + 1);
+    const m2Date = new Date(testDate);
+    const m3Date = new Date(testDate); m3Date.setUTCDate(testDate.getUTCDate() + 1);
+    const targetDate = new Date(testDate); targetDate.setUTCDate(testDate.getUTCDate() + 2);
+    targetDateStr = targetDate.toISOString().split('T')[0];
+
+    const dayOfWeek = HARI_MAP[testDate.getUTCDay()];
+
+    // 3. Setup Temporary Bahan Pokok
     const testBahan = await prismaDb.bahanPokok.create({
       data: {
-        nama: "Bahan Pokok Test Laporan " + Date.now(),
-        satuan: "KG",
+        nama: 'Bahan Pokok Test Laporan ' + Date.now(),
+        satuan: 'KG',
         aktif: true
       }
     });
     testBahanId = testBahan.id;
 
-    // 3. Setup Temporary Jurnal and Anggaran records (for BKU, BP, LPA, SPTJ, BAPSD)
-    console.log("Creating temporary Jurnal and Anggaran records...");
+    // 4. Setup Temporary Jurnal and Anggaran
     const testJurnal = await prismaDb.jurnalTransaksi.create({
       data: {
         periodeId: periode.id,
-        tanggal: new Date(Date.UTC(2026, 6, 2)), // 2026-07-02
+        tanggal: testDate,
         nomorBukti: 99999,
-        uraian: "Test Jurnal Laporan",
-        jenis: "KELUAR",
+        uraian: 'Test Jurnal Laporan',
+        jenis: 'KELUAR',
         nominal: 150000,
         akunKasId: akunKas.id,
         akunDanaBiayaId: akunBiaya.id,
-        createdById: loginData.user.id
+        createdById: userId
       }
     });
     testJurnalId = testJurnal.id;
@@ -93,8 +107,8 @@ async function runTests() {
     const testAnggaran = await prismaDb.anggaranHarian.create({
       data: {
         periodeId: periode.id,
-        tanggal: new Date(Date.UTC(2026, 6, 2)),
-        kategoriDana: "BAHAN_MAKANAN",
+        tanggal: testDate,
+        kategoriDana: 'BAHAN_MAKANAN',
         jumlahPaket: 100,
         rab: 1000000,
         aktual: 150000,
@@ -114,13 +128,12 @@ async function runTests() {
     });
     testDetailId = testDetail.id;
 
-    // 4. Setup KBB Temporary Data: Menu Harian, Blok, Item, Bahan, and InputPenerimaManfaat
-    // We use Date.UTC(2026, 6, 2) which is a Thursday (KAMIS)
+    // 5. Setup Menu Harian, Blok, Item, Bahan, GrupHari, and InputPenerimaManfaat
     const testMenuHarian = await prismaDb.menuHarian.create({
       data: {
         periodeId: periode.id,
-        tanggal: new Date(Date.UTC(2026, 6, 2)),
-        status: "DISETUJUI"
+        tanggal: testDate,
+        status: 'DISETUJUI'
       }
     });
     testMenuHarianId = testMenuHarian.id;
@@ -129,7 +142,7 @@ async function runTests() {
       data: {
         menuHarianId: testMenuHarian.id,
         kelompokUmurMenuId: kelompokUmur.id,
-        createdById: loginData.user.id
+        createdById: userId
       }
     });
     testMenuHarianBlokId = testMenuHarianBlok.id;
@@ -137,8 +150,8 @@ async function runTests() {
     const testMenuItem = await prismaDb.menuItem.create({
       data: {
         blokId: testMenuHarianBlok.id,
-        namaMenu: "Menu Item Test Laporan",
-        komponen: "LAUK_HEWANI"
+        namaMenu: 'Menu Item Test Laporan',
+        komponen: 'LAUK_HEWANI'
       }
     });
     testMenuItemId = testMenuItem.id;
@@ -149,10 +162,10 @@ async function runTests() {
         bahanPokokId: testBahan.id,
         beratBersihGr: 40.00,
         bddPersen: 80.00,
-        beratKotorGr: 50.00, // Formula: 40 / 0.8 = 50
+        beratKotorGr: 50.00,
         hargaSatuan: 20000.00,
         beratSatuanGr: 1000.00,
-        totalHargaBahan: 1000.00, // Formula: 50 * 20000 / 1000 = 1000
+        totalHargaBahan: 1000.00,
         energiKkal: 100.00,
         proteinGr: 10.00,
         lemakGr: 5.00,
@@ -162,11 +175,20 @@ async function runTests() {
     });
     testMenuItemBahanId = testMenuItemBahan.id;
 
+    const grupHari = await prismaDb.grupHari.create({
+      data: {
+        periodeId: periode.id,
+        label: 'Grup Hari Test Laporan ' + Date.now(),
+        hariAktif: [dayOfWeek]
+      }
+    });
+    testGrupHariId = grupHari.id;
+
     const testInputPm = await prismaDb.inputPenerimaManfaat.create({
       data: {
         periodeId: periode.id,
-        hariAktif: ["KAMIS"], // Thursday matches 2026-07-02
-        createdById: loginData.user.id
+        grupHariId: grupHari.id,
+        createdById: userId
       }
     });
     testInputPmId = testInputPm.id;
@@ -181,7 +203,7 @@ async function runTests() {
     });
     testInputPmDetailId = testInputPmDetail.id;
 
-    // 5. Setup Stock Barang Temporary Data: SaldoAwalBarang and MutasiStok
+    // 6. Setup Stock Barang: SaldoAwalBarang and MutasiStok
     const testSaldoAwalBarang = await prismaDb.saldoAwalBarang.create({
       data: {
         periodeId: periode.id,
@@ -192,176 +214,46 @@ async function runTests() {
     });
     testSaldoAwalBarangId = testSaldoAwalBarang.id;
 
-    // Mutasi 1: MASUK, tanggal 2026-07-01, qty 5, hargaBeli 12000
     const m1 = await prismaDb.mutasiStok.create({
       data: {
         bahanPokokId: testBahan.id,
-        tanggal: new Date(Date.UTC(2026, 6, 1)),
-        jenis: "MASUK",
+        tanggal: m1Date,
+        jenis: 'MASUK',
         qty: 5.000,
         hargaBeli: 12000.00,
-        keterangan: "Mutasi Masuk 1",
-        createdById: loginData.user.id
+        keterangan: 'Mutasi Masuk 1',
+        createdById: userId
       }
     });
     testMutasiIds.push(m1.id);
 
-    // Mutasi 2: MASUK, tanggal 2026-07-03, qty 2, hargaBeli 15000 (Newer price!)
     const m2 = await prismaDb.mutasiStok.create({
       data: {
         bahanPokokId: testBahan.id,
-        tanggal: new Date(Date.UTC(2026, 6, 3)),
-        jenis: "MASUK",
+        tanggal: m2Date,
+        jenis: 'MASUK',
         qty: 2.000,
         hargaBeli: 15000.00,
-        keterangan: "Mutasi Masuk 2",
-        createdById: loginData.user.id
+        keterangan: 'Mutasi Masuk 2',
+        createdById: userId
       }
     });
     testMutasiIds.push(m2.id);
 
-    // Mutasi 3: KELUAR, tanggal 2026-07-04, qty 4
     const m3 = await prismaDb.mutasiStok.create({
       data: {
         bahanPokokId: testBahan.id,
-        tanggal: new Date(Date.UTC(2026, 6, 4)),
-        jenis: "KELUAR",
+        tanggal: m3Date,
+        jenis: 'KELUAR',
         qty: 4.000,
-        keterangan: "Mutasi Keluar 1",
-        createdById: loginData.user.id
+        keterangan: 'Mutasi Keluar 1',
+        createdById: userId
       }
     });
     testMutasiIds.push(m3.id);
+  });
 
-    // 6. Test BKU
-    console.log("\n--- Testing GET /laporan/bku ---");
-    const bkuRes = await fetch(`${baseUrl}/laporan/bku?periodeId=${periode.id}`, { headers });
-    assert.strictEqual(bkuRes.status, 200, "BKU response status must be 200");
-    const bkuData = await bkuRes.json();
-    assert.strictEqual(bkuData.success, true, "BKU response success must be true");
-    assert.ok(Array.isArray(bkuData.data), "BKU data must be an array");
-    const testBkuRow = bkuData.data.find(row => row.id === testJurnalId);
-    assert.ok(testBkuRow, "BKU must include our temporary test Jurnal record");
-    assert.strictEqual(testBkuRow.noBukti, 99999, "BKU test row number must be 99999");
-    assert.strictEqual(testBkuRow.kredit, 150000, "BKU test row credit must match nominal");
-    console.log("BKU passed assertions.");
-
-    // 7. Test BP
-    console.log("\n--- Testing GET /laporan/bp ---");
-    const bpRes = await fetch(`${baseUrl}/laporan/bp?periodeId=${periode.id}&akunId=${akunKas.id}`, { headers });
-    assert.strictEqual(bpRes.status, 200, "BP response status must be 200");
-    const bpData = await bpRes.json();
-    assert.strictEqual(bpData.success, true, "BP response success must be true");
-    assert.ok(Array.isArray(bpData.data), "BP data must be an array");
-    const testBpRow = bpData.data.find(row => row.id === testJurnalId);
-    assert.ok(testBpRow, "BP must include our temporary test Jurnal record");
-    assert.strictEqual(testBpRow.debet, 0, "BP test row debet must be 0 for credit-only side on Kas");
-    assert.strictEqual(testBpRow.kredit, 150000, "BP test row kredit must be 150000");
-    console.log("BP passed assertions.");
-
-    // 8. Test LPA
-    console.log("\n--- Testing GET /laporan/lpa ---");
-    const lpaRes = await fetch(`${baseUrl}/laporan/lpa?periodeId=${periode.id}&nomorDokumen=01/LPA/TEST`, { headers });
-    assert.strictEqual(lpaRes.status, 200, "LPA response status must be 200");
-    const lpaData = await lpaRes.json();
-    assert.strictEqual(lpaData.success, true);
-    assert.strictEqual(lpaData.data.nomorDokumen, "01/LPA/TEST", "LPA nomorDokumen must match request");
-    assert.ok(Array.isArray(lpaData.data.rincian), "LPA rincian must be an array");
-    const r = lpaData.data.rincian.find(x => x.kategoriDana === "BAHAN_MAKANAN");
-    assert.ok(r, "LPA must contain BAHAN_MAKANAN category");
-    assert.ok(r.diajukan >= 1000000, "LPA BAHAN_MAKANAN diajukan must include our test record");
-    assert.ok(r.terealisasi >= 150000, "LPA BAHAN_MAKANAN terealisasi must include our test record");
-    console.log("LPA passed assertions.");
-
-    // 9. Test SPTJ
-    console.log("\n--- Testing GET /laporan/sptj ---");
-    const sptjRes = await fetch(`${baseUrl}/laporan/sptj?periodeId=${periode.id}`, { headers });
-    assert.strictEqual(sptjRes.status, 200, "SPTJ response status must be 200");
-    const sptjData = await sptjRes.json();
-    assert.strictEqual(sptjData.success, true);
-    assert.ok(sptjData.data.jumlahPenerimaan >= 1000000, "SPTJ Penerimaan must include our test record");
-    assert.ok(sptjData.data.jumlahPengeluaran >= 150000, "SPTJ Pengeluaran must include our test record");
-    console.log("SPTJ passed assertions.");
-
-    // 10. Test BAPSD
-    console.log("\n--- Testing GET /laporan/bapsd ---");
-    const bapsdRes = await fetch(`${baseUrl}/laporan/bapsd?periodeId=${periode.id}&nomorDokumen=01/BAPSD/TEST`, { headers });
-    assert.strictEqual(bapsdRes.status, 200, "BAPSD response status must be 200");
-    const bapsdData = await bapsdRes.json();
-    assert.strictEqual(bapsdData.success, true);
-    assert.strictEqual(bapsdData.data.nomorDokumen, "01/BAPSD/TEST");
-    assert.ok(bapsdData.data.sisaDana !== undefined, "BAPSD must return sisaDana");
-    console.log("BAPSD passed assertions.");
-
-    // 11. Test KBB (Kebutuhan Belanja Bahan) - Strict Value Assertion
-    console.log("\n--- Testing GET /laporan/kebutuhan-belanja-bahan ---");
-    const kbbRes = await fetch(`${baseUrl}/laporan/kebutuhan-belanja-bahan?periodeId=${periode.id}&tanggalMulai=2026-07-01&tanggalSelesai=2026-07-07`, { headers });
-    assert.strictEqual(kbbRes.status, 200, "KBB response status must be 200");
-    const kbbData = await kbbRes.json();
-    assert.strictEqual(kbbData.success, true);
-    assert.ok(Array.isArray(kbbData.data), "KBB data must be an array");
-    
-    const testKbbRow = kbbData.data.find(row => row.id === testBahan.id);
-    assert.ok(testKbbRow, "KBB must include our test BahanPokok record");
-    // Expected: total porsi = 10 (laki-laki) + 15 (perempuan) = 25
-    // beratKotorGr per portion = 50.00g -> totalBeratKotorGr = 50 * 25 = 1250g
-    // totalHargaBahan per portion = 1000.00 -> totalEstimasiBiaya = 1000 * 25 = 25000
-    assert.strictEqual(testKbbRow.totalBeratKotorGr, 1250, "KBB totalBeratKotorGr calculation must match expected");
-    assert.strictEqual(testKbbRow.totalBeratBersihGr, 1000, "KBB totalBeratBersihGr calculation must match expected (40 * 25 = 1000)");
-    assert.strictEqual(testKbbRow.totalEstimasiBiaya, 25000, "KBB totalEstimasiBiaya calculation must match expected");
-    console.log("KBB passed STRICT VALUE assertions.");
-
-    // 12. Test Laporan Per Periode
-    console.log("\n--- Testing GET /laporan/per-periode ---");
-    const lppRes = await fetch(`${baseUrl}/laporan/per-periode?periodeId=${periode.id}`, { headers });
-    assert.strictEqual(lppRes.status, 200, "LPP response status must be 200");
-    const lppData = await lppRes.json();
-    assert.strictEqual(lppData.success, true);
-    assert.strictEqual(lppData.data.bahanMakanan.pendidikan.metodeAlokasi, "PROPORSIONAL_RAB", "Pendidikan metodeAlokasi flag must be PROPORSIONAL_RAB");
-    assert.strictEqual(lppData.data.bahanMakanan.posyandu.metodeAlokasi, "PROPORSIONAL_RAB", "Posyandu metodeAlokasi flag must be PROPORSIONAL_RAB");
-    console.log("Laporan Per Periode passed assertions.");
-
-    // 13. Test Laporan Per Bulan
-    console.log("\n--- Testing GET /laporan/per-bulan ---");
-    const lpbRes = await fetch(`${baseUrl}/laporan/per-bulan?periodeId=${periode.id}`, { headers });
-    assert.strictEqual(lpbRes.status, 200, "LPB response status must be 200");
-    const lpbData = await lpbRes.json();
-    assert.strictEqual(lpbData.success, true);
-    assert.ok(Array.isArray(lpbData.data), "LPB data must be an array");
-    const testMonthRow = lpbData.data.find(row => row.key === "2026-07");
-    assert.ok(testMonthRow, "LPB must contain data for July 2026");
-    assert.ok(testMonthRow.totalKeluar >= 150000, "LPB July 2026 totalKeluar must include our test record");
-    console.log("Laporan Per Bulan passed assertions.");
-
-    // 14. Test Stock Barang - Strict Value Assertion
-    console.log("\n--- Testing GET /laporan/stock-barang ---");
-    const sbRes = await fetch(`${baseUrl}/laporan/stock-barang?periodeId=${periode.id}&tanggal=2026-07-05`, { headers });
-    assert.strictEqual(sbRes.status, 200, "SB response status must be 200");
-    const sbData = await sbRes.json();
-    assert.strictEqual(sbData.success, true);
-    assert.ok(Array.isArray(sbData.data), "SB data must be an array");
-    
-    const testSbRow = sbData.data.find(row => row.bahanPokokId === testBahan.id);
-    assert.ok(testSbRow, "SB must include our test BahanPokok record");
-    // Expected Qty: Saldo Awal (10) + MASUK (5 + 2) - KELUAR (4) = 13
-    // Expected Price: Newest MASUK <= cutoff date (15000)
-    // Expected Nilai Stock: 13 * 15000 = 195000
-    assert.strictEqual(testSbRow.saldoAwalQty, 10, "SB saldoAwalQty must match expected");
-    assert.strictEqual(testSbRow.totalMasukQty, 7, "SB totalMasukQty must match expected (5 + 2 = 7)");
-    assert.strictEqual(testSbRow.totalKeluarQty, 4, "SB totalKeluarQty must match expected");
-    assert.strictEqual(testSbRow.saldoAkhirQty, 13, "SB saldoAkhirQty must match expected");
-    assert.strictEqual(testSbRow.hargaBeliTerakhir, 15000, "SB hargaBeliTerakhir must match newest MASUK price (15000)");
-    assert.strictEqual(testSbRow.nilaiStock, 195000, "SB nilaiStock must match expected (13 * 15000 = 195000)");
-    console.log("Stock Barang passed STRICT VALUE assertions.");
-
-    console.log("\nALL LAPORAN API TESTS PASSED SUCCESSFULLY WITH STRICT VALUE ASSERTIONS!");
-
-  } catch (err) {
-    console.error("Test execution threw an assertion error:", err);
-    throw err;
-  } finally {
-    console.log("\n--- Cleaning up temporary test data ---");
-    // Delete in reverse order of dependencies
+  afterAll(async () => {
     for (const mId of testMutasiIds) {
       try { await prismaDb.mutasiStok.delete({ where: { id: mId } }); } catch (e) {}
     }
@@ -373,6 +265,9 @@ async function runTests() {
     }
     if (testInputPmId) {
       try { await prismaDb.inputPenerimaManfaat.delete({ where: { id: testInputPmId } }); } catch (e) {}
+    }
+    if (testGrupHariId) {
+      try { await prismaDb.grupHari.delete({ where: { id: testGrupHariId } }); } catch (e) {}
     }
     if (testMenuItemBahanId) {
       try { await prismaDb.menuItemBahan.delete({ where: { id: testMenuItemBahanId } }); } catch (e) {}
@@ -398,7 +293,150 @@ async function runTests() {
     if (testBahanId) {
       try { await prismaDb.bahanPokok.delete({ where: { id: testBahanId } }); } catch (e) {}
     }
-  }
-}
+    await prismaDb.$disconnect();
+  });
 
-runTests().catch(() => process.exit(1));
+  test('GET /api/laporan/bku', async () => {
+    const bkuRes = await request(app)
+      .get('/api/laporan/bku')
+      .query({ periodeId: periode.id })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(bkuRes.status).toBe(200);
+    const bkuData = bkuRes.body;
+    expect(bkuData.success).toBe(true);
+    const rows = bkuData.data.transaksi || bkuData.data.rows || bkuData.data.bkuRows || (Array.isArray(bkuData.data) ? bkuData.data : []);
+    expect(Array.isArray(rows)).toBe(true);
+    const testBkuRow = rows.find(row => row.id === testJurnalId);
+    expect(testBkuRow).toBeTruthy();
+    expect(testBkuRow.noBukti).toBe(99999);
+    expect(testBkuRow.kredit).toBe(150000);
+  });
+
+  test('GET /api/laporan/bp', async () => {
+    const bpRes = await request(app)
+      .get('/api/laporan/bp')
+      .query({ periodeId: periode.id, akunId: akunKas.id })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(bpRes.status).toBe(200);
+    const bpData = bpRes.body;
+    expect(bpData.success).toBe(true);
+    expect(Array.isArray(bpData.data)).toBe(true);
+    const testBpRow = bpData.data.find(row => row.id === testJurnalId);
+    expect(testBpRow).toBeTruthy();
+    expect(testBpRow.debet).toBe(0);
+    expect(testBpRow.kredit).toBe(150000);
+  });
+
+  test('GET /api/laporan/lpa', async () => {
+    const lpaRes = await request(app)
+      .get('/api/laporan/lpa')
+      .query({ periodeId: periode.id, nomorDokumen: '01/LPA/TEST' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(lpaRes.status).toBe(200);
+    const lpaData = lpaRes.body;
+    expect(lpaData.success).toBe(true);
+    expect(lpaData.data.nomorDokumen).toBe('01/LPA/TEST');
+    expect(Array.isArray(lpaData.data.rincian)).toBe(true);
+    const r = lpaData.data.rincian.find(x => x.kategoriDana === 'BAHAN_MAKANAN');
+    expect(r).toBeTruthy();
+    expect(r.diajukan).toBeGreaterThanOrEqual(1000000);
+    expect(r.terealisasi).toBeGreaterThanOrEqual(150000);
+  });
+
+  test('GET /api/laporan/sptj', async () => {
+    const sptjRes = await request(app)
+      .get('/api/laporan/sptj')
+      .query({ periodeId: periode.id })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(sptjRes.status).toBe(200);
+    const sptjData = sptjRes.body;
+    expect(sptjData.success).toBe(true);
+    expect(sptjData.data.jumlahPenerimaan).toBeGreaterThanOrEqual(1000000);
+    expect(sptjData.data.jumlahPengeluaran).toBeGreaterThanOrEqual(150000);
+  });
+
+  test('GET /api/laporan/bapsd', async () => {
+    const bapsdRes = await request(app)
+      .get('/api/laporan/bapsd')
+      .query({ periodeId: periode.id, nomorDokumen: '01/BAPSD/TEST' })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(bapsdRes.status).toBe(200);
+    const bapsdData = bapsdRes.body;
+    expect(bapsdData.success).toBe(true);
+    expect(bapsdData.data.nomorDokumen).toBe('01/BAPSD/TEST');
+    expect(bapsdData.data.sisaDana).not.toBeUndefined();
+  });
+
+  test('GET /api/laporan/kebutuhan-belanja-bahan', async () => {
+    const kbbRes = await request(app)
+      .get('/api/laporan/kebutuhan-belanja-bahan')
+      .query({ periodeId: periode.id, tanggalMulai: testDateStr, tanggalSelesai: targetDateStr })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(kbbRes.status).toBe(200);
+    const kbbData = kbbRes.body;
+    expect(kbbData.success).toBe(true);
+    expect(Array.isArray(kbbData.data)).toBe(true);
+
+    const testKbbRow = kbbData.data.find(row => row.id === testBahanId);
+    expect(testKbbRow).toBeTruthy();
+    expect(testKbbRow.totalBeratKotorGr).toBe(1250);
+    expect(testKbbRow.totalBeratBersihGr).toBe(1000);
+    expect(testKbbRow.totalEstimasiBiaya).toBe(25000);
+  });
+
+  test('GET /api/laporan/per-periode', async () => {
+    const lppRes = await request(app)
+      .get('/api/laporan/per-periode')
+      .query({ periodeId: periode.id })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(lppRes.status).toBe(200);
+    const lppData = lppRes.body;
+    expect(lppData.success).toBe(true);
+    expect(lppData.data.bahanMakanan.pendidikan.metodeAlokasi).toBe('PROPORSIONAL_RAB');
+    expect(lppData.data.bahanMakanan.posyandu.metodeAlokasi).toBe('PROPORSIONAL_RAB');
+  });
+
+  test('GET /api/laporan/per-bulan', async () => {
+    const lpbRes = await request(app)
+      .get('/api/laporan/per-bulan')
+      .query({ periodeId: periode.id })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(lpbRes.status).toBe(200);
+    const lpbData = lpbRes.body;
+    expect(lpbData.success).toBe(true);
+    expect(Array.isArray(lpbData.data)).toBe(true);
+
+    const testMonthRow = lpbData.data.find(row => row.key === testMonthKey);
+    expect(testMonthRow).toBeTruthy();
+    expect(testMonthRow.totalKeluar).toBeGreaterThanOrEqual(150000);
+  });
+
+  test('GET /api/laporan/stock-barang', async () => {
+    const sbRes = await request(app)
+      .get('/api/laporan/stock-barang')
+      .query({ periodeId: periode.id, tanggal: targetDateStr })
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(sbRes.status).toBe(200);
+    const sbData = sbRes.body;
+    expect(sbData.success).toBe(true);
+    expect(Array.isArray(sbData.data)).toBe(true);
+
+    const testSbRow = sbData.data.find(row => row.bahanPokokId === testBahanId);
+    expect(testSbRow).toBeTruthy();
+    expect(testSbRow.saldoAwalQty).toBe(10);
+    expect(testSbRow.totalMasukQty).toBe(7);
+    expect(testSbRow.totalKeluarQty).toBe(4);
+    expect(testSbRow.saldoAkhirQty).toBe(13);
+    expect(testSbRow.hargaBeliTerakhir).toBe(15000);
+    expect(testSbRow.nilaiStock).toBe(195000);
+  });
+});
