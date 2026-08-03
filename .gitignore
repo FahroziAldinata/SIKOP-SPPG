@@ -44,3 +44,7 @@ Excel sppg
 
 .agents/
 
+
+# Test coverage
+backend/coverage/
+frontend/coverage/
