@@ -39,11 +39,12 @@ async function getPorsiPerJenisPorsi(prisma, periodeId, tanggal) {
     include: {
       detail: {
         include: { kategori: true }
-      }
+      },
+      grupHari: true
     }
   });
 
-  const inputsForDay = activeInputs.filter(inp => inp.hariAktif.includes(dayOfWeek));
+  const inputsForDay = activeInputs.filter(inp => (inp.grupHari?.hariAktif || inp.hariAktif || []).includes(dayOfWeek));
 
   for (const input of inputsForDay) {
     for (const det of input.detail) {

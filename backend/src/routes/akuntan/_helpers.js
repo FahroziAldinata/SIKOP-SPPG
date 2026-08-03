@@ -121,7 +121,7 @@ async function getRabItemCalculations(prisma, periodeId, tanggal, priceMap, acti
   if (!menu) return {};
 
   const inputsForDay = dayOfWeek
-    ? activeInputs.filter(inp => inp.hariAktif.includes(dayOfWeek))
+    ? activeInputs.filter(inp => (inp.grupHari?.hariAktif || inp.hariAktif || []).includes(dayOfWeek))
     : [];
 
   const porsiPerKategori = {};

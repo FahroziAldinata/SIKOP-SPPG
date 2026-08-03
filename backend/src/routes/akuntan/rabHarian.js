@@ -82,12 +82,12 @@ router.get("/preview", requireAuth, requireRole("AKUNTAN"), async (req, res) => 
 
     const activeInputs = await prisma.inputPenerimaManfaat.findMany({
       where: { periodeId },
-      include: { detail: true }
+      include: { detail: true, grupHari: true }
     });
 
     const day = targetDate.getUTCDay();
     const dayOfWeek = HARI_MAP[day];
-    const inputsForDay = dayOfWeek ? activeInputs.filter(inp => inp.hariAktif.includes(dayOfWeek)) : [];
+    const inputsForDay = dayOfWeek ? activeInputs.filter(inp => (inp.grupHari?.hariAktif || inp.hariAktif || []).includes(dayOfWeek)) : [];
 
     const porsiPerKategori = {};
     for (const input of inputsForDay) {
@@ -195,7 +195,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabSchema
 
       const activeInputs = await tx.inputPenerimaManfaat.findMany({
         where: { periodeId },
-        include: { detail: true }
+        include: { detail: true, grupHari: true }
       });
 
       const calculations = await getRabItemCalculations(tx, periodeId, tanggal, priceMap, activeInputs);

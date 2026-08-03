@@ -88,7 +88,7 @@ router.get("/rekap", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
     const activeInputs = await prisma.inputPenerimaManfaat.findMany({
       where: { periodeId },
-      include: { detail: true }
+      include: { detail: true, grupHari: true }
     });
 
     // Loop tiap tanggal dalam range periode
@@ -178,7 +178,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
 
     const activeInputs = await prisma.inputPenerimaManfaat.findMany({
       where: { periodeId },
-      include: { detail: true }
+      include: { detail: true, grupHari: true }
     });
 
     const itemMap = await getRabItemCalculations(prisma, periodeId, tanggal, priceMap, activeInputs);
