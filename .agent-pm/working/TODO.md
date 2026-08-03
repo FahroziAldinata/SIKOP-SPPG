@@ -1,4 +1,9 @@
-# TODO — SPPG (diperbarui 2026-08-02)
+# TODO — SPPG (diperbarui 2026-08-03)
+
+## Setup Perangkat Baru (2026-08-03) ✅
+- ✅ Setup lokal lengkap: npm install (backend 269 + frontend 140 pkg), .env dibuat (DB `sppg` Postgres 18 lokal), 18 migration applied, seed sukses, FE build PASS.
+- ✅ Fix drift migration `20260803000000_add_gruphari_mastertarget_dokumenbukti` — 3 model tanpa migration (GrupHari, MasterTargetGizi, DokumenBuktiLpd2m) + InputPenerimaManfaat grupHarId (pola BUG-002 terulang).
+- ✅ Fix frontend/.env + .env.example: `VITE_API_URL=http://localhost:3000/api` (kurang prefix /api → 404).
 
 ## Release V1.0.0 (2026-08-02) ✅
 - ✅ Reset repo + publikasi publik: `github.com/FahroziAldinata/SIKOP-SPPG` — commit `c017282` Initial release v1.0.0 + tag `v1.0.0`, history bersih (kredensial lama tidak ikut)
