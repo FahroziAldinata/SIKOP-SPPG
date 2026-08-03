@@ -104,6 +104,12 @@ describe('Laporan API Integration Tests', () => {
     });
     testJurnalId = testJurnal.id;
 
+    // Bersihkan anggaran yang berpotensi bentrok di unique (periodeId, tanggal, kategoriDana)
+    // — seed membuat AnggaranHarian BAHAN_MAKANAN per tanggal periode, bisa bentrok dengan testDate (GF-009: race/state shared)
+    await prismaDb.anggaranHarian.deleteMany({
+      where: { periodeId: periode.id, tanggal: testDate, kategoriDana: 'BAHAN_MAKANAN' },
+    });
+
     const testAnggaran = await prismaDb.anggaranHarian.create({
       data: {
         periodeId: periode.id,
