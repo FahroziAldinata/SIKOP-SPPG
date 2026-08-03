@@ -53,7 +53,7 @@
 - ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup. Job cron `sync-hermes` (05fd5c684e88) di-pause.
 
 ## BUG (2026-08-03)
-- ✅ **BUG-001** SELESAI: 500 /akuntan/rab-p12/harian + /rekap — `inp.hariAktif` drift ke GrupHari, fix commit `b9ba07b` (4 file). ⚠️ tes HTTP penuh pending (perlu restart BE).
+- ✅ **BUG-001** SELESAI: 500 /akuntan/rab-p12/harian + /rekap — `inp.hariAktif` drift ke GrupHari, fix commit `b9ba07b` (4 file). Tes HTTP penuh PASS (harian + rekap 200, negatif bersih).
 - ✅ **BUG-002** SELESAI: 500 /gizi/master-menu-list — schema drift MasterMenuMingguan, migration `20260802220000_add_minggu_ke_master_menu`, commit `77a5e19`
 
 ---

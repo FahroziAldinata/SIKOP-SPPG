@@ -2,6 +2,9 @@
 
 **Scope Aktif: V2-1 TTD Basah SELESAI + APPROVED ✅ (2026-08-03). CYCLE_END — next: V2-2/V2-3 (TASK_SELECTION baru).**
 
+## Sesi 32 (2026-08-03) — BUG-001 tes HTTP penuh PASS ✅
+- Fix `b9ba07b` (13:10) < server start 15:26 → BE sudah load fix, tanpa restart. Tes OpenCode: harian 200 + rekap 200 (hariAktif GrupHari bekerja, Minggu porsi 0), negatif bersih (404 periode invalid, 400 tanggal di luar rentang). BUG-001 TUTUP TOTAL.
+
 ## Sesi 31 (2026-08-03) — V2-1 TTD Basah: APPROVED ✅ + ARCHIVE (CYCLE_END)
 - Rozi approve setelah verifikasi visual revisi ukuran (canvas 480px, TTD 55px/220px terpusat di PDF).
 - HEAD `24f640a` (3 feat + 2 fix), semua pushed. DOCUMENTATION.md entry asli + klaim palsu ditandai, BUG-003 logged, state files final.
@@ -53,10 +56,7 @@
 - HEAD: `5a50282`, working tree bersih.
 
 ## Pending
-- ⏳ V2-4 cycle gabungan sisa: PeriodeSetupPage (835) + SaldoAwalBarangPage (812) — investigasi siap di `.agent-pm/prompts/oc-v2-4-batch6b-investigasi.txt`
-- V2-1 TTD Basah — backlog (Sprint 24, tertulis NEXT)
-- V2-2 Image handling, V2-3 minor UX — backlog
-- BUG-001: 500 `/akuntan/rab-p12/harian` + `/rekap` — investigasi terpisah (pre-existing suspected, MEDIUM)
+- V2-2 Image handling, V2-3 minor UX — backlog (menunggu TASK_SELECTION)
 
 ## Catatan
 - ⚠️ State files sempat beberapa kali kena overwrite eksternal ke versi lama — ditulis ulang manual. Pantau kalau berulang.

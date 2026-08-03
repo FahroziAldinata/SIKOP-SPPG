@@ -11,7 +11,7 @@
 - **Severity**: Medium
 - **Root cause**: `inp.hariAktif` diakses di accountingHelper.js:46 — kolom SUDAH dihapus dari `InputPenerimaManfaat` (dipindah ke model `GrupHari` saat refactor Task 1, commit `4dbad78`). Query tidak include `grupHari` → undefined → throw.
 - **Fix**: commit `b9ba07b` — 4 file (lib/accountingHelper.js, routes/akuntan/_helpers.js, rabHarian.js, rabP12.js): include `grupHari: true` + guard `(inp.grupHari?.hariAktif || inp.hariAktif || [])`. Verifikasi OpenCode: 0 lokasi terlewat (grep seluruh backend/src), node --check OK, tes fungsi AGY sukses (porsi KECIL 180 / BESAR 340, pagu total 4.840.000).
-- **Status**: SELESAI 2026-08-03 — ⚠️ tes HTTP penuh masih pending (perlu restart BE, server instance lama saat fix).
+- **Status**: SELESAI 2026-08-03 — tes HTTP penuh PASS 2026-08-03 (server start 15:26 sudah load fix): harian 200 + rekap 200 (hariAktif GrupHari bekerja, Minggu porsi 0), negatif bersih (404 periode tidak ditemukan, 400 tanggal di luar rentang).
 
 ### [BUG-002] 500 error pada GET /gizi/master-menu-list — schema drift MasterMenuMingguan
 - **Severity**: Medium (error setiap kali halaman Menu Harian load master menu)
