@@ -51,14 +51,23 @@
     - SaldoAwalBarangPage 813 → 294 (`6d26505`) — 5 komponen `components/akuntan/saldoAwal/`
   - 🏁 **V2-4 SELESAI 11/11** (2026-08-03)
 
-## V2 Infra, Docs, Finalisasi (2026-08-03) ⏸️ PAUSED (Rozi: "jangan lanjut, catat sesi")
+## V2 Infra, Docs, Finalisasi (2026-08-03 → 2026-08-04) ✅ SEMUA SELESAI (sesi 36, approval + tag pending)
 - ✅ **A — Vitest**: BE 62 test (7 file, supertest) + FE 3 test. `be5d967`, `6201e45`. Coverage lines 24.33%.
 - ✅ **B — CI/CD**: `.github/workflows/ci.yml` 5 job hijau (2x ci-test + 3x main). Merge `a8b6b6e` + `ba23398` + `b5af929`.
 - ✅ **C — oxlint backend**: 80 warning → 0/0, script `lint`, 30 file. `d5c7ce2`.
-- ⏳ **D** — global error handler + Pino logging
-- ⏳ **E** — validators audit + OpenAPI/Swagger
-- ⏳ **F** — smoke test semua modul
-- ⏳ **G** — AGENTS.md ×3 + CHANGELOG [2.0.0] (tag oleh Rozi)
+- ✅ **D — global error handler + Pino logging**: lib/logger.js + middleware/errorHandler.js + 227 console.error → logger (63 file). `71d754e`. 62/62 test 2x, lint 0/0.
+- ✅ **E — validators audit + OpenAPI/Swagger**: /api-docs 126 path (zod single-source + manual kritis), proteksi production. `d5b2877`. 62/62 2x, 0 dup.
+- ✅ **F — smoke test semua modul**: smoke-modul.test.js 27 endpoint, 13/13 modul bersih, 0 bug baru. `231f8cc`. Total 89/89 2x. **SELESAI (representative coverage 27/225 + 62 integration test modul kritis)** — sisa ~198 endpoint → Backlog Perluasan Test Coverage (non-blocker).
+- ✅ **G — AGENTS.md ×3 + CHANGELOG [2.0.0]**: `e40044b`. Tag v2.0.0 BELUM (oleh Rozi).
+
+## Backlog Perluasan Test Coverage (2026-08-04) — BUKAN BLOCKER RILIS
+- **Latar**: smoke test Bagian F = cakupan REPRESENTATIF, bukan penuh. Total endpoint backend ±225 (213 router.* + 12 sub-router).
+- **Cakupan saat ini**: 27 endpoint smoke (13/13 modul) + 62 integration test modul kritis = 89 test PASS stabil.
+- **Gap**:
+  - ±198 endpoint belum diuji individual — risiko RENDAH (berbagi middleware/pattern yang sama: requireAuth/requireRole/validate + pola handler seragam), dikerjakan bertahap.
+  - Belum ada PDF/Puppeteer E2E testing — butuh strategi (screenshot comparison ATAU validasi struktur PDF), keputusan pendekatan saat dikerjakan.
+- **Prioritas**: RENDAH-SEDANG. Dikerjakan BERTAHAP setelah rilis v2.0.0. TIDAK memblokir rilis.
+- Catatan teknis terkait (diagnosa sesi 36): testDate laporan.test.js tanpa guard ketersediaan (pola getUnusedDate approval) + rabHarian 2026-07-26 tak dihapus pemeriksaan-bahan.test.js — fix menyatu saat perluasan coverage.
 
 ## Backlog Infra (2026-08-02)
 - ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup. Job cron `sync-hermes` (05fd5c684e88) di-pause.

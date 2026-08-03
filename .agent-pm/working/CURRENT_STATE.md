@@ -1,6 +1,15 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: V2 Infra/Docs/Finalisasi — Bagian A (test infra) ✅ B (CI/CD) ✅ C (lint) ✅. PAUSED per Rozi (2026-08-03) — next: Bagian D (error handler + Pino) saat lanjut.**
+**Scope Aktif: V2 Infra/Docs/Finalisasi — Bagian A-F ✅ G ✅ (2026-08-04, sesi 36). Menunggu approval final Rozi + tag v2.0.0 (oleh Rozi).**
+
+## Sesi 36 (2026-08-04) — V2 Bagian D-G: SELESAI, semua pushed, menunggu approval
+- **D — error handler + Pino** `71d754e`: lib/logger.js (pino + pino-http, silent saat test) + middleware/errorHandler.js + 227 console.error → logger.error (63 file) + index.js logger.info. AGY 2x timeout (tool jalan, teks final tak keluar) — verifikasi OpenCode temukan require logger di DALAM fungsi (shared.js, stockBarang.js) → ReferenceError error-path → FIX_SUBLOOP AGY pindah ke top-level. Final: 62/62 test 2x, lint 0/0, 0 console sisa, 66 file.
+- **E — OpenAPI/Swagger** `d5b2877`: @asteasolutions/zod-to-openapi ^9.1.0 + swagger-ui-express ^5.0.1, src/docs/openapi.js (126 path: 99 dari schema zod validators single-source + ~25 manual auth/admin/kepala/mitra PO/akuntan-master/bukti-lpd2m), mount /api-docs + /api-docs.json SEBELUM errorHandler, proteksi: NODE_ENV!=production || ENABLE_DOCS=true, production wajib requireAuth+ADMIN. AGY tahap 1 timeout, tahap 2 network error → retry sukses (126 path). Verifikasi final: 62/62 2x, 0 dup path, sampel cocok route aktual.
+- **F — smoke test semua modul** `231f8cc`: smoke-modul.test.js 27 endpoint baru (13/13 mount modul), 0 temuan 500 → TANPA BUG entry baru. Total 89/89 test 2x run (GF-009). **STATUS: SELESAI (representative coverage — 27/225 endpoint + 62 integration test modul kritis)**; sisa ~198 endpoint masuk Backlog Perluasan Test Coverage (non-blocker).
+- **G — AGENTS.md ×3 + CHANGELOG** `e40044b`: AGENTS.md root/backend/frontend + CHANGELOG section [2.0.0] (atas, riwayat lama utuh).
+- ✅ **Validasi runtime sesi 36**: BE restart → pino + pino-http aktif (log JSON), /api-docs 200, /api-docs.json 200 (77.5KB, openapi 3.1.0), /api/auth/me 401 format konsisten. **ci.yml debug steps DIHAPUS** (AGY, grep sisa kosong).
+- ⚠️ **Tag v2.0.0 BELUM** (oleh Rozi). Pending: approval final D-G → arsip.
+- HEAD `e40044b`, tree BERSIH, semua pushed.
 
 ## Sesi 35 (2026-08-03) — V2 Bagian A-C: SELESAI + PAUSED (perintah Rozi "jangan lanjut, catat sesi")
 - **Bagian A — Vitest**: backend `npm test` = `vitest run` (7 file, 62 test PASS, coverage lines 24.33%), FE vitest (3 test utils PASS). Konversi 6 integration test HTTP → Vitest+supertest (app export dari app.js, index.js listen). endpoints-kritis.test.js (5 endpoint Akuntan+Laporan). Fix race: `fileParallelism:false` (GF-009 — self-report AGY "62/62" keliru, verifikasi independen temukan 3 FAIL). Commits: `be5d967`, `6201e45`.
