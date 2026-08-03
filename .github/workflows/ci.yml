@@ -41,6 +41,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sppg?schema=public
       TEST_PASSWORD: ganti-password-ini
+      JWT_SECRET: ci-test-secret-untuk-github-actions
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
