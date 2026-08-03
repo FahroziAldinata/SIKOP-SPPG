@@ -38,13 +38,13 @@ describe('GrupHari CRUD & Overlap Validation Tests', () => {
 
   afterAll(async () => {
     if (testPeriode) {
-      try { await prismaDb.grupHari.deleteMany({ where: { periodeId: testPeriode.id } }); } catch (e) {}
-      try { await prismaDb.anggaranHarian.deleteMany({ where: { periodeId: testPeriode.id } }); } catch (e) {}
-      try { await prismaDb.setupLembaga.deleteMany({ where: { periodeId: testPeriode.id } }); } catch (e) {}
-      try { await prismaDb.transaksiPembelianItem.deleteMany({ where: { transaksi: { rabHarian: { periodeId: testPeriode.id } } } }); } catch (e) {}
-      try { await prismaDb.transaksiPembelian.deleteMany({ where: { rabHarian: { periodeId: testPeriode.id } } }); } catch (e) {}
-      try { await prismaDb.rabHarian.deleteMany({ where: { periodeId: testPeriode.id } }); } catch (e) {}
-      try { await prismaDb.periode.delete({ where: { id: testPeriode.id } }); } catch (e) {}
+      try { await prismaDb.grupHari.deleteMany({ where: { periodeId: testPeriode.id } }); } catch {}
+      try { await prismaDb.anggaranHarian.deleteMany({ where: { periodeId: testPeriode.id } }); } catch {}
+      try { await prismaDb.setupLembaga.deleteMany({ where: { periodeId: testPeriode.id } }); } catch {}
+      try { await prismaDb.transaksiPembelianItem.deleteMany({ where: { transaksi: { rabHarian: { periodeId: testPeriode.id } } } }); } catch {}
+      try { await prismaDb.transaksiPembelian.deleteMany({ where: { rabHarian: { periodeId: testPeriode.id } } }); } catch {}
+      try { await prismaDb.rabHarian.deleteMany({ where: { periodeId: testPeriode.id } }); } catch {}
+      try { await prismaDb.periode.delete({ where: { id: testPeriode.id } }); } catch {}
     }
     await prismaDb.$disconnect();
   });

@@ -112,7 +112,7 @@ describe('Pemeriksaan Bahan Makanan (B.7) Integration Tests', () => {
         try {
           await db.transaksiPembelianItem.deleteMany({ where: { transaksiId: id } });
           await db.transaksiPembelian.delete({ where: { id } });
-        } catch (e) {}
+        } catch {}
       }
     }
     await db.$disconnect();

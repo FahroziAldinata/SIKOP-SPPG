@@ -77,7 +77,7 @@ router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), 
       return res.status(404).json({ error: "Setup lembaga atau periode tidak ditemukan" });
     }
     const buffer = await exportBkuXlsx(data);
-    const filename = `BKU-${(data.ringkasan.periodeLabel || periodeId).replace(/[\/\s]/g, '-')}.xlsx`;
+    const filename = `BKU-${(data.ringkasan.periodeLabel || periodeId).replace(/[/\s]/g, '-')}.xlsx`;
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.end(buffer);

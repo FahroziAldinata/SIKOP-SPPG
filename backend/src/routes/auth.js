@@ -164,7 +164,7 @@ router.post("/ttd", requireAuth, (req, res) => {
           if (fs.existsSync(oldFilePath)) {
             fs.unlinkSync(oldFilePath);
           }
-        } catch (_) {
+        } catch {
           // Abaikan error hapus file lama
         }
       }
@@ -213,7 +213,7 @@ router.delete("/ttd", requireAuth, async (req, res) => {
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
-      } catch (_) {
+      } catch {
         // File tidak ada di disk — tetap lanjut update DB
       }
     }

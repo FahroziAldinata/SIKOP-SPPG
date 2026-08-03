@@ -19,7 +19,7 @@ async function requireAuth(req, res, next) {
   let payload;
   try {
     payload = jwt.verify(token, JWT_SECRET);
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: "Token tidak valid atau kadaluarsa" });
   }
 

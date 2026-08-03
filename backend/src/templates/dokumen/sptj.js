@@ -4,7 +4,7 @@
  *   namaPejabat, jabatan, jumlahPenerimaan, jumlahPengeluaran, sisaDana,
  *   tempatPelaporan, tanggalPelaporan, tahunAnggaran, namaLembaga
  */
-const { renderKopSurat, renderFooterTTD, escapeHtml, formatNumberTabel, SHARED_CSS } = require('./shared');
+const { renderKopSurat, escapeHtml, formatNumberTabel, SHARED_CSS } = require('./shared');
 
 /**
  * @param {object} data - data untuk SPTJ

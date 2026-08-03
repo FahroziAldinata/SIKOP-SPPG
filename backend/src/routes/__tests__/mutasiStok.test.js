@@ -60,19 +60,19 @@ describe('Mutasi Stok API Integration Tests', () => {
 
   afterAll(async () => {
     if (testValidasiId) {
-      try { await prismaDb.validasiStok.delete({ where: { id: testValidasiId } }); } catch (e) {}
+      try { await prismaDb.validasiStok.delete({ where: { id: testValidasiId } }); } catch {}
     }
     for (const mutId of testMutasiIds) {
-      try { await prismaDb.mutasiStok.delete({ where: { id: mutId } }); } catch (e) {}
+      try { await prismaDb.mutasiStok.delete({ where: { id: mutId } }); } catch {}
     }
     if (testBahanId) {
-      try { await prismaDb.bahanPokok.delete({ where: { id: testBahanId } }); } catch (e) {}
+      try { await prismaDb.bahanPokok.delete({ where: { id: testBahanId } }); } catch {}
     }
     if (testSupplierId) {
-      try { await prismaDb.supplier.delete({ where: { id: testSupplierId } }); } catch (e) {}
+      try { await prismaDb.supplier.delete({ where: { id: testSupplierId } }); } catch {}
     }
     if (testSupplierInaktifId) {
-      try { await prismaDb.supplier.delete({ where: { id: testSupplierInaktifId } }); } catch (e) {}
+      try { await prismaDb.supplier.delete({ where: { id: testSupplierInaktifId } }); } catch {}
     }
     await prismaDb.$disconnect();
   });

@@ -780,7 +780,6 @@ anggaranHarianRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(sch
       }
 
       let computedRab = 0;
-      let parentHargaSatuan = null;
       let detailsToCreate = [];
 
       if (kategoriDana === "BAHAN_MAKANAN") {
@@ -993,12 +992,10 @@ anggaranHarianRouter.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req
       }
 
       let computedRab = 0;
-      let parentHargaSatuan = existing.hargaSatuan ? parseFloat(existing.hargaSatuan) : null;
       let detailsToCreate = [];
       let shouldDeleteOldDetails = false;
 
       if (targetKategoriDana === "BAHAN_MAKANAN") {
-        parentHargaSatuan = null;
         
         // If new details are provided, we use them. Otherwise, if we only updated e.g. tanggal, we keep existing details.
         // But if we switched kategoriDana to BAHAN_MAKANAN, detailBahanMakanan must be provided!

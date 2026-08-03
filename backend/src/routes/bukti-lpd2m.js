@@ -38,7 +38,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), upload.sing
 
     if (!periodeId || !namaBukti || !jenis) {
       if (req.file && fs.existsSync(req.file.path)) {
-        try { fs.unlinkSync(req.file.path); } catch (_) {}
+        try { fs.unlinkSync(req.file.path); } catch {}
       }
       return res.status(400).json({ error: "periodeId, namaBukti, dan jenis wajib diisi" });
     }
@@ -53,7 +53,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), upload.sing
 
     if (!periode) {
       if (req.file && fs.existsSync(req.file.path)) {
-        try { fs.unlinkSync(req.file.path); } catch (_) {}
+        try { fs.unlinkSync(req.file.path); } catch {}
       }
       return res.status(404).json({ error: "Periode tidak ditemukan" });
     }
@@ -80,7 +80,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), upload.sing
   } catch (error) {
     console.error("[bukti-lpd2m post]", error);
     if (req.file && fs.existsSync(req.file.path)) {
-      try { fs.unlinkSync(req.file.path); } catch (_) {}
+      try { fs.unlinkSync(req.file.path); } catch {}
     }
     res.status(500).json({ error: "Gagal mengupload bukti LPD2M" });
   }

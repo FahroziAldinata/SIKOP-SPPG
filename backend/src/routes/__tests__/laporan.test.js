@@ -284,43 +284,43 @@ describe('Laporan API Integration Tests', () => {
 
   afterAll(async () => {
     for (const mId of testMutasiIds) {
-      try { await prismaDb.mutasiStok.delete({ where: { id: mId } }); } catch (e) {}
+      try { await prismaDb.mutasiStok.delete({ where: { id: mId } }); } catch {}
     }
     if (testSaldoAwalBarangId) {
-      try { await prismaDb.saldoAwalBarang.delete({ where: { id: testSaldoAwalBarangId } }); } catch (e) {}
+      try { await prismaDb.saldoAwalBarang.delete({ where: { id: testSaldoAwalBarangId } }); } catch {}
     }
     if (testInputPmDetailId) {
-      try { await prismaDb.inputPenerimaManfaatDetail.delete({ where: { id: testInputPmDetailId } }); } catch (e) {}
+      try { await prismaDb.inputPenerimaManfaatDetail.delete({ where: { id: testInputPmDetailId } }); } catch {}
     }
     if (testInputPmId) {
-      try { await prismaDb.inputPenerimaManfaat.delete({ where: { id: testInputPmId } }); } catch (e) {}
+      try { await prismaDb.inputPenerimaManfaat.delete({ where: { id: testInputPmId } }); } catch {}
     }
     if (testGrupHariId) {
-      try { await prismaDb.grupHari.delete({ where: { id: testGrupHariId } }); } catch (e) {}
+      try { await prismaDb.grupHari.delete({ where: { id: testGrupHariId } }); } catch {}
     }
     if (testMenuItemBahanId) {
-      try { await prismaDb.menuItemBahan.delete({ where: { id: testMenuItemBahanId } }); } catch (e) {}
+      try { await prismaDb.menuItemBahan.delete({ where: { id: testMenuItemBahanId } }); } catch {}
     }
     if (testMenuItemId) {
-      try { await prismaDb.menuItem.delete({ where: { id: testMenuItemId } }); } catch (e) {}
+      try { await prismaDb.menuItem.delete({ where: { id: testMenuItemId } }); } catch {}
     }
     if (testMenuHarianBlokId) {
-      try { await prismaDb.menuHarianBlok.delete({ where: { id: testMenuHarianBlokId } }); } catch (e) {}
+      try { await prismaDb.menuHarianBlok.delete({ where: { id: testMenuHarianBlokId } }); } catch {}
     }
     if (testMenuHarianId) {
-      try { await prismaDb.menuHarian.delete({ where: { id: testMenuHarianId } }); } catch (e) {}
+      try { await prismaDb.menuHarian.delete({ where: { id: testMenuHarianId } }); } catch {}
     }
     if (testDetailId) {
-      try { await prismaDb.anggaranBahanMakananDetail.delete({ where: { id: testDetailId } }); } catch (e) {}
+      try { await prismaDb.anggaranBahanMakananDetail.delete({ where: { id: testDetailId } }); } catch {}
     }
     if (testAnggaranId) {
-      try { await prismaDb.anggaranHarian.delete({ where: { id: testAnggaranId } }); } catch (e) {}
+      try { await prismaDb.anggaranHarian.delete({ where: { id: testAnggaranId } }); } catch {}
     }
     if (testJurnalId) {
-      try { await prismaDb.jurnalTransaksi.delete({ where: { id: testJurnalId } }); } catch (e) {}
+      try { await prismaDb.jurnalTransaksi.delete({ where: { id: testJurnalId } }); } catch {}
     }
     if (testBahanId) {
-      try { await prismaDb.bahanPokok.delete({ where: { id: testBahanId } }); } catch (e) {}
+      try { await prismaDb.bahanPokok.delete({ where: { id: testBahanId } }); } catch {}
     }
     await prismaDb.$disconnect();
   });

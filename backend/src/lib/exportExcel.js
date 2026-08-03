@@ -75,19 +75,6 @@ function styleTotal(cell) {
   cell.border = BORDER_THIN;
 }
 
-/** Auto-fit lebar kolom berdasarkan konten terpanjang */
-function autoFitColumns(worksheet) {
-  worksheet.columns.forEach(col => {
-    let maxLen = col.header ? String(col.header).length : 8;
-    col.eachCell({ includeEmpty: true }, cell => {
-      const valStr = cell.value !== null && cell.value !== undefined
-        ? String(cell.value)
-        : '';
-      if (valStr.length > maxLen) maxLen = valStr.length;
-    });
-    col.width = Math.min(maxLen + 4, 50);
-  });
-}
 
 // ─── 1. BKU Export ──────────────────────────────────────────────────────────
 

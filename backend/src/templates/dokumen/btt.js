@@ -1,4 +1,4 @@
-const { renderKopSurat, escapeHtml, formatNumberTabel, SHARED_CSS } = require('./shared');
+const { escapeHtml, formatNumberTabel, SHARED_CSS } = require('./shared');
 
 /**
  * Convert number to Indonesian words (terbilang)
@@ -31,14 +31,13 @@ function renderBttHtml(data = {}) {
     keperluan = '',
     identitas = {},
     mitraNama = '',
-    stafPengawasNama = '',
     kepalaNama = '',
     tempat = 'Sumedang',
     tanggal = '',
     kategori = 'operasional'
   } = data;
 
-  const { namaLembaga = '', alamat = '', idSppg = '' } = identitas;
+  const { namaLembaga = '', idSppg = '' } = identitas;
   const terbilangStr = terbilang || formatTerbilang(nominal);
   const labelKeperluan = kategori === 'sewa'
     ? `Uang Sewa ${keperluan}`

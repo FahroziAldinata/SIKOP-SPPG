@@ -2,7 +2,7 @@ const { renderKopSurat, renderFooterTTD, escapeHtml, formatNumberTabel, SHARED_C
 
 function renderPerBulanHtml(data = {}) {
   const { identitas = {}, periodeInfo = '', months = [] } = data;
-  const { namaLembaga = '', alamat = '', namaAkuntan = '', namaKepalaSPPG = '' } = identitas;
+  const { namaAkuntan = '', namaKepalaSPPG = '' } = identitas;
   const kepalaNama = namaKepalaSPPG || '';
 
   const rows = months.length === 0

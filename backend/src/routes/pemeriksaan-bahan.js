@@ -115,7 +115,7 @@ router.get(
       });
 
       // 4. Kirim binary
-      const safeNomor = (data.nomorDokumen || 'pemeriksaan-bahan').replace(/[\/\s]/g, '-');
+      const safeNomor = (data.nomorDokumen || 'pemeriksaan-bahan').replace(/[/\s]/g, '-');
       const buffer = Buffer.from(pdfBuffer);
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `inline; filename="PemeriksaanBahan-${safeNomor}.pdf"`);

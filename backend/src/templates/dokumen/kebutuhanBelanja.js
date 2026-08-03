@@ -2,7 +2,7 @@ const { renderKopSurat, renderFooterTTD, escapeHtml, formatNumberTabel, SHARED_C
 
 function renderKebutuhanBelanjaHtml(data = {}) {
   const { identitas = {}, periodeInfo = '', tanggalMulai = '', tanggalSelesai = '', items = [], totalKeseluruhan = 0 } = data;
-  const { namaLembaga = '', alamat = '', namaAkuntan = '', namaKepalaSPPG = '' } = identitas;
+  const { namaAkuntan = '', namaKepalaSPPG = '' } = identitas;
   const kepalaNama = namaKepalaSPPG || '';
 
   const rows = items.length === 0

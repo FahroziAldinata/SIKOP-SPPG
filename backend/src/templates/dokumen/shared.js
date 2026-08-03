@@ -247,7 +247,7 @@ async function injectTtdImages(html) {
       // Escape namaEscaped untuk regex (karakter HTML entity aman, tapi & perlu escape)
       const namaForRegex = namaEscaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const divPattern = new RegExp(
-        `<div class="ttd-ruang" data-ttd-nama="${namaForRegex}" style="height:(\\d+)px;"><\/div>`,
+        `<div class="ttd-ruang" data-ttd-nama="${namaForRegex}" style="height:(\\d+)px;"></div>`,
         'g'
       );
       result = result.replace(divPattern, (_, h) =>

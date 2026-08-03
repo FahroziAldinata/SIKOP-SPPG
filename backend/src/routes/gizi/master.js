@@ -22,7 +22,7 @@ router.get("/batas-harga-porsi", requireAuth, requireRole("AHLI_GIZI", "AKUNTAN"
   try {
     const data = await prisma.batasHargaPorsi.findMany();
     res.json({ success: true, data });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Gagal mengambil data batas harga porsi" });
   }
 });

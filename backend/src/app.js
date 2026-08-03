@@ -45,7 +45,7 @@ app.use('/api/laporan/pemeriksaan-bahan', pemeriksaanBahanRoutes);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // 500 catch-all — biar error gak pernah bocor stack trace ke client
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error(err);
   res.status(500).json({ success: false, error: 'Terjadi kesalahan di server' });
 });

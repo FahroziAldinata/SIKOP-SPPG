@@ -85,8 +85,8 @@ describe('Approval Module Integration Tests', () => {
     });
 
     afterAll(async () => {
-      if (menu1Id) { try { await prismaDb.menuHarian.delete({ where: { id: menu1Id } }); } catch (e) {} }
-      if (menu2Id) { try { await prismaDb.menuHarian.delete({ where: { id: menu2Id } }); } catch (e) {} }
+      if (menu1Id) { try { await prismaDb.menuHarian.delete({ where: { id: menu1Id } }); } catch {} }
+      if (menu2Id) { try { await prismaDb.menuHarian.delete({ where: { id: menu2Id } }); } catch {} }
     });
 
     test('PUT status to DIAJUKAN (from DRAFT)', async () => {
@@ -161,8 +161,8 @@ describe('Approval Module Integration Tests', () => {
 
     afterAll(async () => {
       if (testMenuId) {
-        try { await prismaDb.approval.deleteMany({ where: { menuHarianId: testMenuId } }); } catch (e) {}
-        try { await prismaDb.menuHarian.delete({ where: { id: testMenuId } }); } catch (e) {}
+        try { await prismaDb.approval.deleteMany({ where: { menuHarianId: testMenuId } }); } catch {}
+        try { await prismaDb.menuHarian.delete({ where: { id: testMenuId } }); } catch {}
       }
     });
 
@@ -259,8 +259,8 @@ describe('Approval Module Integration Tests', () => {
 
     afterAll(async () => {
       if (testRabId) {
-        try { await prismaDb.approval.deleteMany({ where: { rabHarianId: testRabId } }); } catch (e) {}
-        try { await prismaDb.rabHarian.delete({ where: { id: testRabId } }); } catch (e) {}
+        try { await prismaDb.approval.deleteMany({ where: { rabHarianId: testRabId } }); } catch {}
+        try { await prismaDb.rabHarian.delete({ where: { id: testRabId } }); } catch {}
       }
     });
 
@@ -303,10 +303,10 @@ describe('Approval Module Integration Tests', () => {
     });
 
     afterAll(async () => {
-      if (approvalMenu) { try { await prismaDb.approval.delete({ where: { id: approvalMenu.id } }); } catch (e) {} }
-      if (approvalRab) { try { await prismaDb.approval.delete({ where: { id: approvalRab.id } }); } catch (e) {} }
-      if (dummyMenu) { try { await prismaDb.menuHarian.delete({ where: { id: dummyMenu.id } }); } catch (e) {} }
-      if (dummyRab) { try { await prismaDb.rabHarian.delete({ where: { id: dummyRab.id } }); } catch (e) {} }
+      if (approvalMenu) { try { await prismaDb.approval.delete({ where: { id: approvalMenu.id } }); } catch {} }
+      if (approvalRab) { try { await prismaDb.approval.delete({ where: { id: approvalRab.id } }); } catch {} }
+      if (dummyMenu) { try { await prismaDb.menuHarian.delete({ where: { id: dummyMenu.id } }); } catch {} }
+      if (dummyRab) { try { await prismaDb.rabHarian.delete({ where: { id: dummyRab.id } }); } catch {} }
     });
 
     test('GET approvals without periodeId -> 400', async () => {

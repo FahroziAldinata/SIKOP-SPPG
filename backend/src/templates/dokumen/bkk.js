@@ -41,7 +41,7 @@ function renderBkkHtml(data) {
         const tglFormatted = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
         tempatTglStr = tempatPelaporan ? `${tempatPelaporan}, ${tglFormatted}` : tglFormatted;
       }
-    } catch (e) { /* skip */ }
+    } catch { /* skip */ }
   }
 
   const kopHtml = namaLembaga

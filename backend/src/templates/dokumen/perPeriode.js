@@ -2,7 +2,7 @@ const { renderKopSurat, renderFooterTTD, escapeHtml, formatNumberTabel, SHARED_C
 
 function renderPerPeriodeHtml(data = {}) {
   const { identitas = {}, periodeInfo = '', categories = [] } = data;
-  const { namaLembaga = '', alamat = '', namaAkuntan = '', namaKepalaSPPG = '' } = identitas;
+  const { namaAkuntan = '', namaKepalaSPPG = '' } = identitas;
   const kepalaNama = namaKepalaSPPG || '';
 
   const rows = categories.length === 0

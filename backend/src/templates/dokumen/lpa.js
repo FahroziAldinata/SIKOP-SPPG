@@ -7,14 +7,8 @@
  *   nomorRekeningVA, tempatPelaporan, tanggalPelaporan,
  *   namaYayasan, ketuaYayasan, namaAkuntan
  */
-const { renderKopSurat, renderFooterTTD, escapeHtml, formatRupiah, formatNumberTabel, SHARED_CSS } = require('./shared');
+const { renderKopSurat, renderFooterTTD, escapeHtml, formatNumberTabel, SHARED_CSS } = require('./shared');
 
-// Keterangan statis per kategori dana (hardcode per ASUMSI di 08-PLAN-LAYOUT-DOKUMEN.md)
-const KETERANGAN_KATEGORI = {
-  'Bahan Baku': 'Pengadaan bahan baku utama untuk pelaksanaan kegiatan.',
-  'Operasional': 'Penggunaan dana untuk biaya persiapan, pengolahan, distribusi, dan administrasi pelayanan.',
-  'Sewa': 'Penggunaan dana untuk insentif tenaga masak, kader, dan biaya utilitas/fasilitas pelayanan.',
-};
 
 /**
  * @param {object} data - output dari GET /api/laporan/lpa (data field)

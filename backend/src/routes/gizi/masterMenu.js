@@ -225,7 +225,7 @@ router.get("/master-menu-list", requireAuth, requireRole("AHLI_GIZI", "AKUNTAN",
       orderBy: [{ jalur: "asc" }, { mingguKe: "asc" }, { hari: "asc" }]
     });
     res.json({ success: true, data });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Gagal mengambil daftar master menu" });
   }
 });

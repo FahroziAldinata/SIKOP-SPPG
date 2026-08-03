@@ -577,7 +577,6 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
         throw new Error("[VALIDASI] jenis transaksi tidak valid (MASUK atau KELUAR)");
       }
 
-      let newAkunDanaBiaya = existing.akunDanaBiaya;
       if (akunDanaBiayaId !== undefined && akunDanaBiayaId !== existing.akunDanaBiayaId) {
         const checkDanaBiaya = await tx.akun.findUnique({ where: { id: akunDanaBiayaId } });
         if (!checkDanaBiaya) {
@@ -586,7 +585,6 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
         if (!checkDanaBiaya.aktif) {
           throw new Error("[VALIDASI] Akun Dana/Biaya tidak aktif");
         }
-        newAkunDanaBiaya = checkDanaBiaya;
       }
 
       if (akunKasId !== undefined && akunKasId !== existing.akunKasId) {

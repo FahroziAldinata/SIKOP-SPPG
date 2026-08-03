@@ -53,16 +53,16 @@ describe('Validasi Silang InputPenerimaManfaatDetail vs SekolahKelasDetail Tests
 
   afterAll(async () => {
     if (createdPenerimaManfaatId) {
-      try { await prismaDb.inputPenerimaManfaat.delete({ where: { id: createdPenerimaManfaatId } }); } catch (e) {}
+      try { await prismaDb.inputPenerimaManfaat.delete({ where: { id: createdPenerimaManfaatId } }); } catch {}
     }
     if (createdSekolahKelasId) {
-      try { await prismaDb.sekolahKelasDetail.delete({ where: { id: createdSekolahKelasId } }); } catch (e) {}
+      try { await prismaDb.sekolahKelasDetail.delete({ where: { id: createdSekolahKelasId } }); } catch {}
     }
     if (testSekolah) {
-      try { await prismaDb.sekolah.delete({ where: { id: testSekolah.id } }); } catch (e) {}
+      try { await prismaDb.sekolah.delete({ where: { id: testSekolah.id } }); } catch {}
     }
     if (testPeriode) {
-      try { await prismaDb.periode.delete({ where: { id: testPeriode.id } }); } catch (e) {}
+      try { await prismaDb.periode.delete({ where: { id: testPeriode.id } }); } catch {}
     }
     await prismaDb.$disconnect();
   });

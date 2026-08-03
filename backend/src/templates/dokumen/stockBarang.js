@@ -63,8 +63,6 @@ function renderFooterTTDStockBarang({ namaPetugasLogistik = '', namaAkuntan = ''
 function renderStockBarangHtml(data = {}) {
   const { identitas = {}, periodeInfo = '', tanggal = '', items = [] } = data;
   const {
-    namaLembaga = '',
-    alamat = '',
     namaAkuntan = '',
     namaKepalaSPPG = '',
     namaPetugasLogistik = '',

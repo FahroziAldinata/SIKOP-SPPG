@@ -19,7 +19,6 @@ function renderPemeriksaanBahanHtml(data) {
     alamat,
     supplier,
     bahanMakanan = [],
-    totalNilai,
     pemeriksa,
     namaKepalaSPPG,
     tempatPelaporan,

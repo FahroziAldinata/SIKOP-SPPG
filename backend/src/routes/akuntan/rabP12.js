@@ -170,7 +170,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
     }
 
     // 1. Pagu & porsi
-    const { porsi, pagu } = await hitungPaguHarian(prisma, periodeId, tanggal);
+    const { pagu } = await hitungPaguHarian(prisma, periodeId, tanggal);
 
     // 2. Items calculation & existing RAB items lookup
     const priceList = await prisma.hargaBahanPeriode.findMany({ where: { periodeId } });
