@@ -1,6 +1,13 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: V2-2 LPD2M bukti gambar fix SELESAI + APPROVED ✅ (2026-08-03). CYCLE_END — next: V2-3 (TASK_SELECTION baru).**
+**Scope Aktif: V2-3 restrukturisasi komponen SELESAI ✅ (2026-08-03). CYCLE_END — backlog V2 habis, next: TASK_SELECTION baru (backlog V3 jika ada).**
+
+## Sesi 34 (2026-08-03) — V2-3 restrukturisasi struktur komponen FE ✅ + ARCHIVE
+- **Audit**: `frontend/src/components/` 119 file — 104 domain (akuntan/gizi/aslap/kepala) + 15 root + utils.js. 78 pemakaian komponen root lintas pages/domain.
+- **Keputusan Rozi** (koreksi mid-cycle): komponen UI primitif → folder independen; utils.js → `src/lib/` (bukan ui/ — bukan komponen + generateDateRange domain helper); 7 file root dievaluasi satu-satu.
+- **Struktur final**: `components/ui/` 15 (12 primitif + WorkflowStepper + NotifikasiList + DashboardSummaryCards), `components/layout/` 2 (Layout, ProtectedRoute), domain: NominatifUpahGrid → `akuntan/nominatifUpah/`, GrupHariManager → `aslap/penerimaManfaat/`, `src/lib/utils.js`.
+- **Commit** `64feac2` (OpenCode): 20 rename + ~100 import update, 120 file. Build PASS independen, 0 sisa path lama, 0 jsx root.
+- Rozi: "jangan commit apapun sampai folder rapi" → arsip state files DIBIARKAN uncommitted (perintah Rozi — belum di-commit).
 
 ## Sesi 33 (2026-08-03) — V2-2 LPD2M gambar web: FIX APPROVED ✅ + ARCHIVE
 - **Investigasi Hermes** (statis + runtime): fix `f837cc7` SALAH — double prefix `/uploads/uploads/` (filePath DB sudah berisi `uploads/`). Root cause asli: vite proxy cuma `/api` → URL gambar 404. Terbukti: probe file di `backend/uploads/` → 404 padahal ada; server BE PID 12308 start 17:39:53 = kode SEBELUM pull `3a4da6c` (static /uploads masuk 14:30) → instance RAM tanpa static mount.

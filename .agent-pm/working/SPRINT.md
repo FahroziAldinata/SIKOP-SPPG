@@ -1,5 +1,8 @@
 # Sprint Backlog
 
+## Sprint 26 — V2-3 Restrukturisasi komponen FE ✅ (2026-08-03)
+1. ✅ V2-3 struktur komponen — ui/ (15), layout/ (2), domain, src/lib/utils. Commit `64feac2`. Zero behavioral change, build PASS.
+
 ## Sprint 25 — V2-2 LPD2M fix gambar web ✅ (2026-08-03)
 1. ✅ V2-2 LPD2M bukti gambar web 404 — fix `d383faf` (vite proxy /uploads + revert double prefix + nextElementSibling) + cleanup `e602a9c` (hapus summary duplikat). TES Rozi PASS → APPROVED.
 

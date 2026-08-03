@@ -30,7 +30,7 @@
 - V2-2: Image handling (upload → report → auto-delete by period) ✅ SELESAI (commit 100b0da, f837cc7, e898cfb) + FIX gambar web 2026-08-03:
   - ✅ Fix `d383faf`: vite proxy `/uploads` + revert double prefix (`'/'+b.filePath`) + `nextElementSibling` — gambar bukti web tampil, APPROVED Rozi
   - ✅ Cleanup `e602a9c`: hapus summary V2-2 duplikat di root documentation/ (perintah Rozi)
-- V2-3: Perbaikan minor UX (jika ada)
+- V2-3: Perbaikan minor UX (jika ada) ✅ SELESAI (2026-08-03) — restrukturisasi struktur komponen FE: ui/ (15), layout/ (2), domain terpisah, utils → src/lib. Commit `64feac2`.
 - **V2-4: Refactor file ribuan baris — design modular** (2026-08-02): pecah file >800 baris jadi komponen/modul per domain.
   - ✅ **Batch 1** (2026-08-02): akuntan.js → `routes/akuntan/` 9 file — commit `12557a0`
   - ✅ **Batch 2** (2026-08-02): FE LaporanPage.jsx akuntan 3.511 → 1.517 baris — 19 komponen. Commits `57570b2`, `e475d34`, `c7e6134`, `f94694b`
