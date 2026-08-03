@@ -58,7 +58,7 @@
 - ✅ **D — global error handler + Pino logging**: lib/logger.js + middleware/errorHandler.js + 227 console.error → logger (63 file). `71d754e`. 62/62 test 2x, lint 0/0.
 - ✅ **E — validators audit + OpenAPI/Swagger**: /api-docs 126 path (zod single-source + manual kritis), proteksi production. `d5b2877`. 62/62 2x, 0 dup.
 - ✅ **F — smoke test semua modul**: smoke-modul.test.js 27 endpoint, 13/13 modul bersih, 0 bug baru. `231f8cc`. Total 89/89 2x. **SELESAI (representative coverage 27/225 + 62 integration test modul kritis)** — sisa ~198 endpoint → Backlog Perluasan Test Coverage (non-blocker).
-- ✅ **G — AGENTS.md ×3 + CHANGELOG [2.0.0]**: `e40044b`. Tag v2.0.0 BELUM (oleh Rozi).
+- ✅ **G — AGENTS.md ×3 + CHANGELOG [2.0.0]**: `e40044b`. Revisi `8fdbe8d` (cara tambah endpoint/halaman + daftar role lengkap). **Tag `v2.0.0` DIBUAT + pushed** (`e42e051`) — draft GitHub Release tidak dibuat (gh CLI tidak terpasang di device ini).
 
 ## Backlog Perluasan Test Coverage (2026-08-04) — BUKAN BLOCKER RILIS
 - **Latar**: smoke test Bagian F = cakupan REPRESENTATIF, bukan penuh. Total endpoint backend ±225 (213 router.* + 12 sub-router).

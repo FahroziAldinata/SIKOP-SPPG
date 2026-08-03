@@ -1,34 +1,31 @@
-# Handoff — 2026-08-04 — Sesi 36 (V2 Bagian D-G SELESAI, MENUNGGU APPROVAL Rozi)
+# Handoff — 2026-08-04 — Sesi 36 (V2 TUNTAS: D-G APPROVED + ARCHIVED, tag v2.0.0, CYCLE_END)
 
 ## Status Terakhir
-- **V2 Infra/Docs/Finalisasi Bagian D-G: SELESAI + pushed**, tree bersih. HEAD `e40044b`.
-- **Approval final Rozi BELUM** (clarify timeout — Rozi belum balas). Tanpa approval: tidak ada arsip/commit state/tag.
-- State files (CURRENT_STATE/TASK/SPRINT/TODO) SUDAH di-update (auto-write) tapi BELUM di-commit (tunggu instruksi Rozi).
+- **V2 Infra/Docs/Finalisasi Bagian A-G: SEMUA SELESAI + APPROVED Rozi.** Tag `v2.0.0` dibuat + pushed (`e42e051`). CYCLE_END.
+- Arsip selesai: DOCUMENTATION.md entry 2026-08-04, cleanup prompts/, state files final.
+- HEAD: setelah commit final docs+state (lihat git log terakhir). Tree bersih.
 
 ## Task Selesai (Sesi 36)
-1. **D — global error handler + Pino** `71d754e`: lib/logger.js (pino + pino-http, silent test) + middleware/errorHandler.js + 227 console.error → logger.error (63 file) + index.js logger.info. FIX_SUBLOOP: require logger di dalam fungsi (shared.js, stockBarang.js) → ReferenceError error-path → pindah top-level. Verifikasi: 62/62 2x, lint 0/0, 0 console sisa.
-2. **E — OpenAPI/Swagger** `d5b2877`: @asteasolutions/zod-to-openapi ^9.1.0 + swagger-ui-express ^5.0.1, src/docs/openapi.js 126 path (99 dari schema zod validators + ~25 manual kritis), mount /api-docs + /api-docs.json sebelum errorHandler, proteksi production (NODE_ENV!=prod || ENABLE_DOCS=true; prod wajib requireAuth+ADMIN). Verifikasi: 62/62 2x, 0 dup, sampel cocok.
-3. **F — smoke test** `231f8cc`: smoke-modul.test.js 27 endpoint, 13/13 modul bersih, 0 temuan 500 → tanpa BUG entry baru. 89/89 2x.
-4. **G — AGENTS.md ×3 + CHANGELOG [2.0.0]** `e40044b`: root/backend/frontend AGENTS.md + section 2.0.0.
+1. **D** `71d754e` — global error handler + Pino (227 console → logger, 63 file). Validasi runtime PASS (pino-http log aktif).
+2. **E** `d5b2877` — OpenAPI/Swagger /api-docs 126 path. Validasi runtime PASS (/api-docs 200, docs.json 77.5KB openapi 3.1.0).
+3. **F** `231f8cc` — smoke test 13/13 modul, 89/89 2x. SELESAI representative coverage (27/225 + 62 integration).
+4. **G** `e40044b` + `8fdbe8d` — AGENTS.md ×3 + CHANGELOG [2.0.0] + revisi (cara tambah endpoint/halaman, daftar role lengkap enum Prisma).
+5. **ci.yml** `74da21d` — debug steps issue-post dihapus (keputusan pending sesi 35 TUNTAS).
+6. **Tag v2.0.0** pushed. **Draft GitHub Release TIDAK dibuat** — gh CLI tidak terpasang (`gh: command not found`). Kalau Rozi mau release resmi: install gh CLI (`winget install GitHub.cli`) + `gh auth login`, lalu `gh release create v2.0.0 --title "v2.0.0" --notes "..." --draft` ATAU buat manual di github.com/FahroziAldinata/SIKOP-SPPG/releases.
 
-## Task Pending / Next Step (urutan)
-1. **Rozi approve** Bagian D-G (backend-only + docs, bukti OpenCode lengkap) → arsip + commit state files.
-2. **Rozi restart BE** (server PID 16812 stale — start 02:12 < kode D/E 02:46+) → cek `http://localhost:3000/api-docs` 200 + Swagger UI. Tanpa restart, /api-docs 404 + error handler lama aktif.
-3. **Rozi buat tag v2.0.0**:
-   ```
-   git tag -a v2.0.0 -m "Release v2.0.0 — V2: TTD basah, image handling, refactor modular, infra testing/CI/lint, error handler+Pino, OpenAPI/Swagger"
-   git push origin v2.0.0
-   ```
-4. **Keputusan pending**: debug steps (issue-post) di ci.yml — keep/remove (dari sesi 35).
-5. Setelah approval: DOCUMENTATION_ARCHIVE — entry DOCUMENTATION.md (bagian D-G), cleanup prompts/, update HANDOFF, commit state files via OpenCode.
+## Task Pending / Next Step
+- **KOSONG untuk V2** — CYCLE_END.
+- Backlog berikutnya (non-blocker, setelah v2.0.0): **Backlog Perluasan Test Coverage** (TODO.md) — ±198 endpoint belum diuji individual, belum ada PDF/Puppeteer E2E; plus fix teknis menyatu: testDate laporan tanpa guard ketersediaan, rabHarian 2026-07-26 tak dihapus di pemeriksaan-bahan.test.js, deleteMany laporan filter (periodeId,tanggal).
+- Item kecil opsional: draft GitHub Release (butuh gh CLI atau manual).
 
 ## Pola yang Terbukti Sesi 36
-- **AGY timeout = tool jalan, teks final tak keluar** (3x: Bagian D, E1, E2; + 1x network error transient → retry sukses). JANGAN abaikan hasil AGY saat "timeout" — cek `git status`/`git diff` dulu. Timeout ≠ gagal.
-- **AGY model id**: `claude-sonnet-4-6` (dash), BUKAN `claude-sonnet-4.6` — `agy.exe models` untuk daftar.
-- **OpenCode rtk intercept**: `npm`/`rtk lint` di-intercept plugin → error aneh; jalankan `--auto --pure` + binary langsung `backend/node_modules/.bin/*`.
-- **GF-009 lagi-lagi terbukti**: verifikasi OpenCode menemukan ReferenceError scope (require dalam fungsi) yang lolos node --check + 62 test (error-path tak terjangkau). Verifikasi = baca struktur, bukan cuma run test.
-- **Prompt file path**: kalau cwd berubah ke backend/, write_file bisa nyasar ke backend/.agent-pm/ — cek `pwd` sebelum tulis.
+- **AGY timeout = tool JALAN** (3x: D, E1, E2; + 1x network error → retry sukses). Timeout ≠ gagal — cek git status/diff, bukan teks balasan. Model id: `claude-sonnet-4-6` (dash).
+- **OpenCode rtk intercept** npm/rtk lint → jalankan `--auto --pure` + binary `backend/node_modules/.bin/*`.
+- **GF-009 konsisten**: verifikasi independen menemukan bug yang lolos test (ReferenceError scope require dalam fungsi). Verifikasi = baca struktur + run test, bukan cuma run.
+- **Stale server**: /api-docs 404 padahal kode benar = server start sebelum commit (PID start vs mtime file). Fix = restart, bukan edit kode.
+- **MSYS quirk**: curl -o /tmp/... menulis ke path Windows → baca via pipe langsung, bukan file /tmp.
+- **write_file nyasar ke backend/.agent-pm/** kalau cwd di backend/ — cek pwd sebelum tulis prompt.
 
 ## Risiko / Pitfall
-- Server BE STALE — jangan test /api-docs via runtime sebelum restart Rozi.
-- Test total sekarang 89 (62 + 27 smoke) — smoke pakai DB seeded lokal; CI juga jalan (Chrome + postgres service).
+- Server BE sekarang jalan dari proc terminal Hermes (PID 15704) — kalau sesi ditutup, BE ikut mati. Rozi: start manual `npm run dev` di backend kalau mau server persisten.
+- Test 89 (62 + 27 smoke) butuh DB seeded + JWT_SECRET + Chrome.

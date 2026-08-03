@@ -221,6 +221,21 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-04
+
+### V2 Infra Bagian D-G — SELESAI + APPROVED Rozi ✅ (sesi 36)
+- **D — Global error handler + Pino logging** `71d754e`: `lib/logger.js` (pino + pino-http, silent saat NODE_ENV=test) + `middleware/errorHandler.js` + 227 `console.error` → `logger.error` (63 file) + `index.js` `logger.info`. Kontrak error FE (`{error}`, `{success:false,error}`, `{error,message,details}`) tidak berubah. Fix subloop: require logger di dalam fungsi (shared.js, stockBarang.js) → ReferenceError error-path → pindah top-level. Verify: 62/62 test 2x, lint 0/0, 0 console sisa.
+- **E — OpenAPI/Swagger /api-docs** `d5b2877`: `@asteasolutions/zod-to-openapi ^9.1.0` + `swagger-ui-express ^5.0.1`; `src/docs/openapi.js` 126 path (99 dari schema zod validators single-source + ~25 manual kritis auth/admin/kepala/mitra PO/akuntan-master/bukti-lpd2m); mount `/api-docs` + `/api-docs.json` sebelum errorHandler; proteksi production (`NODE_ENV!=prod || ENABLE_DOCS=true`, prod wajib `requireAuth+ADMIN`). Verify: 62/62 2x, 0 dup path.
+- **F — Smoke test semua modul** `231f8cc`: `smoke-modul.test.js` 27 endpoint baru, 13/13 mount modul, 0 temuan 500 → tanpa BUG entry baru. **SELESAI (representative coverage 27/225 + 62 integration test modul kritis)**; sisa ±198 endpoint → Backlog Perluasan Test Coverage (non-blocker, TODO.md). Total 89/89 test 2x.
+- **G — AGENTS.md ×3 + CHANGELOG [2.0.0]** `e40044b`. Revisi lanjutan `8fdbe8d`: section "Cara Menambah Endpoint Baru" (backend) + "Cara Menambah Halaman Baru" (frontend, router di App.jsx) + daftar role lengkap enum Prisma (ASLAP, MITRA, AHLI_GIZI, AKUNTAN, KEPALA_SPPG, ADMIN).
+- **Validasi runtime**: BE restart → pino + pino-http aktif (log JSON stdout), `/api-docs` 200, `/api-docs.json` 200 (77.5KB, openapi 3.1.0, version 2.0.0), `/api/auth/me` 401 format konsisten.
+- **ci.yml cleanup** `74da21d`: hapus debug steps issue-post ("Post debug ke GitHub issue", "Diagnose DB", dll) — CI stabil, grep sisa kosong, 5 job utuh.
+- **Backlog baru**: Perluasan Test Coverage (non-blocker rilis) — ±198 endpoint belum diuji individual (risiko rendah, shared middleware/pattern), belum ada PDF/Puppeteer E2E (perlu strategi screenshot comparison/validasi struktur), prioritas rendah-sedang, bertahap setelah v2.0.0.
+- **Diagnosa test (analisis kode, sesi 36)**: 4 file test pakai shared periodeId via lookup (laporan, approval, pemeriksaan-bahan, endpoints-kritis); `deleteMany` laporan filter `(periodeId, tanggal)` tidak menjangkau tanggal file lain; `testDate` laporan tanpa guard ketersediaan (vs `getUnusedDate` approval); `rabHarian` 2026-07-26 tak pernah dihapus di pemeriksaan-bahan.test.js. `fileParallelism:false` → aman per-run; rawan sisa antar-run/seed. Fix menyatu dengan backlog coverage.
+- **Tag**: `v2.0.0` dibuat + pushed (oleh Rozi/Hermes sesi 36). Release draft GitHub menyusul.
+
+---
+
 ## Catatan Umum
 
 - **AGY**: Mode `-p` = text-only. Butuh `-i` + PTY untuk eksekusi tool. Settings di `C:\Users\Administrator\.gemini\antigravity-cli\settings.json`
