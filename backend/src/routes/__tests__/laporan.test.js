@@ -88,6 +88,35 @@ describe('Laporan API Integration Tests', () => {
     });
     testBahanId = testBahan.id;
 
+    // === Cleanup data test (Strategi A: deleteMany child→parent, idempotent) ===
+    // Model dengan unique non-id yang memakai nilai statis (testDate, nomorBukti 99999)
+    // bisa bentrok dengan seed (seed membuat AnggaranHarian + MenuHarian per tanggal periode)
+    // atau sisa run sebelumnya. Urutan child→parent karena tidak ada onDelete Cascade.
+    // MenuHarian chain
+    await prismaDb.menuItemBahan.deleteMany({
+      where: { menuItem: { blok: { menuHarian: { periodeId: periode.id, tanggal: testDate } } } },
+    }).catch(() => {});
+    await prismaDb.menuItem.deleteMany({
+      where: { blok: { menuHarian: { periodeId: periode.id, tanggal: testDate } } },
+    }).catch(() => {});
+    await prismaDb.menuHarianBlok.deleteMany({
+      where: { menuHarian: { periodeId: periode.id, tanggal: testDate } },
+    }).catch(() => {});
+    await prismaDb.menuHarian.deleteMany({
+      where: { periodeId: periode.id, tanggal: testDate },
+    }).catch(() => {});
+    // AnggaranHarian chain
+    await prismaDb.anggaranBahanMakananDetail.deleteMany({
+      where: { anggaranHarian: { periodeId: periode.id, tanggal: testDate } },
+    }).catch(() => {});
+    await prismaDb.anggaranHarian.deleteMany({
+      where: { periodeId: periode.id, tanggal: testDate },
+    }).catch(() => {});
+    // JurnalTransaksi (nomorBukti 99999 statis — unique (periodeId, nomorBukti))
+    await prismaDb.jurnalTransaksi.deleteMany({
+      where: { periodeId: periode.id, nomorBukti: 99999 },
+    }).catch(() => {});
+
     // 4. Setup Temporary Jurnal and Anggaran
     const testJurnal = await prismaDb.jurnalTransaksi.create({
       data: {
@@ -103,12 +132,6 @@ describe('Laporan API Integration Tests', () => {
       }
     });
     testJurnalId = testJurnal.id;
-
-    // Bersihkan anggaran yang berpotensi bentrok di unique (periodeId, tanggal, kategoriDana)
-    // — seed membuat AnggaranHarian BAHAN_MAKANAN per tanggal periode, bisa bentrok dengan testDate (GF-009: race/state shared)
-    await prismaDb.anggaranHarian.deleteMany({
-      where: { periodeId: periode.id, tanggal: testDate, kategoriDana: 'BAHAN_MAKANAN' },
-    });
 
     const testAnggaran = await prismaDb.anggaranHarian.create({
       data: {
