@@ -2,16 +2,17 @@
 _Generated: 2026-08-03 — snapshot ringkas; sumber: CURRENT_TASK.md & CURRENT_STATE.md_
 
 ### dari CURRENT_TASK.md
-## Status: V2-1 TTD Basah — 3 TAHAP SELESAI + COMMITTED + PUSHED (menunggu tes HTTP + approval akhir)
-- Tahap 1 Backend `3a4da6c`: User.ttdPath + migrasi + route /api/auth/ttd + static /uploads
-- Tahap 2 Frontend `2a1abb0`: SettingPage section TTD — canvas + upload + preview + hapus
-- Tahap 3 PDF `81899e7`: marker data-ttd-nama + injectTtdImages + 26 route + stockBarang
-- HEAD: `81899e7`, pushed. ⚠️ Tes HTTP PENDING (restart BE).
+## Status: ✅ SELESAI — V2-1 TTD Basah APPROVED Rozi (2026-08-03). DOCUMENTATION_ARCHIVE → CYCLE_END.
+- Tahap 1 Backend `3a4da6c` | Tahap 2 Frontend `2a1abb0` | Tahap 3 PDF `81899e7`
+- Fix 1 (TTD tidak muncul) `acc8d6b` — path getTtdBase64 `../../` → `../../../`
+- Fix 2 (ukuran/kecil + tidak tengah) `24f640a` — canvas FE 480px rasio 3:1 + img 55px/220px + wrapper max(ruangTtd,55)
+- Tes HTTP 7/7 + PDF E2E PASS + verifikasi visual Rozi OK. Docs archived `72064a2`.
+- HEAD: `72064a2`, semua pushed. Next: V2-2/V2-3 (TASK_SELECTION baru).
 
 ### dari CURRENT_STATE.md
-**Scope Aktif: V2-1 TTD Basah — 3 tahap SELESAI + committed + pushed. Menunggu tes HTTP (restart BE) + approval akhir.**
-## Sesi 31 (2026-08-03) — V2-1 TTD Basah: BUILD 3 tahap dalam 1 cycle bertahap ✅
-- Keputusan Rozi: TTD per jabatan (profil user), SettingPage, 2 mode (canvas + upload), opsional.
-- Strategi PDF: post-process injection (kolom hardcode di template) — marker + injectTtdImages base64 by nama, fallback kosong.
-- Verifikasi: 31/31 node check, 28 inject 26 route, FE build exit 0.
-- ⚠️ Tes HTTP + PDF penuh PENDING — butuh restart BE (server PID 18876 masih kode lama).
+**Scope Aktif: V2-1 TTD Basah SELESAI + APPROVED ✅ (2026-08-03). CYCLE_END — next: V2-2/V2-3 (TASK_SELECTION baru).**
+## Sesi 31 (2026-08-03) — V2-1 TTD Basah: APPROVED ✅ + ARCHIVE (CYCLE_END)
+- Rozi approve setelah verifikasi visual revisi ukuran (canvas 480px, TTD 55px/220px terpusat di PDF).
+- HEAD `24f640a` (3 feat + 2 fix) + arsip `72064a2`, semua pushed. BUG-003 logged (resolved).
+- ⚠️ Catatan pending (bukan blocker): re-test HTTP penuh BUG-001 (fix `b9ba07b` verified fungsi, tes HTTP belum).
+- ⚠️ migration_lock.toml: modified CRLF-only (jangan di-commit).
