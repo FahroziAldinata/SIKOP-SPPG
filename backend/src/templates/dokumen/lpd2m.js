@@ -48,10 +48,25 @@ function renderLpd2mHtml(data) {
         const dateStr = b.createdAt ? new Date(b.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
         const isImage = b.mimeType && b.mimeType.startsWith('image/');
         return `
-          <div style="border:1px solid #ccc; padding:10px; border-radius:4px; page-break-inside:avoid; text-align:center;">
-            ${isImage ? `<img src="${b.base64Data}" style="max-width:100%; max-height:300px; object-fit:contain; display:block; margin:0 auto 8px auto;" />` : `<div style="font-size:9pt; font-style:italic; margin-bottom:8px;">[Dokumen Non-Gambar]</div>`}
-            <div style="font-size:9pt; color:#333; font-weight:bold;">${escapeHtml(b.namaBukti)} (${escapeHtml(b.jenis)})</div>
-            <div style="font-size:8pt; color:#666;">Diupload pada: ${escapeHtml(dateStr)}</div>
+          <div style="display:flex; align-items:center; gap:12px; border:1px solid #ccc; padding:10px; border-radius:4px; page-break-inside:avoid;">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:9pt; color:#333; font-weight:bold;">${escapeHtml(b.namaBukti)}</div>
+              <div style="font-size:9pt; color:#555;">(${escapeHtml(b.jenis)})</div>
+              <div style="font-size:8pt; color:#666; margin-top:2px;">Diupload pada: ${escapeHtml(dateStr)}</div>
+            </div>
+            <div style="flex-shrink:0;">
+              ${isImage
+                ? `<img src="${b.base64Data}" alt="${escapeHtml(b.namaBukti)}"
+                      style="max-height:80px; max-width:120px; object-fit:contain; border-radius:4px; border:1px solid #ccc; background:#fff; display:block;"
+                      onerror="this.style.display='none'; var fb=this.nextElementSibling; if(fb) fb.style.display='flex';" />
+                   <div style="display:none; width:80px; height:60px; background:#e2e8f0; border:1px solid #ccc; border-radius:4px; align-items:center; justify-content:center; flex-direction:column; font-size:11px; color:#666; text-align:center; padding:4px; box-sizing:border-box;">
+                     🖼️<br/>[Gagal Load]
+                   </div>`
+                : `<div style="display:flex; width:80px; height:60px; background:#e2e8f0; border:1px solid #ccc; border-radius:4px; align-items:center; justify-content:center; flex-direction:column; font-size:11px; color:#666; text-align:center; padding:4px; box-sizing:border-box;">
+                     📄<br/>[Non-Gambar]
+                   </div>`
+              }
+            </div>
           </div>
         `;
       }).join('')}

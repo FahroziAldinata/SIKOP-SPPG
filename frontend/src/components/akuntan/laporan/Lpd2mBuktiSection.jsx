@@ -139,15 +139,17 @@ export const Lpd2mBuktiSection = ({
                                 key={b.id}
                                 style={{
                                     display: 'flex',
-                                    justify: 'space-between',
+                                    flexDirection: 'row',
                                     alignItems: 'center',
+                                    gap: '12px',
                                     padding: '8px 12px',
                                     backgroundColor: 'var(--bg, #f1f5f9)',
                                     borderRadius: '4px',
                                     fontSize: '13px'
                                 }}
                             >
-                                <div>
+                                {/* KIRI: nama, badge jenis, tanggal */}
+                                <div style={{ flex: 1, minWidth: 0 }}>
                                     <span style={{ fontWeight: 600, marginRight: '8px' }}>{b.namaBukti}</span>
                                     <span style={{
                                         fontSize: '11px',
@@ -162,21 +164,84 @@ export const Lpd2mBuktiSection = ({
                                         {new Date(b.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => handleDeleteBukti(b.id)}
-                                    style={{
-                                        padding: '4px 8px',
-                                        backgroundColor: '#ef4444',
-                                        color: '#fff',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        fontSize: '12px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    🗑️ Hapus
-                                </button>
+
+                                {/* KANAN: thumbnail / placeholder + tombol hapus */}
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                                    {b.mimeType && b.mimeType.startsWith('image/') ? (
+                                        <span style={{ position: 'relative', display: 'inline-block' }}>
+                                            <img
+                                                src={'/' + b.filePath}
+                                                alt={b.namaBukti}
+                                                style={{
+                                                    maxHeight: '80px',
+                                                    maxWidth: '120px',
+                                                    objectFit: 'contain',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid var(--border, #cbd5e1)',
+                                                    background: '#fff',
+                                                    display: 'block'
+                                                }}
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    const fb = e.currentTarget.nextSibling;
+                                                    if (fb) fb.style.display = 'flex';
+                                                }}
+                                            />
+                                            {/* Fallback jika gambar gagal load */}
+                                            <div style={{
+                                                display: 'none',
+                                                maxHeight: '80px',
+                                                width: '80px',
+                                                height: '60px',
+                                                backgroundColor: 'var(--bg, #e2e8f0)',
+                                                border: '1px solid var(--border, #cbd5e1)',
+                                                borderRadius: '4px',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                flexDirection: 'column',
+                                                fontSize: '11px',
+                                                color: 'var(--text-muted)',
+                                                textAlign: 'center',
+                                                padding: '4px'
+                                            }}>
+                                                🖼️<br />[Gagal Load]
+                                            </div>
+                                        </span>
+                                    ) : (
+                                        <div style={{
+                                            width: '80px',
+                                            height: '60px',
+                                            backgroundColor: 'var(--bg, #e2e8f0)',
+                                            border: '1px solid var(--border, #cbd5e1)',
+                                            borderRadius: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            flexDirection: 'column',
+                                            fontSize: '11px',
+                                            color: 'var(--text-muted)',
+                                            textAlign: 'center',
+                                            padding: '4px'
+                                        }}>
+                                            📄<br />[Non-Gambar]
+                                        </div>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDeleteBukti(b.id)}
+                                        style={{
+                                            padding: '4px 8px',
+                                            backgroundColor: '#ef4444',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            fontSize: '12px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        🗑️ Hapus
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
