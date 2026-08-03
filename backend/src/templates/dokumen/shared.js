@@ -158,8 +158,8 @@ async function getTtdBase64(nama) {
     if (!user?.ttdPath) return '';
     // ttdPath dari DB: '/uploads/ttd/xxx.png' → ambil basename saja
     const filename = path.basename(user.ttdPath);
-    // __dirname = backend/src/templates/dokumen → ../../ = backend/
-    const filePath = path.join(__dirname, '../../uploads/ttd', filename);
+    // __dirname = backend/src/templates/dokumen → ../../../ = backend/
+    const filePath = path.join(__dirname, '../../../uploads/ttd', filename);
     if (!fs.existsSync(filePath)) return '';
     return fs.readFileSync(filePath).toString('base64');
   } catch (e) {
