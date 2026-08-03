@@ -19,6 +19,9 @@ const buktiLpd2mRoutes = require('./routes/bukti-lpd2m');
 
 const { httpLogger } = require('./lib/logger');
 const errorHandler = require('./middleware/errorHandler');
+const swaggerUi = require('swagger-ui-express');
+const { swaggerSpec } = require('./docs/openapi');
+const { requireAuth, requireRole } = require('./middleware/auth');
 
 const app = express();
 app.use(cors({
@@ -47,6 +50,18 @@ app.use('/api/laporan/pemeriksaan-bahan', pemeriksaanBahanRoutes);
 // Static serving untuk file upload (TTD, bukti, dll)
 // app.js ada di backend/src, jadi ../uploads = backend/uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Swagger API Documentation
+const docsEnabled = process.env.NODE_ENV !== 'production' || process.env.ENABLE_DOCS === 'true';
+if (docsEnabled) {
+  const docsAuth = process.env.NODE_ENV === 'production'
+    ? [requireAuth, requireRole('ADMIN')]
+    : [];
+  app.get('/api-docs.json', ...docsAuth, (req, res) => {
+    res.json(JSON.parse(swaggerSpec));
+  });
+  app.use('/api-docs', ...docsAuth, swaggerUi.serve, swaggerUi.setup(JSON.parse(swaggerSpec)));
+}
 
 app.use(errorHandler);
 
