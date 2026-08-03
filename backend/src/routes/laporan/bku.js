@@ -6,6 +6,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { exportBkuXlsx } = require("../../lib/exportExcel");
 const { renderBkuHtml } = require("../../templates/dokumen/bku");
 const { renderCatatanHtml } = require("../../templates/dokumen/catatan");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getBkuData } = require("./_helpers");
 
 const router = express.Router();
@@ -46,7 +47,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
@@ -101,7 +102,7 @@ catatanRouter.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), va
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,

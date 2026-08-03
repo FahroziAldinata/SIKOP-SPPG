@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const { laporanBpSchema, laporanRekapSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderBpHtml } = require("../../templates/dokumen/bp");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getBpData, BP_CONFIGS } = require("./_helpers");
 
 const router = express.Router();
@@ -86,7 +87,7 @@ for (const cfg of BP_CONFIGS) {
 
       browser = await launchPuppeteer();
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: "networkidle0" });
+      await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
       const pdfBuffer = await page.pdf({
         format: "A4",
         printBackground: true,

@@ -10,6 +10,7 @@ const {
   KATEGORI_PORSI_BESAR_SMK,
   KATEGORI_PIC_SEKOLAH
 } = require("../../constants/kategori");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLembaga, authMiddleware } = require("./_helpers");
 
 const router = express.Router();
@@ -495,7 +496,7 @@ router.get(["/laporan/periode/pdf", "/laporan/per-periode/pdf", "/api/aslap/lapo
     browser = await launchPuppeteer();
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,

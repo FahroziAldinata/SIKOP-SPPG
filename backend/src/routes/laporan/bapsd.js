@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const { laporanBapsdSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderBapsdHtml } = require("../../templates/dokumen/bapsd");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 
 const router = express.Router();
 
@@ -103,7 +104,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,

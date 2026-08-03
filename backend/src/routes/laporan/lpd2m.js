@@ -7,6 +7,7 @@ const { validate } = require("../../middleware/validate");
 const { laporanMultiPeriodeSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderLpd2mHtml } = require("../../templates/dokumen/lpd2m");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLpd2mData } = require("./_helpers");
 
 const router = express.Router();
@@ -83,7 +84,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       landscape: true,

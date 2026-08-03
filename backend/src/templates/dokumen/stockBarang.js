@@ -40,19 +40,19 @@ function renderFooterTTDStockBarang({ namaPetugasLogistik = '', namaAkuntan = ''
         <div style="width:30%;">
           <div>Dibuat Oleh,</div>
           <div style="margin-top:2px;">Petugas Logistik</div>
-          <div style="height:45px;"></div>
+          <div class="ttd-ruang" data-ttd-nama="${escapeHtml(namaPetugasLogistik)}" style="height:45px;"></div>
           <div><strong>${escapeHtml(namaPetugasLogistik || '—')}</strong></div>
         </div>
         <div style="width:30%;">
           <div>Diperiksa Oleh,</div>
           <div style="margin-top:2px;">Akuntan SPPG</div>
-          <div style="height:45px;"></div>
+          <div class="ttd-ruang" data-ttd-nama="${escapeHtml(namaAkuntan)}" style="height:45px;"></div>
           <div><strong>${escapeHtml(namaAkuntan || '—')}</strong></div>
         </div>
         <div style="width:30%;">
           <div>Mengetahui,</div>
           <div style="margin-top:2px;">Kepala SPPG</div>
-          <div style="height:45px;"></div>
+          <div class="ttd-ruang" data-ttd-nama="${escapeHtml(namaKepalaSPPG)}" style="height:45px;"></div>
           <div><strong>${escapeHtml(namaKepalaSPPG || '—')}</strong></div>
         </div>
       </div>

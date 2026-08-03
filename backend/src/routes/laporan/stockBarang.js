@@ -6,6 +6,7 @@ const { laporanStokSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { exportStockXlsx } = require("../../lib/exportExcel");
 const { renderStockBarangHtml } = require("../../templates/dokumen/stockBarang");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
 const { getStockBarangData } = require("./_helpers");
 
@@ -201,7 +202,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     const html = renderStockBarangHtml(data);
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({ format: "A4", printBackground: true, margin: { top: "10mm", right: "10mm", bottom: "1mm", left: "10mm" } });
     res.set({ "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="Stock-Barang.pdf"`, "Content-Length": pdfBuffer.length });
     res.end(pdfBuffer);

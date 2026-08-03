@@ -14,6 +14,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const { launchPuppeteer } = require('../lib/launchPuppeteer');
 const { getPemeriksaanBahanData } = require('../lib/pemeriksaanBahanHelper');
 const { renderPemeriksaanBahanHtml } = require('../templates/dokumen/pemeriksaanBahan');
+const { injectTtdImages } = require('../templates/dokumen/shared');
 
 const router = express.Router();
 
@@ -105,7 +106,7 @@ router.get(
       // 3. Generate PDF via puppeteer
       browser = await launchPuppeteer();
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+      await page.setContent(await injectTtdImages(html), { waitUntil: 'networkidle0' });
       const pdfBuffer = await page.pdf({
         format: 'A4',
         landscape: true,

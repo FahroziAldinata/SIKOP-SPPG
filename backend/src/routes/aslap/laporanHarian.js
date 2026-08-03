@@ -4,6 +4,7 @@ const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderAslapHarianHtml } = require("../../templates/dokumen/aslapHarian");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { KATEGORI_PIC_SEKOLAH, KATEGORI_PIC_KADER } = require("../../constants/kategori");
 const { getLembaga, authMiddleware } = require("./_helpers");
 
@@ -451,7 +452,7 @@ router.get(["/laporan/harian/pdf", "/api/aslap/laporan/harian/pdf"], authMiddlew
     browser = await launchPuppeteer();
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,

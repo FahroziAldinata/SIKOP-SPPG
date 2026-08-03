@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderGiziOrganoleptikHtml } = require("../../templates/dokumen/giziOrganoleptik");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { HARI_MAP } = require("../../lib/accountingHelper");
 
 const router = express.Router();
@@ -204,7 +205,7 @@ router.get("/laporan/organoleptik/pdf", requireAuth, requireRole("AHLI_GIZI", "K
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
 
     const pdfBuffer = await page.pdf({
       format: "A4",

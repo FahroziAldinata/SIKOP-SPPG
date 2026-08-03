@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const { laporanLpaSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderLpaHtml } = require("../../templates/dokumen/lpa");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { JABATAN_KEPALA_SPPG } = require("./_helpers");
 
 const router = express.Router();
@@ -154,7 +155,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     browser = await launchPuppeteer();
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,

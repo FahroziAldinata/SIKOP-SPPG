@@ -62,18 +62,35 @@ function renderKopSurat({ namaLembaga = '', alamat = '', logoFileName = 'logo-bg
  * @param {string} [tempatTanggal]   - "Jakarta, 14 Juli 2026"
  * @param {object} [opts]
  * @param {string} [opts.tengahLabel]  - label kolom tengah (kalau 3 kolom, biasanya "Mengetahui")
+ * @param {number} [opts.ruangTtd]     - tinggi area ruang TTD (default 15)
+ * @param {object} [ttdBase64ByNama]   - map { [nama]: base64String } dari prepareTtdMap() (opsional).
+ *   Kalau diberikan dan nama penandatangan cocok, area TTD diisi <img> base64.
+ *   Kalau tidak diberikan/tidak cocok, render div kosong seperti semula (backward compatible).
  */
-function renderFooterTTD(kolom = [], tempatTanggal = '', opts = {}) {
+function renderFooterTTD(kolom = [], tempatTanggal = '', opts = {}, ttdBase64ByNama = {}) {
+  /**
+   * Render area ruang TTD untuk satu kolom.
+   * Kalau ada base64 untuk nama ini, tampilkan <img>; kalau tidak, div kosong.
+   */
+  function renderRuangTtd(nama, ruangTtd) {
+    const base64 = (ttdBase64ByNama && nama) ? (ttdBase64ByNama[nama] || '') : '';
+    if (base64) {
+      return `<div class="ttd-ruang" style="height:${ruangTtd}px; display:flex; align-items:flex-end; justify-content:center;"><img src="data:image/png;base64,${base64}" alt="TTD ${escapeHtml(nama)}" style="height:${ruangTtd}px;max-width:180px;object-fit:contain;" /></div>`;
+    }
+    return `<div class="ttd-ruang" data-ttd-nama="${escapeHtml(nama)}" style="height:${ruangTtd}px;"></div>`;
+  }
+
   const count = kolom.length;
   if (count === 1) {
     const k = kolom[0];
+    const ruangTtd = opts?.ruangTtd ?? 15;
     return `
       <div class="footer-ttd" style="display:flex; justify-content:center; margin-top:30px;">
         <div class="ttd-kolom" style="width:45%;">
           ${k.label ? `<div class="ttd-label" style="font-weight: normal; margin-bottom: 2px;">${escapeHtml(k.label)}</div>` : ''}
           ${k.org ? `<div class="ttd-org" style="font-weight: normal; margin-top: 2px;">${escapeHtml(k.org)}</div>` : ''}
           ${k.jabatan ? `<div class="ttd-jabatan" style="font-weight: normal; margin-top: 2px;">${escapeHtml(k.jabatan)}</div>` : ''}
-          <div class="ttd-ruang" style="height:${opts?.ruangTtd ?? 15}px;"></div>
+          ${renderRuangTtd(k.nama, ruangTtd)}
           <div class="ttd-nama" style="font-size: 11pt;"><strong>${escapeHtml(k.nama)}</strong></div>
           ${k.jabatanBawah ? `<div class="ttd-jabatan-bawah" style="font-size: 11pt; margin-top: 2px;">${escapeHtml(k.jabatanBawah)}</div>` : ''}
         </div>
@@ -82,6 +99,7 @@ function renderFooterTTD(kolom = [], tempatTanggal = '', opts = {}) {
   }
 
   const cols = kolom.map((k, i) => {
+    const ruangTtd = opts?.ruangTtd ?? 15;
     const dateHtml = (i === 1 && tempatTanggal)
       ? `<div class="ttd-tempat-tgl" style="margin-bottom: 1px;">${tempatTanggal}</div>`
       : `<div class="ttd-tempat-tgl-placeholder" style="height: 12px; margin-bottom: 1px;"></div>`;
@@ -92,7 +110,7 @@ function renderFooterTTD(kolom = [], tempatTanggal = '', opts = {}) {
         ${k.label ? `<div class="ttd-label" style="font-weight: normal; margin-bottom: 2px;">${escapeHtml(k.label)}</div>` : ''}
         ${k.org ? `<div class="ttd-org" style="font-weight: normal; margin-top: 2px;">${escapeHtml(k.org)}</div>` : ''}
         ${k.jabatan ? `<div class="ttd-jabatan" style="font-weight: normal; margin-top: 2px;">${escapeHtml(k.jabatan)}</div>` : ''}
-        <div class="ttd-ruang" style="height:${opts?.ruangTtd ?? 15}px;"></div>
+        ${renderRuangTtd(k.nama, ruangTtd)}
         <div class="ttd-nama" style="font-size: 11pt;"><strong>${escapeHtml(k.nama)}</strong></div>
         ${k.jabatanBawah ? `<div class="ttd-jabatan-bawah" style="font-size: 11pt; margin-top: 2px;">${escapeHtml(k.jabatanBawah)}</div>` : ''}
       </div>
@@ -117,6 +135,129 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+/**
+ * Ambil TTD user sebagai base64 string.
+ * Query prisma.user berdasarkan nama (findFirst, aktif:true) → baca file dari uploads/ttd/.
+ * Return '' kalau user tidak ketemu, ttdPath null, atau file tidak ada.
+ * Prisma di-require lazy (di dalam fungsi) untuk menghindari circular dependency.
+ *
+ * @param {string} nama - nama penandatangan
+ * @returns {Promise<string>} base64 string (tanpa prefix data URI), atau ''
+ */
+async function getTtdBase64(nama) {
+  if (!nama) return '';
+  try {
+    // Lazy require — hindari potensi circular di top-level
+    const prisma = require('../../lib/prisma');
+    const user = await prisma.user.findFirst({
+      where: { nama, aktif: true },
+      select: { ttdPath: true },
+    });
+    if (!user?.ttdPath) return '';
+    // ttdPath dari DB: '/uploads/ttd/xxx.png' → ambil basename saja
+    const filename = path.basename(user.ttdPath);
+    // __dirname = backend/src/templates/dokumen → ../../ = backend/
+    const filePath = path.join(__dirname, '../../uploads/ttd', filename);
+    if (!fs.existsSync(filePath)) return '';
+    return fs.readFileSync(filePath).toString('base64');
+  } catch (e) {
+    console.error('Gagal memuat TTD untuk', nama, ':', e.message);
+    return '';
+  }
+}
+
+/**
+ * Pre-compute map { [nama]: base64String } untuk semua penandatangan dalam kolom.
+ * Dipanggil dari route handler (async) SEBELUM memanggil fungsi render template.
+ * Hasilnya diteruskan sebagai argumen ke-4 renderFooterTTD.
+ *
+ * Contoh penggunaan di route:
+ *   const ttdMap = await prepareTtdMap(kolomArray);
+ *   const html = renderXxxHtml({ ..., ttdMap });
+ *   // di template: renderFooterTTD(kolom, tempatTgl, opts, ttdMap)
+ *
+ * @param {Array<{nama?: string}>} kolom - array kolom TTD (sama dgn arg pertama renderFooterTTD)
+ * @returns {Promise<object>} map { [nama]: base64 }
+ */
+async function prepareTtdMap(kolom = []) {
+  // Kumpulkan nama unik yang tidak kosong
+  const namaUnik = [...new Set(
+    (Array.isArray(kolom) ? kolom : [])
+      .map(k => (k && k.nama) ? k.nama.trim() : '')
+      .filter(Boolean)
+  )];
+  const entries = await Promise.all(
+    namaUnik.map(async (nama) => [nama, await getTtdBase64(nama)])
+  );
+  return Object.fromEntries(entries);
+}
+
+/**
+ * Post-process HTML: scan data-ttd-nama markers, load base64 TTD via getTtdBase64,
+ * replace empty ruang-TTD divs with <img> tags.
+ * Dipanggil di route handler: await page.setContent(await injectTtdImages(html), ...)
+ *
+ * @param {string} html - HTML hasil render template
+ * @returns {Promise<string>} HTML dengan TTD terinject (atau original kalau gagal/kosong)
+ */
+async function injectTtdImages(html) {
+  try {
+    // Fast path: tidak ada marker sama sekali
+    if (!html || !html.includes('data-ttd-nama=')) return html;
+
+    // Scan semua marker data-ttd-nama="..." (nama sudah di-escapeHtml)
+    const markerPattern = /data-ttd-nama="([^"]*)"/g;
+    const namaEscapedSet = new Set();
+    let m;
+    while ((m = markerPattern.exec(html)) !== null) {
+      if (m[1]) namaEscapedSet.add(m[1]);
+    }
+
+    if (namaEscapedSet.size === 0) return html;
+
+    // Decode HTML entities untuk query DB (escapeHtml encode: & < > " ')
+    function unescapeHtml(s) {
+      return s
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#039;/g, "'");
+    }
+
+    // Batch query semua nama unik
+    const namaEscapedArr = [...namaEscapedSet];
+    const entries = await Promise.all(
+      namaEscapedArr.map(async (namaEscaped) => {
+        const namaRaw = unescapeHtml(namaEscaped);
+        const base64 = await getTtdBase64(namaRaw);
+        return [namaEscaped, base64];
+      })
+    );
+    const ttdMap = Object.fromEntries(entries);
+
+    // Ganti tiap div kosong yang punya marker dengan <img> kalau base64 ada
+    // Pattern: <div class="ttd-ruang" data-ttd-nama="NAMA" style="height:Npx;"></div>
+    let result = html;
+    for (const [namaEscaped, base64] of Object.entries(ttdMap)) {
+      if (!base64) continue; // tidak ada TTD → biarkan div kosong
+      // Escape namaEscaped untuk regex (karakter HTML entity aman, tapi & perlu escape)
+      const namaForRegex = namaEscaped.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const divPattern = new RegExp(
+        `<div class="ttd-ruang" data-ttd-nama="${namaForRegex}" style="height:(\\d+)px;"><\/div>`,
+        'g'
+      );
+      result = result.replace(divPattern, (_, h) =>
+        `<div class="ttd-ruang" data-ttd-nama="${namaEscaped}" style="height:${h}px; display:flex; align-items:flex-end; justify-content:center;"><img src="data:image/png;base64,${base64}" alt="TTD" style="height:${h}px;max-width:180px;object-fit:contain;" /></div>`
+      );
+    }
+    return result;
+  } catch (e) {
+    console.error('[injectTtdImages] Error, returning original html:', e.message);
+    return html;
+  }
 }
 
 /**
@@ -224,4 +365,4 @@ const SHARED_CSS = `
   .pembuka { font-size: 11pt; line-height: 1.4; margin-bottom: 4px; }
 `;
 
-module.exports = { renderKopSurat, renderFooterTTD, escapeHtml, formatRupiah, formatNumberTabel, SHARED_CSS };
+module.exports = { renderKopSurat, renderFooterTTD, escapeHtml, formatRupiah, formatNumberTabel, SHARED_CSS, getTtdBase64, prepareTtdMap, injectTtdImages };

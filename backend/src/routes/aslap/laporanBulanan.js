@@ -4,6 +4,7 @@ const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderAslapPerBulanHtml } = require("../../templates/dokumen/aslapPerBulan");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { KODE_TO_ROW_FIELD, KATEGORI_PIC_SEKOLAH } = require("../../constants/kategori");
 const { getLembaga, authMiddleware } = require("./_helpers");
 
@@ -340,7 +341,7 @@ router.get(["/laporan/bulanan/pdf", "/laporan/per-bulan/pdf", "/api/aslap/lapora
     browser = await launchPuppeteer();
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,

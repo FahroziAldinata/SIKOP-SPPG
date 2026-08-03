@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderGiziPemenuhanHtml } = require("../../templates/dokumen/giziPemenuhan");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { HARI_MAP } = require("../../lib/accountingHelper");
 
 const router = express.Router();
@@ -228,7 +229,7 @@ router.get("/laporan/pemenuhan-gizi/pdf", requireAuth, requireRole("AHLI_GIZI", 
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
 
     const pdfBuffer = await page.pdf({
       format: "A4",

@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../../middleware/auth");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
 const { renderRabP12Html } = require("../../templates/dokumen/rabP12");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const {
   hitungPaguHarian,
   hitungSubtotalBahanHarian,
@@ -254,7 +255,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,

@@ -7,6 +7,7 @@ const schemas = require("../validators/mitra");
 const { launchPuppeteer } = require("../lib/launchPuppeteer");
 const { renderNotaPesananHtml } = require("../templates/dokumen/notaPesanan");
 const { renderPoRealisasiHtml } = require("../templates/dokumen/poRealisasi");
+const { injectTtdImages } = require("../templates/dokumen/shared");
 
 const router = express.Router();
 
@@ -743,7 +744,7 @@ router.get("/po/:id/pdf", requireAuth, requireRole("MITRA", "AKUNTAN", "ASLAP"),
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
 
     const pdfBuffer = await page.pdf({
       format: "A4",
@@ -925,7 +926,7 @@ router.get("/laporan/realisasi-po/pdf", requireAuth, requireRole("MITRA", "AKUNT
 
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
 
     const pdfBuffer = await page.pdf({
       format: "A4",

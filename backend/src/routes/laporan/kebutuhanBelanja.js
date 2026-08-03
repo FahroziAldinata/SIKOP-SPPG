@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const { laporanKebutuhanBelanjaSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderKebutuhanBelanjaHtml } = require("../../templates/dokumen/kebutuhanBelanja");
+const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { normalizeDateUTC, HARI_MAP, getTotalPorsiBlok } = require("../../lib/accountingHelper");
 const { getKebutuhanBelanjaData } = require("./_helpers");
 
@@ -110,7 +111,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     const html = renderKebutuhanBelanjaHtml(data);
     browser = await launchPuppeteer();
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(await injectTtdImages(html), { waitUntil: "networkidle0" });
     const pdfBuffer = await page.pdf({ format: "A4", printBackground: true, margin: { top: "10mm", right: "10mm", bottom: "1mm", left: "10mm" } });
     res.set({ "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="Kebutuhan-Belanja.pdf"`, "Content-Length": pdfBuffer.length });
     res.end(pdfBuffer);
