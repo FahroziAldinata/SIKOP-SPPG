@@ -170,7 +170,7 @@ export const Lpd2mBuktiSection = ({
                                     {b.mimeType && b.mimeType.startsWith('image/') ? (
                                         <span style={{ position: 'relative', display: 'inline-block' }}>
                                             <img
-                                                src={'/uploads/' + b.filePath}
+                                                src={'/' + b.filePath}
                                                 alt={b.namaBukti}
                                                 style={{
                                                     maxHeight: '80px',
@@ -183,7 +183,7 @@ export const Lpd2mBuktiSection = ({
                                                 }}
                                                 onError={(e) => {
                                                     e.currentTarget.style.display = 'none';
-                                                    const fb = e.currentTarget.nextSibling;
+                                                    const fb = e.currentTarget.nextElementSibling;
                                                     if (fb) fb.style.display = 'flex';
                                                 }}
                                             />
