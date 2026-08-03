@@ -1,12 +1,12 @@
 # CURRENT TASK — 2026-08-03
 
-## Status: SELESAI — BUG-001 fixed + V2-4 tuntas 11/11 (3 commit serial, semua pushed)
+## Status: ✅ SELESAI — V2-1 TTD Basah APPROVED Rozi (2026-08-03). DOCUMENTATION_ARCHIVE → CYCLE_END.
 
-- Cycle 1: BUG-001 fix backend — commit `b9ba07b` (4 file: accountingHelper, _helpers, rabHarian, rabP12)
-- Cycle 2: PeriodeSetupPage 836→268 — commit `755b894` (5 komponen periodeSetup/)
-- Cycle 3: SaldoAwalBarangPage 813→294 — commit `6d26505` (5 komponen saldoAwal/)
-- Semua zero behavioral change verified OpenCode + build PASS.
+- **Tahap 1 Backend** `3a4da6c` | **Tahap 2 Frontend** `2a1abb0` | **Tahap 3 PDF** `81899e7`
+- **Fix 1** (TTD tidak muncul) `acc8d6b` | **Fix 2** (ukuran/kecil + tidak tengah) `24f640a`
+- Tes HTTP 7/7 + PDF E2E PASS + verifikasi visual Rozi OK (canvas 480px, img 55px/220px terpusat).
+- HEAD: `24f640a`, semua pushed. Docs archived (DOCUMENTATION.md entry V2-1 asli + klaim palsu ditandai, BUG-003 logged).
 
 ## Next Step
-- Menunggu approval akhir Rozi (3 task) → update docs → V2-1 TTD Basah (Sprint 24) via TASK_SELECTION baru.
-- Tes HTTP BUG-001: restart BE lalu cek /api/akuntan/rab-p12/harian + /rekap (masih pending — server instance lama saat fix).
+- CYCLE_END — task berikutnya mulai dari TASK_SELECTION baru (backlog: V2-2 image handling, V2-3 minor UX).
+- Catatan pending (bukan blocker): re-test HTTP penuh BUG-001 (fix `b9ba07b` sudah verified fungsi, tes HTTP belum).

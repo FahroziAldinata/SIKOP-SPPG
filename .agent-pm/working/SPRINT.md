@@ -1,7 +1,7 @@
 # Sprint Backlog
 
-## Sprint 24 — V2-1 TTD Basah (2026-08-01) — BELUM DIMULAI
-1. ⏳ V2-1 TTD Basah — upload gambar per user (SEMUA ROLE) + preview + modal. Menunggu TASK_SELECTION.
+## Sprint 24 — V2-1 TTD Basah ✅ (2026-08-03)
+1. ✅ V2-1 TTD Basah — SELESAI + APPROVED Rozi. 3 tahap (`3a4da6c`, `2a1abb0`, `81899e7`) + fix path (`acc8d6b`) + fix ukuran/center (`24f640a`). Tes HTTP 7/7 + PDF E2E PASS + verifikasi visual OK.
 
 ## Sprint 23 — Laporan Ahli Gizi ✅ (2026-07-31)
 1. ✅ G1 Laporan Pemenuhan Gizi — endpoint rekap target vs realisasi 5 zat gizi + PDF + UI RangeCalendar. Diuji Rozi OK.

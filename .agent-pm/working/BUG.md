@@ -2,6 +2,11 @@
 
 ## Active Bugs
 
+### [BUG-003] TTD Basah tidak muncul di PDF + ukuran kecil (2026-08-03)
+- **Root cause 1**: `getTtdBase64` (shared.js:162) path salah `'../../uploads/ttd'` dari `backend/src/templates/dokumen` → `backend/src/uploads/ttd` (tidak ada). Harus `'../../../'` → `backend/uploads/ttd`. Fix `acc8d6b`.
+- **Root cause 2 (revisi Rozi)**: img TTD clamp `height:40px;max-width:180px` + PNG rasio 7.2:1 (canvas 100% lebar) → tinggi efektif ~25px + goresan off-center. Fix `24f640a` (canvas 480px rasio 3:1 + img 55px/220px + wrapper max(ruangTtd,55)).
+- **Status**: SELESAI 2026-08-03 — diuji Rozi OK, task approved.
+
 ### [BUG-001] 500 error pada GET /rab-p12/harian dan /rab-p12/rekap
 - **Severity**: Medium
 - **Root cause**: `inp.hariAktif` diakses di accountingHelper.js:46 — kolom SUDAH dihapus dari `InputPenerimaManfaat` (dipindah ke model `GrupHari` saat refactor Task 1, commit `4dbad78`). Query tidak include `grupHari` → undefined → throw.

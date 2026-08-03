@@ -1,14 +1,17 @@
 # LIVE CONTEXT (auto-snapshot)
-_Generated: 2026-08-02 01:52:56 +0700 — snapshot ringkas; sumber: CURRENT_TASK.md & CURRENT_STATE.md_
+_Generated: 2026-08-03 — snapshot ringkas; sumber: CURRENT_TASK.md & CURRENT_STATE.md_
 
 ### dari CURRENT_TASK.md
-## Status: IN_PROGRESS — V2-4 Refactor Batch 1 (verifikasi + commit pending)
+## Status: V2-1 TTD Basah — 3 TAHAP SELESAI + COMMITTED + PUSHED (menunggu tes HTTP + approval akhir)
+- Tahap 1 Backend `3a4da6c`: User.ttdPath + migrasi + route /api/auth/ttd + static /uploads
+- Tahap 2 Frontend `2a1abb0`: SettingPage section TTD — canvas + upload + preview + hapus
+- Tahap 3 PDF `81899e7`: marker data-ttd-nama + injectTtdImages + 26 route + stockBarang
+- HEAD: `81899e7`, pushed. ⚠️ Tes HTTP PENDING (restart BE).
+
 ### dari CURRENT_STATE.md
-**Scope Aktif: V2-4 Refactor File Ribuan Baris — batch 1 akuntan.js (VERIFIKASI + COMMIT belum)**
-## Sesi 26 — V2-4 Batch 1: Refactor akuntan.js modular + Infra live-context ✅ (2026-08-02)
-- **Task dikerjakan**: (1) LIVE_CONTEXT.md auto-snapshot + mini-refresh Telegram (cron `live-context-snapshot` bc228bfc03d8, tiap 10m, silent) — commit b93228f + 89890d2; (2) Audit image asset — 5 file semua terpakai, tidak ada yatim; (3) V2-4 batch 1 — akuntan.js 4.637 baris dipecah jadi 9 file folder `routes/akuntan/` (index + _helpers + 7 sub-router: rabP12, rabHarian, jurnal, dokumenResmi, nominatifUpah, stok, master)
-- **Status**: 🔄 HAMPIR SELESAI — node --check ALL PASS, APP_OK boot sukses. BELUM: verifikasi endpoint (curl 401), BELUM commit
-## Sesi 25 — Audit & Cleanup File Usang ✅ (2026-08-02)
-- **Task dikerjakan**: Audit file usang seluruh project (backend + frontend + dependency) + eksekusi hapus 10 file/folder + uninstall 4 dependency FE tidak terpakai (@emotion/react, @emotion/styled, @mui/material, antd)
-- **Status**: ✅ SELESAI — FE build PASS, 0 referensi rusak, git status bersih
-## Sesi 24 — M1-M3 Laporan Mitra + G-REVISI ✅ (2026-07-31)
+**Scope Aktif: V2-1 TTD Basah — 3 tahap SELESAI + committed + pushed. Menunggu tes HTTP (restart BE) + approval akhir.**
+## Sesi 31 (2026-08-03) — V2-1 TTD Basah: BUILD 3 tahap dalam 1 cycle bertahap ✅
+- Keputusan Rozi: TTD per jabatan (profil user), SettingPage, 2 mode (canvas + upload), opsional.
+- Strategi PDF: post-process injection (kolom hardcode di template) — marker + injectTtdImages base64 by nama, fallback kosong.
+- Verifikasi: 31/31 node check, 28 inject 26 route, FE build exit 0.
+- ⚠️ Tes HTTP + PDF penuh PENDING — butuh restart BE (server PID 18876 masih kode lama).

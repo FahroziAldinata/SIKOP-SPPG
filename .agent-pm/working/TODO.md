@@ -20,7 +20,13 @@
 - ✅ Laporan Mitra M1-M3 (`commit-M1`..`commit-M3`)
 
 ## Backlog V2 (menunggu TASK_SELECTION)
-- **V2-1: TTD Basah (upload gambar per user) — SEMUA ROLE** ← NEXT
+- **V2-1: TTD Basah (upload gambar per user) — SEMUA ROLE** ✅ SELESAI + APPROVED (2026-08-03)
+  - ✅ **Tahap 1 Backend** (`3a4da6c`): `User.ttdPath` + migrasi `20260803065119_add_ttd_path_user` + route `/api/auth/ttd` POST/GET/DELETE (multer 5MB png/jpg, `req.user.sub`) + static `/uploads`
+  - ✅ **Tahap 2 Frontend** (`2a1abb0`): SettingPage section TTD — canvas signature (mouse+touch, DPR) + upload + preview + hapus. Build PASS
+  - ✅ **Tahap 3 PDF** (`81899e7`): marker `data-ttd-nama` + `injectTtdImages` (base64 by nama) + 26 route + stockBarang
+  - ✅ **Fix path** (`acc8d6b`): getTtdBase64 `../../` → `../../../` (bug TTD tidak muncul)
+  - ✅ **Fix ukuran/center** (`24f640a`): canvas 480px rasio 3:1 + img 55px/220px + wrapper max(ruangTtd,55) — revisi Rozi
+  - ✅ Tes HTTP 7/7 + PDF E2E + verifikasi visual Rozi OK → approved → archived
 - V2-2: Image handling (upload → report → auto-delete by period)
 - V2-3: Perbaikan minor UX (jika ada)
 - **V2-4: Refactor file ribuan baris — design modular** (2026-08-02): pecah file >800 baris jadi komponen/modul per domain.
