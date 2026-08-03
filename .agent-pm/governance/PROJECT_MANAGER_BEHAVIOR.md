@@ -136,7 +136,7 @@ commit. Rozi koreksi: "commit tugas opencode".
 - Referensi kesalahan nyata: GF-008 di GOVERNANCE_FINDINGS.md (commit `e475d34` via AGY).
 
 ## Informasi untuk user
-Jika ada perbaikan BE suruh user matikan console be saja tapi beritahu user aktifkan kembali
+Jika ada perbaikan BE silahkan matikan be yang aktif dan  beritahu user aktifkan kembali
 
 ### Self-Check Sebelum Mark SELESAI (Untuk GF-007)
 
