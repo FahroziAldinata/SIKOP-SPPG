@@ -27,7 +27,7 @@
   - ✅ **Fix path** (`acc8d6b`): getTtdBase64 `../../` → `../../../` (bug TTD tidak muncul)
   - ✅ **Fix ukuran/center** (`24f640a`): canvas 480px rasio 3:1 + img 55px/220px + wrapper max(ruangTtd,55) — revisi Rozi
   - ✅ Tes HTTP 7/7 + PDF E2E + verifikasi visual Rozi OK → approved → archived
-- V2-2: Image handling (upload → report → auto-delete by period)
+- V2-2: Image handling (upload → report → auto-delete by period) ✅ SELESAI (commit 100b0da, f837cc7, e898cfb)
 - V2-3: Perbaikan minor UX (jika ada)
 - **V2-4: Refactor file ribuan baris — design modular** (2026-08-02): pecah file >800 baris jadi komponen/modul per domain.
   - ✅ **Batch 1** (2026-08-02): akuntan.js → `routes/akuntan/` 9 file — commit `12557a0`
@@ -55,6 +55,7 @@
 ## BUG (2026-08-03)
 - ✅ **BUG-001** SELESAI: 500 /akuntan/rab-p12/harian + /rekap — `inp.hariAktif` drift ke GrupHari, fix commit `b9ba07b` (4 file). Tes HTTP penuh PASS (harian + rekap 200, negatif bersih).
 - ✅ **BUG-002** SELESAI: 500 /gizi/master-menu-list — schema drift MasterMenuMingguan, migration `20260802220000_add_minggu_ke_master_menu`, commit `77a5e19`
+- ✅ **BUG-003** SELESAI: 404 gambar LPD2M — path frontend salah, fix commit `f837cc7` (tambah /uploads/ prefix)
 
 ---
 Model sesi: [Hermes oc/deepseek-v4-flash-free] (lihat knowledge/10-model-strategy.md)
