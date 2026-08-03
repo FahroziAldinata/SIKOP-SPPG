@@ -34,3 +34,27 @@ Panduan khusus untuk coding agent di `frontend/` — SIKOP-SPPG (React 19 + Vite
 
 - Jangan import komponen langsung dari node_modules HeroUI bila sudah ada wrapper di `components/ui/`
 - Jangan ubah `lib/utils.js` tanpa menyesuaikan `utils.test.js`
+
+## Cara Menambah Halaman Baru
+
+Router di `frontend/src/App.jsx` (React Router `BrowserRouter` + `Routes`/`Route`, bukan `createBrowserRouter`). Semua route halaman berada di dalam satu root `<Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>`, lalu route per halaman adalah anak dengan pola:
+
+```jsx
+<Route
+  path="aslap/penerima-manfaat"
+  element={
+    <ProtectedRoute allowedRoles={['ASLAP']}>
+      <PenerimaManfaatPage />
+    </ProtectedRoute>
+  }
+/>
+```
+
+Ikuti langkah berikut saat menambah halaman baru:
+
+1. **Buat file di `frontend/src/pages/<domain>/NamaHalaman.jsx`** — ikuti pola halaman existing di folder domain (mis. `pages/aslap/`, `pages/gizi/`, `pages/akuntan/`).
+2. **Pecah logic besar ke `frontend/src/components/<domain>/`** — mengikuti pola restrukturisasi V2-3: `components/ui/`, `components/layout/`, dan folder domain terpisah (`components/akuntan/`, `components/gizi/`, `components/aslap/`, `components/kepala/`).
+3. **Gunakan komponen dari `frontend/src/components/ui/` SEBELUM membuat komponen baru** (HeroUI/komponen custom) — reuse dulu (mis. `NumberInput`, `DatePicker`, `Skeleton`, `ConfirmDialog`, `Table`, `StatusBadge`).
+4. **Panggil API melalui `frontend/src/hooks/useApi.js`** (BUKAN fetch/axios langsung) — catatan: `useApi` auto-prefix `/api` dari `VITE_API_URL`, jadi jangan tulis `/api/...` dua kali di URL.
+5. **Daftarkan route pada file `frontend/src/App.jsx`** — tambahkan import halaman + `<Route path="..." element={...} />` di dalam root `<Route>`.
+6. **Bungkus dengan `ProtectedRoute` + role yang sesuai** kalau halaman butuh proteksi role (`allowedRoles={['ROLE']}`), mengikuti pola existing di `frontend/src/App.jsx`.

@@ -15,9 +15,19 @@ Panduan khusus untuk coding agent di `backend/` — REST API SIKOP-SPPG (Express
 ## Pola Route
 
 - Router Express per domain: `const router = express.Router()` + `module.exports = router`
-- Proteksi: `requireAuth` (semua), lalu `requireRole('AKUNTAN'|'ASLAP'|'GIZI'|'KEPALA'|'ADMIN'|...)`
+- Proteksi: `requireAuth` (semua), lalu `requireRole('ASLAP', 'MITRA', 'AHLI_GIZI', 'AKUNTAN', 'KEPALA_SPPG', 'ADMIN')` — role valid LENGKAP sesuai enum `Role` di `prisma/schema.prisma`
 - Validasi body: `validate(schema)` dari `middleware/validate.js` (Zod, error → 400 `{ error }`)
 - Mount di `src/app.js` dengan prefix `/api/<domain>`
+
+## Cara Menambah Endpoint Baru
+
+Ikuti 5 langkah berikut saat menambah endpoint API baru di backend:
+
+1. **Buat/extend schema Zod** di `backend/src/validators/<domain>.js` — ikuti pola schema yang sudah ada di file validators domain tersebut (mis. `akuntan.js`, `aslap.js`, `gizi.js`, `laporan.js`, `mitra.js`).
+2. **Buat route handler** di file route domain yang sesuai (`backend/src/routes/`), pakai `requireAuth + requireRole(...) + validate(schema)` — ikuti pola `backend/src/middleware/auth.js` + `backend/src/middleware/validate.js`.
+3. **Registrasikan endpoint di `backend/src/docs/openapi.js`** (WAJIB — kalau tidak, endpoint tidak muncul di Swagger `/api-docs`).
+4. **Tambahkan test** di `backend/src/routes/__tests__/` — pola supertest + `const { app } = require('../../app')`.
+5. **Jalankan `cd backend && npm test`** → pastikan seluruh 89+ test lama tetap PASS (`fileParallelism: false` — jangan ubah test existing).
 
 ## Pola Test
 
