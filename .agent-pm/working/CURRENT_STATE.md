@@ -6,7 +6,7 @@
 - **Setup lengkap perangkat ini**: node_modules backend (269 pkg) + frontend (140 pkg), .env dibuat (DB lokal `sppg` Postgres 18), 18 migration applied, seed BERHASIL, FE build PASS, backend boot OK.
 - **Fix drift (pola BUG-002 terulang)**: 3 model tanpa migration — `GrupHari`, `MasterTargetGizi`, `DokumenBuktiLpd2m` + drift `InputPenerimaManfaat` (hariAktif vs grupHarId). Migration manual `20260803000000_add_gruphari_mastertarget_dokumenbukti` (AGY).
 - **Fix 404 FE**: `VITE_API_URL` butuh prefix `/api` — frontend/.env + frontend/.env.example diperbaiki (`.env.example` repo tadinya salah, jebakan clone).
-- **Catatan**: DB Postgres 18 lokal jalan port 5432, password postgres dari Rozi. PUPPETEER_EXECUTABLE_PATH masih kosong — PDF perlu dites.
+- **Catatan**: DB Postgres 18 lokal jalan port 5432, password postgres dari Rozi. PUPPETEER_EXECUTABLE_PATH diisi `C:\Program Files\Google\Chrome\Application\chrome.exe` + tes launch OK + PDF test Rozi APPROVED.
 - HEAD: `5a50282`, working tree bersih.
 
 ## Sesi 28 (2026-08-02) — V2-4 Refactor modular: backend 3/3 ✅ + FE 10/13 ✅
