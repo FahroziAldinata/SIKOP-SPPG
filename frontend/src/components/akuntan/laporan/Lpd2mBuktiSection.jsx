@@ -170,7 +170,7 @@ export const Lpd2mBuktiSection = ({
                                     {b.mimeType && b.mimeType.startsWith('image/') ? (
                                         <span style={{ position: 'relative', display: 'inline-block' }}>
                                             <img
-                                                src={'/' + b.filePath}
+                                                src={'/uploads/' + b.filePath}
                                                 alt={b.namaBukti}
                                                 style={{
                                                     maxHeight: '80px',
