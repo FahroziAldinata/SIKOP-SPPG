@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table } from '../../components/Table';
-import { StatusBadge } from '../../components/StatusBadge';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import Dropdown from '../../components/Dropdown';
-import { Skeleton } from '../../components/Skeleton';
+import { Table } from '../../components/ui/Table';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import Dropdown from '../../components/ui/Dropdown';
+import { Skeleton } from '../../components/ui/Skeleton';
 
 const ROLE_OPTIONS = [
   { value: 'ADMIN', label: 'Admin' },

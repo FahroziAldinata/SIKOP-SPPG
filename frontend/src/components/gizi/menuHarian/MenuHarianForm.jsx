@@ -1,5 +1,5 @@
 import React from 'react';
-import { DatePicker } from '../../DatePicker';
+import { DatePicker } from '../../ui/DatePicker';
 import { fieldLabel as defaultFieldLabel, buttonStyle as defaultButtonStyle } from './helpers';
 
 export const MenuHarianForm = ({

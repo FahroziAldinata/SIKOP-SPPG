@@ -1,6 +1,6 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
-import { GrupHariManager } from '../../GrupHariManager';
+import Dropdown from '../../ui/Dropdown';
+import { GrupHariManager } from './GrupHariManager';
 
 export const TopToolbar = ({
   periods,

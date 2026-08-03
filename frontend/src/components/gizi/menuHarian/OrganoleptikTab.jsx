@@ -1,5 +1,5 @@
 import React from 'react';
-import { DatePicker } from '../../DatePicker';
+import { DatePicker } from '../../ui/DatePicker';
 import {
     formatDate as defaultFormatDate,
     getTanggalMusnah as defaultGetTanggalMusnah,

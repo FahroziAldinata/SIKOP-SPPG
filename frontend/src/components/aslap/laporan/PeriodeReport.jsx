@@ -1,7 +1,7 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
-import { Table } from '../../Table';
-import { Skeleton } from '../../Skeleton';
+import Dropdown from '../../ui/Dropdown';
+import { Table } from '../../ui/Table';
+import { Skeleton } from '../../ui/Skeleton';
 import { Printer, RefreshCw, Filter, FileText, School, Users } from 'lucide-react';
 
 export const PeriodeReport = ({

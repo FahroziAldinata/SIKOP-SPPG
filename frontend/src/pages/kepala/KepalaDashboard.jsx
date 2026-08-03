@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../../hooks/useApi';
-import { WorkflowStepper } from '../../components/WorkflowStepper';
-import { NotifikasiList } from '../../components/NotifikasiList';
-import { DashboardSummaryCards } from '../../components/DashboardSummaryCards';
-import Dropdown from '../../components/Dropdown';
-import { Card } from '../../components/Card';
-import { Skeleton } from '../../components/Skeleton';
+import { WorkflowStepper } from '../../components/ui/WorkflowStepper';
+import { NotifikasiList } from '../../components/ui/NotifikasiList';
+import { DashboardSummaryCards } from '../../components/ui/DashboardSummaryCards';
+import Dropdown from '../../components/ui/Dropdown';
+import { Card } from '../../components/ui/Card';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export const KepalaDashboard = () => {

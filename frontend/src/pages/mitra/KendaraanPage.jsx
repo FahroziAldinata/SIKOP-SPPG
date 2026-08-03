@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table, renderStatus } from '../../components/Table';
-import { FieldButton } from '../../components/FieldButton';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { Table, renderStatus } from '../../components/ui/Table';
+import { FieldButton } from '../../components/ui/FieldButton';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 export const KendaraanPage = () => {
   const { request } = useApi();

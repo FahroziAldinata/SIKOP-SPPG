@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { renderDate } from '../../components/Table';
-import { Card } from '../../components/Card';
+import { renderDate } from '../../components/ui/Table';
+import { Card } from '../../components/ui/Card';
 
 import {
     cleanDateStr,

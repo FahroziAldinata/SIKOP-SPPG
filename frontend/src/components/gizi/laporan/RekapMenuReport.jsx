@@ -1,6 +1,6 @@
 import React from 'react';
-import { Table } from '../../Table';
-import { StatusBadge } from '../../StatusBadge';
+import { Table } from '../../ui/Table';
+import { StatusBadge } from '../../ui/StatusBadge';
 
 export const RekapMenuReport = ({ loading, data, columnsRekap }) => {
   return (

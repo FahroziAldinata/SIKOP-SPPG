@@ -1,6 +1,6 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
-import { Skeleton } from '../../Skeleton';
+import Dropdown from '../../ui/Dropdown';
+import { Skeleton } from '../../ui/Skeleton';
 import { FileText, RefreshCw, Printer, Filter, School, BookOpen, Users } from 'lucide-react';
 
 export const PerKelasReport = ({

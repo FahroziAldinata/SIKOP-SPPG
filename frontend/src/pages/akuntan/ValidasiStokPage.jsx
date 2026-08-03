@@ -1,9 +1,9 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table, renderDate, renderCurrency, renderTruncate } from '../../components/Table';
-import { DatePicker } from '../../components/DatePicker';
-import Dropdown from '../../components/Dropdown';
+import { Table, renderDate, renderCurrency, renderTruncate } from '../../components/ui/Table';
+import { DatePicker } from '../../components/ui/DatePicker';
+import Dropdown from '../../components/ui/Dropdown';
 
 export const ValidasiStokPage = () => {
     const { request } = useApi();

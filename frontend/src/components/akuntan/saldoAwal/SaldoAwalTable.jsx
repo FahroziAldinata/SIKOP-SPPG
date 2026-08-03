@@ -1,6 +1,6 @@
 import React from 'react';
-import { Table } from '../../Table';
-import { Skeleton } from '../../Skeleton';
+import { Table } from '../../ui/Table';
+import { Skeleton } from '../../ui/Skeleton';
 
 export const SaldoAwalTable = ({
     loading = false,

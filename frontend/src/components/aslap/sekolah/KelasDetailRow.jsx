@@ -1,5 +1,5 @@
 import React from 'react';
-import { Skeleton } from '../../Skeleton';
+import { Skeleton } from '../../ui/Skeleton';
 import { categoryLabelMap as defaultCategoryLabelMap } from './constants';
 
 export const KelasDetailRow = ({

@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderDate, renderStatus } from '../../Table';
+import { renderDate, renderStatus } from '../../ui/Table';
 import { calculateBlockGizi, KOMPONEN_LABEL } from './helpers';
 
 export const MenuDetailView = ({ detailData, bahanPokokMap }) => {

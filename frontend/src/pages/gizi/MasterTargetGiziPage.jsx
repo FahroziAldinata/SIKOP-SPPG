@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table } from '../../components/Table';
+import { Table } from '../../components/ui/Table';
 
 export default function MasterTargetGiziPage() {
   const { request } = useApi();

@@ -1,9 +1,9 @@
 import React from 'react';
-import { DatePicker } from '../../DatePicker';
-import Dropdown from '../../Dropdown';
-import { Skeleton } from '../../Skeleton';
-import { Table } from '../../Table';
-import { NumberInput } from '../../NumberInput';
+import { DatePicker } from '../../ui/DatePicker';
+import Dropdown from '../../ui/Dropdown';
+import { Skeleton } from '../../ui/Skeleton';
+import { Table } from '../../ui/Table';
+import { NumberInput } from '../../ui/NumberInput';
 
 export const PoInputForm = ({
     handleCreatePo,

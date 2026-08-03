@@ -15,7 +15,7 @@ import {
 import {useLocale} from 'react-aria-components/I18nProvider';
 import {tv} from 'tailwind-variants';
 import {Button} from './Button';
-import {composeTailwindRenderProps, focusRing} from './utils';
+import {composeTailwindRenderProps, focusRing} from '../../lib/utils';
 
 const cellStyles = tv({
   extend: focusRing,

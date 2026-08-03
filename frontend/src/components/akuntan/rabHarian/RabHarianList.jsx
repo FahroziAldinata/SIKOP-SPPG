@@ -1,7 +1,7 @@
 import React from 'react';
-import { Skeleton } from '../../Skeleton';
-import { Table, renderDate, renderStatus, renderCurrency } from '../../Table';
-import { ConfirmDialog } from '../../ConfirmDialog';
+import { Skeleton } from '../../ui/Skeleton';
+import { Table, renderDate, renderStatus, renderCurrency } from '../../ui/Table';
+import { ConfirmDialog } from '../../ui/ConfirmDialog';
 
 export const RabHarianList = ({
     loading,

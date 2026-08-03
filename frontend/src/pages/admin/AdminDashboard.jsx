@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApi } from '../../hooks/useApi';
-import { Card } from '../../components/Card';
-import { Skeleton } from '../../components/Skeleton';
+import { Card } from '../../components/ui/Card';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { Users, Shield, BookOpen, FileSpreadsheet, Home, Settings } from 'lucide-react';
 
 export const AdminDashboard = () => {

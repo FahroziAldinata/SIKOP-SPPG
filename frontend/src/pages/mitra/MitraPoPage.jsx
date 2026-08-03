@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { renderDate } from '../../components/Table';
-import Dropdown from '../../components/Dropdown';
-import { NumberInput } from '../../components/NumberInput';
-import { Skeleton } from '../../components/Skeleton';
+import { renderDate } from '../../components/ui/Table';
+import Dropdown from '../../components/ui/Dropdown';
+import { NumberInput } from '../../components/ui/NumberInput';
+import { Skeleton } from '../../components/ui/Skeleton';
 
 export const MitraPoPage = () => {
     const { request } = useApi();

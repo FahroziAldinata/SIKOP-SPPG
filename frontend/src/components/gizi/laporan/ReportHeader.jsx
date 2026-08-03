@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText } from 'lucide-react';
-import Dropdown from '../../Dropdown';
+import Dropdown from '../../ui/Dropdown';
 
 export const REPORT_TYPE_OPTIONS = [
   { value: 'PEMENUHAN', label: 'Laporan Pemenuhan Gizi' },

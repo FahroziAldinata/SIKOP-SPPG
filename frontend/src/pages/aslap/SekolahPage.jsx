@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { PeriodeFilterBar } from '../../components/aslap/sekolah/PeriodeFilterBar';
 import { SekolahTable } from '../../components/aslap/sekolah/SekolahTable';
 import { SekolahFormModal } from '../../components/aslap/sekolah/SekolahFormModal';

@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderDate, renderStatus } from '../../Table';
+import { renderDate, renderStatus } from '../../ui/Table';
 
 export const RabDetailView = ({ detailData }) => {
     return (

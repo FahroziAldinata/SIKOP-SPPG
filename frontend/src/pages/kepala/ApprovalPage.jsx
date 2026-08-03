@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ApprovalPeriodSelector } from '../../components/kepala/approval/ApprovalPeriodSelector';
 import { MenuApprovalTable } from '../../components/kepala/approval/MenuApprovalTable';
 import { RabApprovalTable } from '../../components/kepala/approval/RabApprovalTable';

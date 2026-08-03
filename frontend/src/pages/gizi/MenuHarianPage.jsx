@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import Dropdown from '../../components/Dropdown';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { Table, renderDate } from '../../components/Table';
+import Dropdown from '../../components/ui/Dropdown';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Table, renderDate } from '../../components/ui/Table';
 import {
     fieldLabel,
     buttonStyle,

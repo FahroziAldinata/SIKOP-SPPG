@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table, renderDate, renderStatus, renderTruncate } from '../../components/Table';
-import { DatePicker } from '../../components/DatePicker';
-import Dropdown from '../../components/Dropdown';
-import { NumberInput } from '../../components/NumberInput';
-import { Skeleton } from '../../components/Skeleton';
+import { Table, renderDate, renderStatus, renderTruncate } from '../../components/ui/Table';
+import { DatePicker } from '../../components/ui/DatePicker';
+import Dropdown from '../../components/ui/Dropdown';
+import { NumberInput } from '../../components/ui/NumberInput';
+import { Skeleton } from '../../components/ui/Skeleton';
 
 
 export const MutasiStokPage = () => {

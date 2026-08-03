@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table } from '../../components/Table';
-import { DatePicker } from '../../components/DatePicker';
-import Dropdown from '../../components/Dropdown';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
-import { StatusBadge } from '../../components/StatusBadge';
-import { NominatifUpahGrid } from '../../components/NominatifUpahGrid';
-import { NumberInput } from '../../components/NumberInput';
+import { Table } from '../../components/ui/Table';
+import { DatePicker } from '../../components/ui/DatePicker';
+import Dropdown from '../../components/ui/Dropdown';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { StatusBadge } from '../../components/ui/StatusBadge';
+import { NominatifUpahGrid } from '../../components/akuntan/nominatifUpah/NominatifUpahGrid';
+import { NumberInput } from '../../components/ui/NumberInput';
 
 export const NominatifUpahPage = () => {
     const { request } = useApi();

@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import { useApi } from '../hooks/useApi';
+import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
+import { useApi } from '../../hooks/useApi';
 import {
   Sun,
   Moon,

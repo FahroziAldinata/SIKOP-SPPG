@@ -1,5 +1,5 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
+import Dropdown from '../../ui/Dropdown';
 import { Search, Printer } from 'lucide-react';
 
 export const ReportActionButtons = ({

@@ -1,5 +1,5 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
+import Dropdown from '../../ui/Dropdown';
 import { FileText } from 'lucide-react';
 import { REPORT_TYPE_OPTIONS } from './constants';
 

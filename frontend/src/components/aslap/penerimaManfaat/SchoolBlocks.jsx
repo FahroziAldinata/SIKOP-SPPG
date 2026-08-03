@@ -1,6 +1,6 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
-import { NumberInput } from '../../NumberInput';
+import Dropdown from '../../ui/Dropdown';
+import { NumberInput } from '../../ui/NumberInput';
 import { getDefaultKelas, getKelasLabel, jenjangOptions } from './constants';
 
 export const SchoolBlocks = ({

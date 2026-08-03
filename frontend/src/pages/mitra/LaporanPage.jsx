@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import Dropdown from '../../components/Dropdown';
-import { Table, renderDate } from '../../components/Table';
-import { Skeleton } from '../../components/Skeleton';
+import Dropdown from '../../components/ui/Dropdown';
+import { Table, renderDate } from '../../components/ui/Table';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { Printer, RefreshCw, FileText, Filter } from 'lucide-react';
 
 const REPORT_TYPE_OPTIONS = [

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useApi } from '../../../hooks/useApi';
 import { useToast } from '../../../context/ToastContext';
 import { useAuth } from '../../../context/AuthContext';
-import { Skeleton } from '../../../components/Skeleton';
+import { Skeleton } from '../../../components/ui/Skeleton';
 import { ReportFilterBar } from '../../../components/akuntan/laporan/ReportFilterBar';
 import { ReportActionButtons } from '../../../components/akuntan/laporan/ReportActionButtons';
 import { BkuTable } from '../../../components/akuntan/laporan/BkuTable';

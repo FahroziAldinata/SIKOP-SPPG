@@ -1,6 +1,6 @@
 import React from 'react';
-import { Skeleton } from '../../Skeleton';
-import { Card } from '../../Card';
+import { Skeleton } from '../../ui/Skeleton';
+import { Card } from '../../ui/Card';
 
 export const RingkasanAnggaranCards = ({ ringkasanLoading, ringkasanAnggaran, totalRingkasan }) => {
     return (

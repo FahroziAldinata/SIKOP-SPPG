@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Table } from './Table';
-import { generateDateRange } from './utils';
+import { Table } from '../../ui/Table';
+import { generateDateRange } from '../../../lib/utils';
 
 export const NominatifUpahGrid = ({
   periode,

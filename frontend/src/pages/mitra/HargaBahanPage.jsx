@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table } from '../../components/Table';
-import Dropdown from '../../components/Dropdown';
-import { NumberInput } from '../../components/NumberInput';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { Table } from '../../components/ui/Table';
+import Dropdown from '../../components/ui/Dropdown';
+import { NumberInput } from '../../components/ui/NumberInput';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 export const HargaBahanPage = () => {
   const { request } = useApi();

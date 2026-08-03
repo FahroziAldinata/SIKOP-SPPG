@@ -1,8 +1,8 @@
 import React from 'react';
-import { DatePicker } from '../../DatePicker';
-import { Skeleton } from '../../Skeleton';
-import { Table, renderCurrency } from '../../Table';
-import { NumberInput } from '../../NumberInput';
+import { DatePicker } from '../../ui/DatePicker';
+import { Skeleton } from '../../ui/Skeleton';
+import { Table, renderCurrency } from '../../ui/Table';
+import { NumberInput } from '../../ui/NumberInput';
 
 export const RabPreviewSection = ({
     tanggalInput,

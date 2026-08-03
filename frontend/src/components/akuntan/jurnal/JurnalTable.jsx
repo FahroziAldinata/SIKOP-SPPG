@@ -1,6 +1,6 @@
 import React from 'react';
-import { Table, renderDate, renderCode, renderTruncate, renderStatus } from '../../Table';
-import { Skeleton } from '../../Skeleton';
+import { Table, renderDate, renderCode, renderTruncate, renderStatus } from '../../ui/Table';
+import { Skeleton } from '../../ui/Skeleton';
 
 export const JurnalTable = ({
     loading,

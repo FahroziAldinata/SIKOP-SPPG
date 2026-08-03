@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { Skeleton } from '../../Skeleton';
+import { Skeleton } from '../../ui/Skeleton';
 import { categoryLabelMap as defaultCategoryLabelMap } from './constants';
 import { KelasDetailRow } from './KelasDetailRow';
 

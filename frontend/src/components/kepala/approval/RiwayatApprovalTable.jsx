@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, renderDate, renderStatus, renderTruncate } from '../../Table';
+import { Table, renderDate, renderStatus, renderTruncate } from '../../ui/Table';
 
 export const RiwayatApprovalTable = ({ approvalList, renderDate: customRenderDate, renderStatus: customRenderStatus, renderTruncate: customRenderTruncate }) => {
     const dateRenderer = customRenderDate || renderDate;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { PeriodeFilter } from '../../components/akuntan/jurnal/PeriodeFilter';
 import { JurnalForm } from '../../components/akuntan/jurnal/JurnalForm';
 import { JurnalTable } from '../../components/akuntan/jurnal/JurnalTable';

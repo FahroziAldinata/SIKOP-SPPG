@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table } from '../../Table';
+import { Table } from '../../ui/Table';
 import { getKelasLabel } from './constants';
 
 export const PenerimaListTable = ({

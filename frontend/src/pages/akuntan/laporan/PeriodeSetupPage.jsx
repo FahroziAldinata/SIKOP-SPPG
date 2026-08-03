@@ -3,7 +3,7 @@ import { useApi } from '../../../hooks/useApi';
 import { useToast } from '../../../context/ToastContext';
 import { useAuth } from '../../../context/AuthContext';
 import { parseDate } from "@internationalized/date";
-import { Skeleton } from '../../../components/Skeleton';
+import { Skeleton } from '../../../components/ui/Skeleton';
 
 import { PeriodeListCard } from '../../../components/akuntan/periodeSetup/PeriodeListCard';
 import { PeriodeAnggaranFieldset } from '../../../components/akuntan/periodeSetup/PeriodeAnggaranFieldset';

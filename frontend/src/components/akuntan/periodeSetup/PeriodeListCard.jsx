@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatusBadge } from '../../StatusBadge';
+import { StatusBadge } from '../../ui/StatusBadge';
 
 export const PeriodeListCard = ({ periodeList = [], user, onRequestClose }) => {
     return (

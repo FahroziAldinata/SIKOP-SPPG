@@ -2,9 +2,9 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { Login } from './pages/auth/Login';
-import { Layout } from './components/Layout';
+import { Layout } from './components/layout/Layout';
 
 // Landing Dashboards
 import { AslapDashboard } from './pages/aslap/AslapDashboard';

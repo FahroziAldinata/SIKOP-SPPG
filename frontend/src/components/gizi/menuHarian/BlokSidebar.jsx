@@ -1,5 +1,5 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
+import Dropdown from '../../ui/Dropdown';
 import { Trash2 } from 'lucide-react';
 import { buttonStyle as defaultButtonStyle } from './helpers';
 

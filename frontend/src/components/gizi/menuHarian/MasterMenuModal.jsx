@@ -1,5 +1,5 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
+import Dropdown from '../../ui/Dropdown';
 import { fieldLabel as defaultFieldLabel, buttonStyle as defaultButtonStyle } from './helpers';
 
 export const MasterMenuModal = ({

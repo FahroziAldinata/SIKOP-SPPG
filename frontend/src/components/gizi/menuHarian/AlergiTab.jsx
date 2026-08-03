@@ -1,6 +1,6 @@
 import React from 'react';
-import { NumberInput } from '../../NumberInput';
-import { FieldButton } from '../../FieldButton';
+import { NumberInput } from '../../ui/NumberInput';
+import { FieldButton } from '../../ui/FieldButton';
 import { Trash2 } from 'lucide-react';
 import { fieldLabel as defaultFieldLabel, buttonStyle as defaultButtonStyle } from './helpers';
 

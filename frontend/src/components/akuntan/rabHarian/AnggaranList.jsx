@@ -1,7 +1,7 @@
 import React from 'react';
-import { Skeleton } from '../../Skeleton';
-import { Table, renderDate } from '../../Table';
-import { ConfirmDialog } from '../../ConfirmDialog';
+import { Skeleton } from '../../ui/Skeleton';
+import { Table, renderDate } from '../../ui/Table';
+import { ConfirmDialog } from '../../ui/ConfirmDialog';
 
 export const AnggaranList = ({
     anggaranLoading,

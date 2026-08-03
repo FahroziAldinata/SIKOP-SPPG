@@ -4,7 +4,7 @@ import {
     Button as RACButton
 } from 'react-aria-components/Button';
 import { tv } from 'tailwind-variants';
-import { focusRing } from './utils';
+import { focusRing } from '../../lib/utils';
 
 let button = tv({
     extend: focusRing,

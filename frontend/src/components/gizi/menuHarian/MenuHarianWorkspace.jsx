@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderStatus } from '../../Table';
+import { renderStatus } from '../../ui/Table';
 import { BlokWorkspace } from './BlokWorkspace';
 import { PengirimanPanel } from './PengirimanPanel';
 import {

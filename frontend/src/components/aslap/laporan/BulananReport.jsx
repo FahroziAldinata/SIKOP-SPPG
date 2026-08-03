@@ -1,7 +1,7 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
-import { Table } from '../../Table';
-import { Skeleton } from '../../Skeleton';
+import Dropdown from '../../ui/Dropdown';
+import { Table } from '../../ui/Table';
+import { Skeleton } from '../../ui/Skeleton';
 import { Calendar, RefreshCw, Printer, Filter, FileText } from 'lucide-react';
 import { BULAN_OPTIONS } from './constants';
 

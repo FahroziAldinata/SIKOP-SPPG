@@ -1,6 +1,6 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
-import { FieldButton } from '../../FieldButton';
+import Dropdown from '../../ui/Dropdown';
+import { FieldButton } from '../../ui/FieldButton';
 import { Trash2 } from 'lucide-react';
 import { fieldLabel as defaultFieldLabel, buttonStyle as defaultButtonStyle } from './helpers';
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Table } from '../../components/Table';
-import Dropdown from '../../components/Dropdown';
-import { Skeleton } from '../../components/Skeleton';
+import { Table } from '../../components/ui/Table';
+import Dropdown from '../../components/ui/Dropdown';
+import { Skeleton } from '../../components/ui/Skeleton';
 
 export const DokumenResmiPage = () => {
     const { request } = useApi();

@@ -1,5 +1,5 @@
 import React from 'react';
-import Dropdown from '../../Dropdown';
+import Dropdown from '../../ui/Dropdown';
 import { getBahanName as defaultGetBahanName, getBahanLabel as defaultGetBahanLabel, buttonStyle as defaultButtonStyle } from './helpers';
 
 export const BahanPanel = ({

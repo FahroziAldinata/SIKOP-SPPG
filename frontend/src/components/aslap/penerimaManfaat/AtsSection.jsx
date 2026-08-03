@@ -1,5 +1,5 @@
 import React from 'react';
-import { NumberInput } from '../../NumberInput';
+import { NumberInput } from '../../ui/NumberInput';
 
 export const AtsSection = ({ ats, setAts }) => {
   return (

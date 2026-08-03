@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { categoryLabelMap, getKelasLabel, getDefaultKelas } from '../../components/aslap/penerimaManfaat/constants';
 import { TopToolbar } from '../../components/aslap/penerimaManfaat/TopToolbar';
 import { PenerimaForm } from '../../components/aslap/penerimaManfaat/PenerimaForm';

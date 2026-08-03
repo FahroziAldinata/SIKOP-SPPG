@@ -1,7 +1,7 @@
 import React from 'react';
-import { DatePicker } from '../../DatePicker';
-import Dropdown from '../../Dropdown';
-import { NumberInput } from '../../NumberInput';
+import { DatePicker } from '../../ui/DatePicker';
+import Dropdown from '../../ui/Dropdown';
+import { NumberInput } from '../../ui/NumberInput';
 import QuickFillBanper from './QuickFillBanper';
 import QuickFillPo from './QuickFillPo';
 

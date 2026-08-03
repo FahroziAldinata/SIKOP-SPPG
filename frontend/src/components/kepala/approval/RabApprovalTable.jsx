@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, renderDate, renderStatus } from '../../Table';
+import { Table, renderDate, renderStatus } from '../../ui/Table';
 
 export const RabApprovalTable = ({ pendingRabList, openDetailModal, triggerSetujui, triggerTolak, renderDate: customRenderDate, renderStatus: customRenderStatus }) => {
     const dateRenderer = customRenderDate || renderDate;

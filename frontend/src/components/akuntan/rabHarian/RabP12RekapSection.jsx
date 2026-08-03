@@ -1,6 +1,6 @@
 import React from 'react';
-import { Skeleton } from '../../Skeleton';
-import { Table, renderDate, renderCurrency } from '../../Table';
+import { Skeleton } from '../../ui/Skeleton';
+import { Table, renderDate, renderCurrency } from '../../ui/Table';
 
 export const RabP12RekapSection = ({
     loadingP12,
