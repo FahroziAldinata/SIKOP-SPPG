@@ -305,6 +305,7 @@ model User {
   aktif        Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  ttdPath      String?
 
   hargaBahanDiinput     HargaBahanPeriode[]         @relation("MitraInputHargaBahan")
   hargaPaketDiinput     HargaPaketKategoriPeriode[] @relation("PenginputHargaPaket")

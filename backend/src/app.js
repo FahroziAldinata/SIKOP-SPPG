@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
@@ -38,6 +39,10 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/laporan-bug', laporanBugRoutes);
 app.use('/api/laporan/pemeriksaan-bahan', pemeriksaanBahanRoutes);
+
+// Static serving untuk file upload (TTD, bukti, dll)
+// app.js ada di backend/src, jadi ../uploads = backend/uploads
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // 500 catch-all — biar error gak pernah bocor stack trace ke client
 app.use((err, req, res, next) => {
