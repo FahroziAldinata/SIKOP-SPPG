@@ -488,7 +488,7 @@ export const SettingPage = () => {
                             onTouchMove={handleCanvasMouseMove}
                             onTouchEnd={handleCanvasMouseUp}
                             style={{
-                                width: '100%',
+                                width: 'min(480px, 100%)',
                                 height: '160px',
                                 border: '1px solid var(--border)',
                                 borderRadius: 'var(--radius-sm)',

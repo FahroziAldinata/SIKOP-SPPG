@@ -74,10 +74,11 @@ function renderFooterTTD(kolom = [], tempatTanggal = '', opts = {}, ttdBase64ByN
    */
   function renderRuangTtd(nama, ruangTtd) {
     const base64 = (ttdBase64ByNama && nama) ? (ttdBase64ByNama[nama] || '') : '';
+    const tinggi = Math.max(ruangTtd ?? 15, 55);
     if (base64) {
-      return `<div class="ttd-ruang" style="height:${ruangTtd}px; display:flex; align-items:flex-end; justify-content:center;"><img src="data:image/png;base64,${base64}" alt="TTD ${escapeHtml(nama)}" style="height:${ruangTtd}px;max-width:180px;object-fit:contain;" /></div>`;
+      return `<div class="ttd-ruang" style="height:${tinggi}px; display:flex; align-items:flex-end; justify-content:center;"><img src="data:image/png;base64,${base64}" alt="TTD ${escapeHtml(nama)}" style="height:55px;max-width:220px;object-fit:contain;" /></div>`;
     }
-    return `<div class="ttd-ruang" data-ttd-nama="${escapeHtml(nama)}" style="height:${ruangTtd}px;"></div>`;
+    return `<div class="ttd-ruang" data-ttd-nama="${escapeHtml(nama)}" style="height:${tinggi}px;"></div>`;
   }
 
   const count = kolom.length;
@@ -250,7 +251,7 @@ async function injectTtdImages(html) {
         'g'
       );
       result = result.replace(divPattern, (_, h) =>
-        `<div class="ttd-ruang" data-ttd-nama="${namaEscaped}" style="height:${h}px; display:flex; align-items:flex-end; justify-content:center;"><img src="data:image/png;base64,${base64}" alt="TTD" style="height:${h}px;max-width:180px;object-fit:contain;" /></div>`
+        `<div class="ttd-ruang" data-ttd-nama="${namaEscaped}" style="height:${Math.max(Number(h), 55)}px; display:flex; align-items:flex-end; justify-content:center;"><img src="data:image/png;base64,${base64}" alt="TTD" style="height:55px;max-width:220px;object-fit:contain;" /></div>`
       );
     }
     return result;
