@@ -42,3 +42,6 @@ Excel sppg
 .agent-pm/plans/
 .agent-pm/prompts/
 
+.agents/
+.agent-pm/knowledge/rtk-setup-guide.md
+
