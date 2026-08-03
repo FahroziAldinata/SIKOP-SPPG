@@ -187,6 +187,20 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-03
+
+### BUG-001 — 500 RAB P12 harian/rekap (hariAktif drift GrupHari) ✅
+- **Root cause**: `inp.hariAktif` diakses di accountingHelper.js:46 — kolom sudah dihapus dari InputPenerimaManfaat (pindah ke GrupHari, refactor Task 1 `4dbad78`). Query tanpa include `grupHari` → undefined → throw → 500.
+- **Fix**: `b9ba07b` — 4 file (lib/accountingHelper.js, routes/akuntan/_helpers.js, rabHarian.js, rabP12.js): include `grupHari: true` + guard `(inp.grupHari?.hariAktif || inp.hariAktif || [])`. rabP12.js perlu (bukan overreach — hasil data salah senyap tanpa include). Verifikasi: grep seluruh backend/src 0 lokasi terlewat, node --check OK, tes fungsi AGY sukses.
+- **Status**: ✅ SELESAI (tes HTTP penuh pending — perlu restart BE).
+
+### V2-4 cycle gabungan FE — TUNTAS 11/11 ✅
+- **PeriodeSetupPage** 836→268 (`755b894`): 5 komponen `components/akuntan/periodeSetup/` — PeriodeListCard, PeriodeAnggaranFieldset, LembagaFieldset, PelaporanFieldset, ClosePeriodeModal. Dead imports today/getLocalTimeZone dibuang.
+- **SaldoAwalBarangPage** 813→294 (`6d26505`): 5 komponen `components/akuntan/saldoAwal/` — PeriodeSelector, SaldoAwalForm, SaldoAwalBulkForm, SaldoAwalTable, TambahBahanModal.
+- **Pola**: parent = orchestrator (state/handler/useEffect tetap), child = presentational murni (0 hooks). Zero behavioral change verified (diff normalized + build PASS).
+
+---
+
 ## Catatan Umum
 
 - **AGY**: Mode `-p` = text-only. Butuh `-i` + PTY untuk eksekusi tool. Settings di `C:\Users\Administrator\.gemini\antigravity-cli\settings.json`

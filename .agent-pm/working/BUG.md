@@ -4,14 +4,9 @@
 
 ### [BUG-001] 500 error pada GET /rab-p12/harian dan /rab-p12/rekap
 - **Severity**: Medium
-- **Langkah Reproduce**:
-  1. Login role AKUNTAN
-  2. GET `/api/akuntan/rab-p12/harian` atau `/api/akuntan/rab-p12/rekap` (periode tertentu)
-  3. Response 500: `{"error":"Terjadi kesalahan server saat mengambil pagu & porsi RAB harian"}`
-- **Root cause**: `hitungPaguHarian` → `getPorsiPerJenisPorsi` throw pada `hariAktif` undefined
-- **Status**: BARU — suspected **pre-existing** (confidence MEDIUM: jalur kode identik dengan original akuntan.js per grep baris 81-82, 135, 4529, tapi belum dual-run head-to-head dengan data sama)
-- **Prioritas**: perlu investigasi terpisah, **BUKAN blocker** untuk refactor V2-4 batch 1
-- **Ditemukan saat**: smoke test V2-4 Batch 1 (2026-08-02, sesi verifikasi behavioral)
+- **Root cause**: `inp.hariAktif` diakses di accountingHelper.js:46 — kolom SUDAH dihapus dari `InputPenerimaManfaat` (dipindah ke model `GrupHari` saat refactor Task 1, commit `4dbad78`). Query tidak include `grupHari` → undefined → throw.
+- **Fix**: commit `b9ba07b` — 4 file (lib/accountingHelper.js, routes/akuntan/_helpers.js, rabHarian.js, rabP12.js): include `grupHari: true` + guard `(inp.grupHari?.hariAktif || inp.hariAktif || [])`. Verifikasi OpenCode: 0 lokasi terlewat (grep seluruh backend/src), node --check OK, tes fungsi AGY sukses (porsi KECIL 180 / BESAR 340, pagu total 4.840.000).
+- **Status**: SELESAI 2026-08-03 — ⚠️ tes HTTP penuh masih pending (perlu restart BE, server instance lama saat fix).
 
 ### [BUG-002] 500 error pada GET /gizi/master-menu-list — schema drift MasterMenuMingguan
 - **Severity**: Medium (error setiap kali halaman Menu Harian load master menu)

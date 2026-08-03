@@ -38,14 +38,17 @@
     - SekolahPage 1.017 → 431 (`f231e9d`)
     - ApprovalPage 878 → 289 (`3a5e9da`)
     - Working state (`41bf661`)
-  - ⏳ **Sisa cycle gabungan**: PeriodeSetupPage (835) + SaldoAwalBarangPage (812) — investigasi siap, BUILD AGY → VERIFY OpenCode → commit
+  - ✅ **Sisa cycle gabungan TUNTAS 11/11** (2026-08-03):
+    - PeriodeSetupPage 836 → 268 (`755b894`) — 5 komponen `components/akuntan/periodeSetup/`
+    - SaldoAwalBarangPage 813 → 294 (`6d26505`) — 5 komponen `components/akuntan/saldoAwal/`
+  - 🏁 **V2-4 SELESAI 11/11** (2026-08-03)
 
 ## Backlog Infra (2026-08-02)
 - ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup. Job cron `sync-hermes` (05fd5c684e88) di-pause.
 
-## BUG (2026-08-02)
+## BUG (2026-08-03)
+- ✅ **BUG-001** SELESAI: 500 /akuntan/rab-p12/harian + /rekap — `inp.hariAktif` drift ke GrupHari, fix commit `b9ba07b` (4 file). ⚠️ tes HTTP penuh pending (perlu restart BE).
 - ✅ **BUG-002** SELESAI: 500 /gizi/master-menu-list — schema drift MasterMenuMingguan, migration `20260802220000_add_minggu_ke_master_menu`, commit `77a5e19`
-- ⏳ **BUG-001** open: 500 /akuntan/rab-p12/harian + /rekap — investigasi terpisah (pre-existing suspected)
 
 ---
 Model sesi: [Hermes oc/deepseek-v4-flash-free] (lihat knowledge/10-model-strategy.md)

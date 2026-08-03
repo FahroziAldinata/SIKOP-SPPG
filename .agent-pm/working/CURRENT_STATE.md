@@ -1,6 +1,12 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: V2-4 Cycle gabungan FE — PAUSED (8/11 selesai + committed). Sisa: PeriodeSetupPage + SaldoAwalBarangPage**
+**Scope Aktif: V2-4 SELESAI 11/11 ✅ + BUG-001 resolved. Next: V2-1 TTD Basah (Sprint 24).**
+
+## Sesi 30 (2026-08-03) — BUG-001 fix + V2-4 tuntas 11/11 (3 cycle serial)
+- **BUG-001** ✅ FIXED: 500 /akuntan/rab-p12/harian + /rekap — `inp.hariAktif` drift ke GrupHari (kolom dihapus dari InputPenerimaManfaat, refactor Task 1). Fix 4 file (accountingHelper, _helpers, rabHarian, rabP12): include `grupHari: true` + guard `(inp.grupHari?.hariAktif || inp.hariAktif || [])`. Verifikasi OpenCode: 0 lokasi terlewat, node --check OK, tes fungsi AGY sukses (porsi 180/340). Commit `b9ba07b`.
+- **V2-4 cycle gabungan TUNTAS 11/11** ✅: PeriodeSetupPage 836→268 (`755b894`, 5 komponen periodeSetup/), SaldoAwalBarangPage 813→294 (`6d26505`, 5 komponen saldoAwal/). Semua zero behavioral change verified (diff normalized + build PASS).
+- **Catatan**: tes HTTP BUG-001 butuh restart BE (server instance lama saat fix). PUPPETEER aman (test approved sesi 29).
+- HEAD: `6d26505`, working tree bersih.
 
 ## Sesi 29 (2026-08-03) — Setup perangkat baru (clone v2) ✅ + Fix drift migration
 - **Setup lengkap perangkat ini**: node_modules backend (269 pkg) + frontend (140 pkg), .env dibuat (DB lokal `sppg` Postgres 18), 18 migration applied, seed BERHASIL, FE build PASS, backend boot OK.
