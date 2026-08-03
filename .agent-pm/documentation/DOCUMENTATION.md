@@ -212,6 +212,13 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 - **Cleanup** `e602a9c` (perintah Rozi): hapus `documentation/2026-08-03-v2-2-lpd2m-bukti-layout-summary.md` di root (konsolidasi di file ini).
 - **Tes Rozi**: PDF ✓ + web thumbnail ✓ → APPROVED. BE dimatikan Hermes (atas instruksi Rozi), dihidupkan ulang Rozi.
 
+### V2-3 — Restrukturisasi struktur komponen FE ✅ (2026-08-03)
+- **Audit**: `frontend/src/components/` 119 file — 104 domain (akuntan/gizi/aslap/kepala) + 15 root + utils.js. Komponen root dipakai lintas (Dropdown 16, Skeleton 15, Table 14, ConfirmDialog 10...).
+- **Struktur final**: `components/ui/` (15: 12 primitif + WorkflowStepper + NotifikasiList + DashboardSummaryCards), `components/layout/` (Layout + ProtectedRoute), domain: NominatifUpahGrid → `akuntan/nominatifUpah/`, GrupHariManager → `aslap/penerimaManfaat/`, `utils.js` → `src/lib/`.
+- **Keputusan Rozi mid-cycle**: utils.js TIDAK di ui/ (bukan komponen + generateDateRange domain helper) → `lib/`.
+- **Commit** `64feac2` (OpenCode): 20 rename + ~100 import update, 120 file. Verify: build PASS, 0 sisa path lama, 0 jsx di root components/. Zero behavioral change.
+- 1 commit bersih (Rozi: "jangan commit apapun sampai folder komponen rapi").
+
 ---
 
 ## Catatan Umum
