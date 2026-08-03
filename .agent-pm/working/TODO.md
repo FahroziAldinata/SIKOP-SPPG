@@ -69,6 +69,64 @@
 - **Prioritas**: RENDAH-SEDANG. Dikerjakan BERTAHAP setelah rilis v2.0.0. TIDAK memblokir rilis.
 - Catatan teknis terkait (diagnosa sesi 36): testDate laporan.test.js tanpa guard ketersediaan (pola getUnusedDate approval) + rabHarian 2026-07-26 tak dihapus pemeriksaan-bahan.test.js — fix menyatu saat perluasan coverage.
 
+## V3 — Production Readiness + Fitur Lanjutan (BACKLOG, belum dikerjakan)
+
+> Status: BACKLOG murni — seluruh isi di bawah ini DOKUMENTASI RENCANA, belum dikerjakan. Menunggu instruksi eksekusi Rozi. Jangan mulai sebelum TASK_SELECTION.
+
+### FASE 1 — Keamanan Dasar
+- Rate limiting pada endpoint login (anti brute-force)
+- HTTPS production (termination di reverse proxy / platform deploy)
+- Review mekanisme JWT: expiry, algoritma, dan kebutuhan refresh token
+- Audit implementasi AuditLog (kelengkapan, konsistensi pencatatan)
+- Audit bcrypt/password hashing: SEMUA jalur password (login, reset, ganti password, seed, dll) — evaluasi cost factor yang dipakai
+- Audit logging password: pastikan tidak ada password/log sensitif tercatat di log mana pun (Pino, error handler, pino-http)
+- Audit fitur reset password (ada/tidak, alur, keamanan)
+
+### FASE 2 — Data Safety
+- Backup PostgreSQL otomatis (jadwal + retensi + lokasi off-site)
+- Dokumentasi `docs/DISASTER_RECOVERY.md` (prosedur restore, RPO/RTO)
+- Audit kebocoran data pribadi di log/error/Swagger (redaksi field sensitif di response error & dokumentasi)
+
+### FASE 3 — Dynamic RBAC
+- Model Prisma: `Resource` & `RolePermission` (permission matrix di DB, bukan hardcode)
+- Middleware `requirePermission()` (ganti/pelengkap `requireRole()` per-endpoint)
+- CRUD resource + permission matrix (halaman admin kelola resource & izin per role)
+- Endpoint `/api/my-permissions` (FE ambil izin user login)
+- UI matrix role-resource (tabel role × resource)
+- Sidebar dinamis (menu muncul sesuai izin)
+- Admin sebagai superuser (akses semua permission)
+
+### FASE 4 — Dokumentasi End-User
+- Panduan penggunaan per role (Aslap, Ahli Gizi, Akuntan, Kepala SPPG, Mitra, Admin)
+- Screenshot alur tiap modul
+- Prosedur support (troubleshooting umum, kontak, eskalasi)
+
+### FASE 5 — Deployment & Environment Production
+- Pisahkan environment production (env file terpisah, build terpisah, proteksi /api-docs production sudah ada — lengkapi sisanya)
+- Setup domain bila perlu
+- Uptime monitoring (healthcheck berkala, alert)
+
+### FASE 6 — Legal/Administratif
+- Klarifikasi status hukum aplikasi (izin/persetujuan pihak SPPG/BGN bila diperlukan)
+- Rencana data ownership & handover (siapa pemilik data, prosedur serah terima)
+
+### FASE 7 — Fitur AI Chatbot
+- BYOK (bring-your-own-key) — user pakai API key sendiri
+- Default provider: Gemini / Groq
+- Tool calling TANPA SQL langsung (agent tidak pernah eksekusi query mentah)
+- Read-only (chatbot tidak bisa mutasi data)
+- Scope per role (jawaban dibatasi data yang boleh dilihat role tsb)
+- Audit endpoint reusable (log pertanyaan-jawaban-tool-call untuk audit)
+- Desain tool registry (daftar tool terpusat + dokumentasi)
+- UI API key (halaman kelola key user)
+- Endpoint chat (backend)
+- Chat widget (frontend)
+- Pengujian pembatasan akses (uji role A tidak bisa bocorkan data role B)
+
+### FASE 8 — Notifikasi Eksternal
+- **Email**: Nodemailer + Gmail App Password; integrasi dengan model `Notifikasi` existing; template email; preferensi user (jenis notif via email atau tidak)
+- **WhatsApp**: evaluasi WhatsApp Business API vs Baileys/whatsapp-web.js (non-resmi); jika pakai non-resmi wajib nomor khusus (bukan nomor pribadi); dokumentasikan risiko (ban/block, ToS)
+
 ## Backlog Infra (2026-08-02)
 - ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup. Job cron `sync-hermes` (05fd5c684e88) di-pause.
 
