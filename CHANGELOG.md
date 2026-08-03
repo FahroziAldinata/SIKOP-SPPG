@@ -5,6 +5,28 @@ Semua perubahan penting pada proyek ini didokumentasikan di file ini.
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/),
 dan versi mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-08-04
+
+### Added
+
+- **TTD basah**: upload tanda tangan per user (canvas/PNG) via `/api/auth/ttd` + field `User.ttdPath`, section TTD di SettingPage (canvas signature + upload + preview + hapus), serta injeksi gambar TTD ke PDF (`renderFooterTTD` marker + `injectTtdImages`, 26 route) dengan fix ukuran (canvas 480px rasio 3:1, img 55x220px) dan fix path `getTtdBase64`.
+- **OpenAPI/Swagger**: dokumentasi API dari schema Zod (`src/docs/openapi.js`) dengan UI live di `/api-docs` + `/api-docs.json` (diproteksi `requireRole('ADMIN')` di production).
+- **Testing infrastructure**: Vitest + supertest — 89 test di `src/routes/__tests__/`, `fileParallelism: false`, `testTimeout` 20s, strategi setup DB child-first (deleteMany) untuk stabilitas CI.
+- **CI GitHub Actions** (`.github/workflows/ci.yml`, trigger main + PR): 5 job — `node-check`, `test-backend` (Postgres 16 service + Google Chrome + JWT_SECRET env), `lint-fe`, `lint-be`, `build-fe`.
+
+### Changed
+
+- **Restrukturisasi komponen frontend**: UI primitif dipindah ke `components/ui/`, layout ke `components/layout/`, utils ke `lib/`.
+- **Refactor modular backend**: route besar dipecah per domain — `gizi.js` → 17 file, `aslap.js` → 12 file, `laporan.js` → 19 file (tiap folder punya `index.js` + file per fitur).
+- **Refactor frontend file >800 baris**: RabHarianPage (10 komponen), AkuntanPoPage (10), JurnalTransaksiPage (6), MenuHarianPage (13), PenerimaManfaatPage (7), SekolahPage (6), ApprovalPage (8), LaporanPage aslap (7), LaporanPage akuntan (19), LaporanGiziPage (8), SaldoAwalBarangPage (813→294), PeriodeSetupPage (836→268).
+- **Global error handler + logging Pino**: `middleware/errorHandler.js` + `lib/logger.js` (pino/pino-http), menggantikan logging ad-hoc.
+- **Lint oxlint**: 80 warning backend diperbaiki — 0 errors / 0 warnings + script lint.
+
+### Fixed
+
+- **LPD2M bukti gambar**: layout ringkasan kiri nama / kanan gambar (web + PDF), fix path prefix `/uploads/`, dan fix proxy Vite `/uploads` + fallback `onError` (BUG-003).
+- **BUG-001**: 500 error `GET /rab-p12/harian` & `/rekap` — guard `hariAktif` dipindah ke GrupHari (include grupHari + fallback).
+
 ## [1.0.0] - 2026-08-02
 
 ### Added
