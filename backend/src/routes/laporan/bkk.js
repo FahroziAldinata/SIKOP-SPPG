@@ -6,6 +6,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderBkkHtml } = require("../../templates/dokumen/bkk");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getBkkData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
     }
     res.json({ success: true, data });
   } catch (error) {
-    console.error("[bkk]", error);
+    logger.error("[bkk]", error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat BKK" });
   }
 });
@@ -54,7 +55,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[bkk/pdf]", error);
+    logger.error("[bkk/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF BKK" });
   } finally {
     if (browser) await browser.close();

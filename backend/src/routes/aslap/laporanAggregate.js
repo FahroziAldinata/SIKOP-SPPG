@@ -4,6 +4,7 @@ const { requireAuth } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { KATEGORI_PESERTA_DIDIK, KATEGORI_NON_PESERTA_DIDIK } = require("../../constants/kategori");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -66,7 +67,7 @@ router.get(["/laporan/aggregate", "/api/aslap/laporan/aggregate"], requireAuth, 
       total: grandTotal
     });
   } catch (error) {
-    console.error("Aggregate error:", error);
+    logger.error("Aggregate error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

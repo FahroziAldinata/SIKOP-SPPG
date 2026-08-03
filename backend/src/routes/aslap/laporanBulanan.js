@@ -7,6 +7,7 @@ const { renderAslapPerBulanHtml } = require("../../templates/dokumen/aslapPerBul
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { KODE_TO_ROW_FIELD, KATEGORI_PIC_SEKOLAH } = require("../../constants/kategori");
 const { getLembaga, authMiddleware } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -309,7 +310,7 @@ router.get(["/laporan/bulanan", "/laporan/per-bulan", "/api/aslap/laporan/bulana
     });
 
   } catch (error) {
-    console.error("Error get laporan bulanan aslap:", error);
+    logger.error("Error get laporan bulanan aslap:", error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil laporan bulanan aslap" });
   }
 });
@@ -356,7 +357,7 @@ router.get(["/laporan/bulanan/pdf", "/laporan/per-bulan/pdf", "/api/aslap/lapora
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[laporan/bulanan/pdf]", error);
+    logger.error("[laporan/bulanan/pdf]", error);
     const message = error.message && error.message.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat PDF Laporan Bulanan";

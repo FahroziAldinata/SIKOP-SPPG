@@ -6,6 +6,7 @@ const { laporanRekapSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderSptjHtml } = require("../../templates/dokumen/sptj");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat SPTJ" });
   }
 });
@@ -95,7 +96,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[sptj/pdf]", error);
+    logger.error("[sptj/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF SPTJ" });
   } finally {
     if (browser) await browser.close();

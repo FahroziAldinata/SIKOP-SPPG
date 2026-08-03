@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { getHargaBahan } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.get("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP"
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data bahan menu item" });
   }
 });
@@ -114,7 +115,7 @@ router.post("/menu-item-bahan", requireAuth, requireRole("AHLI_GIZI"), validate(
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -230,7 +231,7 @@ router.put("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI"), valida
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -257,7 +258,7 @@ router.delete("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI"), asy
 
     res.json({ success: true, message: "Data bahan menu item berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data bahan menu item tidak ditemukan" });
     }

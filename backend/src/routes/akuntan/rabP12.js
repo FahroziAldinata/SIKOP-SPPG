@@ -10,6 +10,7 @@ const {
   hitungSubtotalBahanHarian,
   getRabItemCalculations
 } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.get("/harian", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message && error.message.startsWith("[BATAS_TIDAK_ADA]")) {
       return res.status(500).json({ error: "Data BatasHargaPorsi (KECIL/BESAR) belum tersedia di database" });
     }
@@ -138,7 +139,7 @@ router.get("/rekap", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
       data: { periodeId, rekap }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message && error.message.startsWith("[BATAS_TIDAK_ADA]")) {
       return res.status(500).json({ error: "Data BatasHargaPorsi (KECIL/BESAR) belum tersedia di database" });
     }
@@ -269,7 +270,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[rab-p12/pdf]", error);
+    logger.error("[rab-p12/pdf]", error);
     if (error.message && error.message.startsWith("[BATAS_TIDAK_ADA]")) {
       return res.status(500).json({ error: "Data BatasHargaPorsi (KECIL/BESAR) belum tersedia di database" });
     }

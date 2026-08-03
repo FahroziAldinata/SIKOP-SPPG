@@ -7,6 +7,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderNeracaSaldoHtml } = require("../../templates/dokumen/neracaSaldo");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getNeracaSaldoData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       data,
     });
   } catch (error) {
-    console.error("[neraca-saldo]", error);
+    logger.error("[neraca-saldo]", error);
     res.status(500).json({ error: "Gagal mengambil data Neraca Saldo" });
   }
 });
@@ -63,7 +64,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[neraca-saldo/pdf]", error);
+    logger.error("[neraca-saldo/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Neraca Saldo" });
   } finally {
     if (browser) await browser.close();

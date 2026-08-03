@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.get("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEP
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data menu item" });
   }
 });
@@ -55,7 +56,7 @@ router.post("/menu-item", requireAuth, requireRole("AHLI_GIZI"), validate(schema
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -91,7 +92,7 @@ router.put("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI"), validate(sch
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -118,7 +119,7 @@ router.delete("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI"), async (re
 
     res.json({ success: true, message: "Data menu item berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data menu item tidak ditemukan" });
     }

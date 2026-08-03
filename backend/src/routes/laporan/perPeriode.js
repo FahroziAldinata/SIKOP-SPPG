@@ -7,6 +7,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderPerPeriodeHtml } = require("../../templates/dokumen/perPeriode");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getPerPeriodeData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -82,7 +83,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses laporan per periode" });
   }
 });
@@ -101,7 +102,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     res.set({ "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="Per-Periode.pdf"`, "Content-Length": pdfBuffer.length });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[per-periode/pdf]", error);
+    logger.error("[per-periode/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Laporan Per Periode" });
   } finally {
     if (browser) await browser.close();

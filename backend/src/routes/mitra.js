@@ -8,6 +8,7 @@ const { launchPuppeteer } = require("../lib/launchPuppeteer");
 const { renderNotaPesananHtml } = require("../templates/dokumen/notaPesanan");
 const { renderPoRealisasiHtml } = require("../templates/dokumen/poRealisasi");
 const { injectTtdImages } = require("../templates/dokumen/shared");
+const { logger } = require("../lib/logger");
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.get("/bahan-pokok", requireAuth, requireRole("MITRA", "ASLAP", "KEPALA_SP
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data bahan pokok" });
   }
 });
@@ -44,7 +45,7 @@ router.put("/bahan-pokok/:id", requireAuth, requireRole("MITRA"), validate(schem
     });
     res.json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui data bahan pokok" });
   }
 });
@@ -64,7 +65,7 @@ router.get("/kendaraan", requireAuth, requireRole("MITRA", "AHLI_GIZI", "ASLAP",
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar kendaraan" });
   }
 });
@@ -77,7 +78,7 @@ router.get("/kendaraan/:id", requireAuth, requireRole("MITRA", "AHLI_GIZI", "ASL
     if (!data) return res.status(404).json({ error: "Data kendaraan tidak ditemukan" });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail kendaraan" });
   }
 });
@@ -96,7 +97,7 @@ router.post("/kendaraan", requireAuth, requireRole("MITRA"), validate(schemas.ke
     });
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menyimpan kendaraan" });
   }
 });
@@ -120,7 +121,7 @@ router.put("/kendaraan/:id", requireAuth, requireRole("MITRA"), validate(schemas
     });
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui kendaraan" });
   }
 });
@@ -135,7 +136,7 @@ router.delete("/kendaraan/:id", requireAuth, requireRole("MITRA"), async (req, r
     await prisma.kendaraan.delete({ where: { id } });
     res.json({ success: true, message: "Data kendaraan berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") return res.status(404).json({ error: "Data kendaraan tidak ditemukan" });
     if (error.code === "P2003" || error.message?.includes("23001") || error.message?.includes("foreign key constraint")) {
       return res.status(409).json({ error: "Kendaraan tidak dapat dihapus karena masih digunakan pada data pengiriman" });
@@ -172,7 +173,7 @@ router.get("/harga-bahan", requireAuth, requireRole("MITRA", "ASLAP", "KEPALA_SP
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data harga bahan" });
   }
 });
@@ -197,7 +198,7 @@ router.get("/harga-bahan/:id", requireAuth, requireRole("MITRA", "ASLAP", "KEPAL
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data harga bahan" });
   }
 });
@@ -251,7 +252,7 @@ router.post("/harga-bahan", requireAuth, requireRole("MITRA"), validate(schemas.
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Harga bahan pokok untuk periode ini sudah terdaftar" });
     }
@@ -340,7 +341,7 @@ router.put("/harga-bahan/:id", requireAuth, requireRole("MITRA"), validate(schem
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Harga bahan pokok untuk periode ini sudah terdaftar" });
     }
@@ -377,7 +378,7 @@ router.delete("/harga-bahan/:id", requireAuth, requireRole("MITRA"), async (req,
 
     res.json({ success: true, message: "Data harga bahan pokok berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data harga bahan pokok tidak ditemukan" });
     }
@@ -568,7 +569,7 @@ router.get("/po/kebutuhan", requireAuth, requireRole("MITRA", "AKUNTAN"), async 
       ingredients: result
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses kebutuhan PO" });
   }
 });
@@ -647,7 +648,7 @@ router.put("/po/:id/realisasi", requireAuth, requireRole("MITRA"), validate(sche
 
     res.json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message && error.message.startsWith("[VALIDASI]")) {
       return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
     }
@@ -689,7 +690,7 @@ router.get("/po/list", requireAuth, requireRole("MITRA", "AKUNTAN", "ASLAP"), as
 
     res.json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil list PO" });
   }
 });
@@ -759,7 +760,7 @@ router.get("/po/:id/pdf", requireAuth, requireRole("MITRA", "AKUNTAN", "ASLAP"),
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[po/:id/pdf]", error);
+    logger.error("[po/:id/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Nota Pesanan" });
   } finally {
     if (browser) await browser.close();
@@ -890,7 +891,7 @@ router.get("/laporan/realisasi-po", requireAuth, requireRole("MITRA", "AKUNTAN",
       }
     });
   } catch (error) {
-    console.error("[GET /laporan/realisasi-po]", error);
+    logger.error("[GET /laporan/realisasi-po]", error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil laporan realisasi PO" });
   }
 });
@@ -942,7 +943,7 @@ router.get("/laporan/realisasi-po/pdf", requireAuth, requireRole("MITRA", "AKUNT
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[GET /laporan/realisasi-po/pdf]", error);
+    logger.error("[GET /laporan/realisasi-po/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Laporan Realisasi PO" });
   } finally {
     if (browser) await browser.close();

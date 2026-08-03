@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -37,7 +38,7 @@ router.get("/grup-hari", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data grup hari" });
   }
 });
@@ -79,7 +80,7 @@ router.post("/grup-hari", requireAuth, requireRole("ASLAP"), validate(schemas.gr
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat grup hari" });
   }
 });
@@ -139,7 +140,7 @@ router.put("/grup-hari/:id", requireAuth, requireRole("ASLAP"), validate(schemas
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui grup hari" });
   }
 });
@@ -164,7 +165,7 @@ router.delete("/grup-hari/:id", requireAuth, requireRole("ASLAP"), async (req, r
 
     res.json({ message: "Grup hari dan data penerima manfaat terkait berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus grup hari" });
   }
 });

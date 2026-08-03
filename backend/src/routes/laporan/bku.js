@@ -8,6 +8,7 @@ const { renderBkuHtml } = require("../../templates/dokumen/bku");
 const { renderCatatanHtml } = require("../../templates/dokumen/catatan");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getBkuData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 const catatanRouter = express.Router();
@@ -27,7 +28,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       data
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat BKU" });
   }
 });
@@ -61,7 +62,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[bku/pdf]", error);
+    logger.error("[bku/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF BKU" });
   } finally {
     if (browser) await browser.close();
@@ -82,7 +83,7 @@ router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.end(buffer);
   } catch (error) {
-    console.error("[bku/export-excel]", error);
+    logger.error("[bku/export-excel]", error);
     res.status(500).json({ error: "Gagal membuat Excel BKU" });
   }
 });
@@ -116,7 +117,7 @@ catatanRouter.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), va
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[catatan/pdf]", error);
+    logger.error("[catatan/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Catatan" });
   } finally {
     if (browser) await browser.close();

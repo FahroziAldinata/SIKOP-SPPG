@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { HARI_MAP } = require("../../lib/accountingHelper");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -83,7 +84,7 @@ router.get("/menu-harian", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPAL
 
     res.json(mapped);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data menu harian" });
   }
 });
@@ -159,7 +160,7 @@ router.get("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "K
 
     res.json(mapped);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data menu harian" });
   }
 });
@@ -251,7 +252,7 @@ router.post("/menu-harian", requireAuth, requireRole("AHLI_GIZI"), validate(sche
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Menu harian atau blok kelompok umur sudah terdaftar" });
     }
@@ -383,7 +384,7 @@ router.put("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI"), validate(s
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Menu harian untuk tanggal ini sudah terdaftar" });
     }
@@ -430,7 +431,7 @@ router.delete("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI"), async (
 
     res.json({ success: true, message: "Data menu harian berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data menu harian tidak ditemukan" });
     }

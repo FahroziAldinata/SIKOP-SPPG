@@ -7,6 +7,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderGiziOrganoleptikHtml } = require("../../templates/dokumen/giziOrganoleptik");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { HARI_MAP } = require("../../lib/accountingHelper");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -147,7 +148,7 @@ router.get("/laporan/organoleptik", requireAuth, requireRole("AHLI_GIZI", "KEPAL
     const data = await getOrganoleptikData(tanggalMulai, tanggalSelesai, blokKode, tanggalList);
     res.json({ success: true, data });
   } catch (error) {
-    console.error("[laporan/organoleptik]", error);
+    logger.error("[laporan/organoleptik]", error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil laporan uji organoleptik" });
   }
 });
@@ -220,7 +221,7 @@ router.get("/laporan/organoleptik/pdf", requireAuth, requireRole("AHLI_GIZI", "K
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[laporan/organoleptik/pdf]", error);
+    logger.error("[laporan/organoleptik/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Laporan Uji Organoleptik & Keamanan Pangan" });
   } finally {
     if (browser) await browser.close();

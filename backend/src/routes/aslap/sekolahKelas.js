@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { inferJenjang } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.get("/sekolah-kelas-detail", requireAuth, requireRole("ASLAP", "KEPALA_SP
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data kelas detail" });
   }
 });
@@ -48,7 +49,7 @@ router.get("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP", "KEPAL
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data detail kelas sekolah" });
   }
 });
@@ -173,7 +174,7 @@ router.post("/sekolah-kelas-detail", requireAuth, requireRole("ASLAP"), validate
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[VALIDASI_SILANG_BALIK]")) {
         const details = JSON.parse(error.message.replace("[VALIDASI_SILANG_BALIK] ", ""));
@@ -338,7 +339,7 @@ router.put("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP"), valid
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[VALIDASI_SILANG_BALIK]")) {
         const details = JSON.parse(error.message.replace("[VALIDASI_SILANG_BALIK] ", ""));
@@ -380,7 +381,7 @@ router.delete("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP"), as
 
     res.json({ success: true, message: "Data detail kelas sekolah berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus detail kelas sekolah" });
   }
 });

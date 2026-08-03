@@ -8,6 +8,7 @@
  *   transaksi: array of { bulan, tanggal, noBukti, kodeAkun, uraian, debet, kredit, saldoBerjalan, jumlah, sumberKas }
  */
 const { renderKopSurat, renderFooterTTD, escapeHtml, formatRupiah, formatNumberTabel, SHARED_CSS } = require('./shared');
+const { logger } = require('../../lib/logger');
 
 const NAMA_BULAN = [
   "", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -59,7 +60,7 @@ function renderBkuHtml(data) {
       }
     }
   } catch (e) {
-    console.error("Gagal memformat periodeLabel BKU:", e);
+    logger.error("Gagal memformat periodeLabel BKU:", e);
   }
 
   // Format tempat & tanggal pelaporan untuk TTD
@@ -72,7 +73,7 @@ function renderBkuHtml(data) {
         tempatTglStr = tempatPelaporan ? `${tempatPelaporan}, ${tglFormatted}` : tglFormatted;
       }
     } catch (e) {
-      console.error("Gagal memformat tanggalPelaporan BKU:", e);
+      logger.error("Gagal memformat tanggalPelaporan BKU:", e);
     }
   }
 

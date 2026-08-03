@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { logger } = require('../../lib/logger');
 
 /**
  * Shared HTML template fragments for PDF dokumen resmi SPPG.
@@ -22,7 +23,7 @@ function renderKopSurat({ namaLembaga = '', alamat = '', logoFileName = 'logo-bg
       logoBase64 = fs.readFileSync(logoPath).toString('base64');
     }
   } catch (e) {
-    console.error('Gagal memuat logo untuk kop surat:', e);
+    logger.error('Gagal memuat logo untuk kop surat:', e);
   }
 
   const logoSrc = logoBase64 
@@ -164,7 +165,7 @@ async function getTtdBase64(nama) {
     if (!fs.existsSync(filePath)) return '';
     return fs.readFileSync(filePath).toString('base64');
   } catch (e) {
-    console.error('Gagal memuat TTD untuk', nama, ':', e.message);
+    logger.error('Gagal memuat TTD untuk', nama, ':', e.message);
     return '';
   }
 }
@@ -256,7 +257,7 @@ async function injectTtdImages(html) {
     }
     return result;
   } catch (e) {
-    console.error('[injectTtdImages] Error, returning original html:', e.message);
+    logger.error('[injectTtdImages] Error, returning original html:', e.message);
     return html;
   }
 }

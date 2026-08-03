@@ -16,6 +16,7 @@ const {
   rabHeaderSnapshot,
   rabItemsSnapshot
 } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 const anggaranHarianRouter = express.Router();
@@ -153,7 +154,7 @@ router.get("/preview", requireAuth, requireRole("AKUNTAN"), async (req, res) => 
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message && error.message.startsWith("[BATAS_TIDAK_ADA]")) {
       return res.status(500).json({ error: "Data BatasHargaPorsi (KECIL/BESAR) belum tersedia di database" });
     }
@@ -295,7 +296,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabSchema
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "RAB harian untuk tanggal ini sudah terdaftar pada periode terpilih" });
     }
@@ -350,7 +351,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar RAB harian" });
   }
 });
@@ -398,7 +399,7 @@ router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail RAB harian" });
   }
 });
@@ -489,7 +490,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabHari
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "RAB harian untuk tanggal ini sudah terdaftar pada periode terpilih" });
     }
@@ -585,7 +586,7 @@ router.put("/:id/items", requireAuth, requireRole("AKUNTAN"), validate(schemas.r
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
       if (error.message.startsWith("[VALIDASI]")) return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
@@ -676,7 +677,7 @@ router.put("/:id/verify", requireAuth, requireRole("AKUNTAN"), async (req, res) 
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
       if (error.message.startsWith("[VALIDASI]")) return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
@@ -731,7 +732,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
     res.json({ success: true, message: "Data RAB harian beserta seluruh transaksi dan approval terkait berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data RAB harian tidak ditemukan" });
     }
@@ -873,7 +874,7 @@ anggaranHarianRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(sch
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Anggaran harian untuk tanggal dan kategori dana ini sudah terdaftar pada periode terpilih" });
     }
@@ -908,7 +909,7 @@ anggaranHarianRouter.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG")
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar anggaran harian" });
   }
 });
@@ -934,7 +935,7 @@ anggaranHarianRouter.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPP
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail anggaran harian" });
   }
 });
@@ -1116,7 +1117,7 @@ anggaranHarianRouter.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Anggaran harian untuk tanggal dan kategori dana ini sudah terdaftar pada periode terpilih" });
     }
@@ -1156,7 +1157,7 @@ anggaranHarianRouter.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (
 
     res.json({ success: true, message: "Data anggaran harian berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data anggaran harian tidak ditemukan" });
     }

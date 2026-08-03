@@ -6,6 +6,7 @@ const { validate } = require("../../middleware/validate");
 const { logAudit } = require("../../lib/auditHelper");
 const schemas = require("../../validators/akuntan");
 const { saldoAwalBarangSnapshot } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 const mutasiStokRouter = express.Router();
@@ -59,7 +60,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.saldoAwal
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Saldo awal untuk bahan pokok ini di periode yang sama sudah ada" });
     }
@@ -83,7 +84,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil saldo awal barang" });
   }
 });
@@ -146,7 +147,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025" || (error.message && error.message.startsWith("[NOT_FOUND]"))) {
       return res.status(404).json({ error: "Saldo awal barang tidak ditemukan" });
     }
@@ -178,7 +179,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
     });
     res.json({ success: true, message: "Saldo awal barang berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025" || (error.message && error.message.startsWith("[NOT_FOUND]"))) {
       return res.status(404).json({ error: "Saldo awal barang tidak ditemukan" });
     }
@@ -295,7 +296,7 @@ router.post("/bulk", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
       detailGagal
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses bulk saldo awal barang" });
   }
 });
@@ -390,7 +391,7 @@ mutasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menyimpan mutasi stok" });
   }
 });
@@ -423,7 +424,7 @@ mutasiStokRouter.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res) 
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data mutasi stok" });
   }
 });
@@ -478,7 +479,7 @@ validasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), async (req, re
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Validasi stok untuk bahan pokok pada tanggal ini sudah tercatat" });
     }
@@ -544,7 +545,7 @@ validasiStokRouter.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data validasi stok" });
   }
 });
@@ -601,7 +602,7 @@ validasiStokRouter.get("/preview", requireAuth, requireRole("AKUNTAN"), async (r
       sisaSistem
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses preview validasi stok" });
   }
 });

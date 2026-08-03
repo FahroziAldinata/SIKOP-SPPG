@@ -8,6 +8,7 @@
  *   transaksi: array of { bulan, tanggal, noBukti, Uraian, debet, kredit, saldoBerjalan, jumlah }
  */
 const { renderKopSurat, escapeHtml, formatNumberTabel, SHARED_CSS } = require('./shared');
+const { logger } = require('../../lib/logger');
 
 const NAMA_BULAN = [
   "", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -59,7 +60,7 @@ function renderCatatanHtml(data) {
       }
     }
   } catch (e) {
-    console.error("Gagal memformat periodeLabel Catatan:", e);
+    logger.error("Gagal memformat periodeLabel Catatan:", e);
   }
 
   // Filter transaksi hanya yang KELUAR (kredit > 0)

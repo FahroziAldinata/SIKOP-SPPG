@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { inferJenjang } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ router.get("/penerima-manfaat", requireAuth, requireRole("ASLAP", "KEPALA_SPPG",
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data penerima manfaat" });
   }
 });
@@ -62,7 +63,7 @@ router.get("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP", "KEPALA_SP
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data penerima manfaat" });
   }
 });
@@ -286,7 +287,7 @@ router.post("/penerima-manfaat", requireAuth, requireRole("ASLAP"), validate(sch
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[VALIDASI_SILANG]")) {
         const details = JSON.parse(error.message.replace("[VALIDASI_SILANG] ", ""));
@@ -498,7 +499,7 @@ router.put("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP"), validate(
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[VALIDASI_SILANG]")) {
         const details = JSON.parse(error.message.replace("[VALIDASI_SILANG] ", ""));
@@ -538,7 +539,7 @@ router.delete("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP"), async 
 
     res.json({ success: true, message: "Data penerima manfaat beserta detailnya berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus data penerima manfaat" });
   }
 });

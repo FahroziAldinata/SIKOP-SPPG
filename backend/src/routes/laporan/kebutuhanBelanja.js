@@ -8,6 +8,7 @@ const { renderKebutuhanBelanjaHtml } = require("../../templates/dokumen/kebutuha
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { normalizeDateUTC, HARI_MAP, getTotalPorsiBlok } = require("../../lib/accountingHelper");
 const { getKebutuhanBelanjaData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 const bahanRouter = express.Router();
@@ -97,7 +98,7 @@ bahanRouter.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validat
 
     res.json({ success: true, data: Object.values(akumulasiBahan) });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses kebutuhan belanja bahan" });
   }
 });
@@ -116,7 +117,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     res.set({ "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="Kebutuhan-Belanja.pdf"`, "Content-Length": pdfBuffer.length });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[kebutuhan-belanja/pdf]", error);
+    logger.error("[kebutuhan-belanja/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Kebutuhan Belanja" });
   } finally {
     if (browser) await browser.close();

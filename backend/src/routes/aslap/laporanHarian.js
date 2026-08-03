@@ -7,6 +7,7 @@ const { renderAslapHarianHtml } = require("../../templates/dokumen/aslapHarian")
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { KATEGORI_PIC_SEKOLAH, KATEGORI_PIC_KADER } = require("../../constants/kategori");
 const { getLembaga, authMiddleware } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -430,7 +431,7 @@ router.get(["/laporan/harian", "/api/aslap/laporan/harian"], authMiddleware(["AS
       }
     });
   } catch (error) {
-    console.error("Error get laporan harian aslap:", error);
+    logger.error("Error get laporan harian aslap:", error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil laporan harian aslap" });
   }
 });
@@ -467,7 +468,7 @@ router.get(["/laporan/harian/pdf", "/api/aslap/laporan/harian/pdf"], authMiddlew
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[laporan/harian/pdf]", error);
+    logger.error("[laporan/harian/pdf]", error);
     const message = error.message && error.message.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat PDF Laporan Harian";

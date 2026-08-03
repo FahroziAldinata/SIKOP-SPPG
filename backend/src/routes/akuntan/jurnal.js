@@ -9,6 +9,7 @@ const { validate } = require("../../middleware/validate");
 const { logAudit } = require("../../lib/auditHelper");
 const schemas = require("../../validators/akuntan");
 const { jurnalSnapshot } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -156,7 +157,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.jurnalSch
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Nomor bukti transaksi sudah terdaftar pada periode terpilih" });
     }
@@ -214,7 +215,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar jurnal transaksi" });
   }
 });
@@ -271,7 +272,7 @@ router.get("/prefill/:transaksiPembelianId", requireAuth, requireRole("AKUNTAN")
       transaksiPembelianId: po.id
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses prefill data jurnal" });
   }
 });
@@ -330,7 +331,7 @@ router.get("/bulk-preview", requireAuth, requireRole("AKUNTAN"), async (req, res
 
     res.json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil preview bulk jurnal" });
   }
 });
@@ -490,7 +491,7 @@ router.post("/bulk-generate", requireAuth, requireRole("AKUNTAN"), validate(sche
       count: createdJurnals.length
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -521,7 +522,7 @@ router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail jurnal transaksi" });
   }
 });
@@ -686,7 +687,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -740,7 +741,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
     res.json({ success: true, message: "Jurnal transaksi berhasil dihapus", data: deleted });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });

@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -76,7 +77,7 @@ router.put("/po/:id/approve", requireAuth, requireRole("ASLAP"), validate(schema
 
     res.json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message && error.message.startsWith("[404]")) {
       return res.status(404).json({ error: error.message.replace("[404] ", "") });
     }

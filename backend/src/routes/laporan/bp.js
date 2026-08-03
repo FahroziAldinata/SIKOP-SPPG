@@ -7,6 +7,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderBpHtml } = require("../../templates/dokumen/bp");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getBpData, BP_CONFIGS } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -52,7 +53,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 
     res.json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat Buku Pembantu" });
   }
 });
@@ -69,7 +70,7 @@ for (const cfg of BP_CONFIGS) {
 
       res.json({ success: true, ...result });
     } catch (error) {
-      console.error(`[bp/${cfg.path}]`, error);
+      logger.error(`[bp/${cfg.path}]`, error);
       res.status(500).json({ error: `Gagal mengambil data BP ${cfg.jenisPembantu}` });
     }
   });
@@ -102,7 +103,7 @@ for (const cfg of BP_CONFIGS) {
       });
       res.end(pdfBuffer);
     } catch (error) {
-      console.error(`[bp/${cfg.path}/pdf]`, error);
+      logger.error(`[bp/${cfg.path}/pdf]`, error);
       res.status(500).json({ error: `Gagal membuat PDF BP ${cfg.jenisPembantu}` });
     } finally {
       if (browser) await browser.close();

@@ -7,6 +7,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderLpaHtml } = require("../../templates/dokumen/lpa");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { JABATAN_KEPALA_SPPG } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -94,7 +95,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat LPA" });
   }
 });
@@ -169,7 +170,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[lpa/pdf]", error);
+    logger.error("[lpa/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF LPA" });
   } finally {
     if (browser) await browser.close();

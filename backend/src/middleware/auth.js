@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const prisma = require("../lib/prisma");
+const { logger } = require("../lib/logger");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -37,7 +38,7 @@ async function requireAuth(req, res, next) {
 
     next();
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return res.status(500).json({ error: "Terjadi kesalahan server saat verifikasi akun" });
   }
 }

@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.get("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI", "ASLA
     if (!data) return res.status(404).json({ error: "Data uji organoleptik tidak ditemukan" });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil uji organoleptik" });
   }
 });
@@ -49,7 +50,7 @@ router.post("/menu-organoleptik", requireAuth, requireRole("AHLI_GIZI"), validat
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Uji organoleptik untuk blok ini sudah terdaftar" });
     }
@@ -106,7 +107,7 @@ router.put("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI"), vali
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
       if (error.message.startsWith("[VALIDASI]")) return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
@@ -125,7 +126,7 @@ router.delete("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI"), a
     await prisma.menuOrganoleptik.delete({ where: { id } });
     res.json({ success: true, message: "Data uji organoleptik berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") return res.status(404).json({ error: "Data uji organoleptik tidak ditemukan" });
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus uji organoleptik" });
   }

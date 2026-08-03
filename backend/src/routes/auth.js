@@ -6,6 +6,7 @@ const path = require("path");
 const fs = require("fs");
 const prisma = require("../lib/prisma");
 const { requireAuth, JWT_SECRET } = require("../middleware/auth");
+const { logger } = require("../lib/logger");
 
 const router = express.Router();
 
@@ -127,7 +128,7 @@ router.put("/profile", requireAuth, async (req, res) => {
       user: { id: updated.id, nama: updated.nama, username: updated.username, role: updated.role }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui profil" });
   }
 });
@@ -176,7 +177,7 @@ router.post("/ttd", requireAuth, (req, res) => {
 
       res.json({ ttdPath });
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       res.status(500).json({ error: "Terjadi kesalahan server saat menyimpan TTD" });
     }
   });
@@ -191,7 +192,7 @@ router.get("/ttd", requireAuth, async (req, res) => {
     });
     res.json({ ttdPath: user ? user.ttdPath : null });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data TTD" });
   }
 });
@@ -225,7 +226,7 @@ router.delete("/ttd", requireAuth, async (req, res) => {
 
     res.json({ ttdPath: null });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus TTD" });
   }
 });

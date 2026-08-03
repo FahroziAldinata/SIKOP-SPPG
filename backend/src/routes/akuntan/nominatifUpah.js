@@ -2,6 +2,7 @@ const express = require("express");
 const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -121,7 +122,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -164,7 +165,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
 
     res.json(formatted);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar nominatif upah" });
   }
 });
@@ -198,7 +199,7 @@ router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
       totalUpah: Math.round(totalUpah * 100) / 100
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail nominatif upah" });
   }
 });
@@ -334,7 +335,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -356,7 +357,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
     });
     res.json({ success: true, message: "Daftar nominatif upah berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Daftar nominatif upah tidak ditemukan" });
     }

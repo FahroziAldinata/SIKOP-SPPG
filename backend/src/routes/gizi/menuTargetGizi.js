@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.get("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP
     if (!data) return res.status(404).json({ error: "Data target gizi tidak ditemukan" });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil target gizi" });
   }
 });
@@ -49,7 +50,7 @@ router.post("/menu-target-gizi", requireAuth, requireRole("AHLI_GIZI"), validate
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Target gizi untuk blok ini sudah terdaftar" });
     }
@@ -97,7 +98,7 @@ router.put("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI"), valid
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
       if (error.message.startsWith("[VALIDASI]")) return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
@@ -116,7 +117,7 @@ router.delete("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI"), as
     await prisma.menuTargetGizi.delete({ where: { id } });
     res.json({ success: true, message: "Data target gizi berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") return res.status(404).json({ error: "Data target gizi tidak ditemukan" });
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus target gizi" });
   }

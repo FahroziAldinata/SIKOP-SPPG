@@ -9,6 +9,7 @@ const {
 const { validate } = require("../../middleware/validate");
 const { logAudit } = require("../../lib/auditHelper");
 const schemas = require("../../validators/akuntan");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -32,7 +33,7 @@ router.get("/akun", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data akun" });
   }
 });
@@ -56,7 +57,7 @@ router.get("/supplier", requireAuth, requireRole("AKUNTAN", "MITRA"), async (req
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data supplier" });
   }
 });
@@ -77,7 +78,7 @@ router.post("/supplier", requireAuth, requireRole("AKUNTAN"), async (req, res) =
     });
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menyimpan supplier baru" });
   }
 });
@@ -107,7 +108,7 @@ router.get("/periode/latest-setup", requireAuth, requireRole("AKUNTAN"), async (
     
     res.json({ success: true, data: null });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data periode terakhir" });
   }
 });
@@ -197,7 +198,7 @@ router.post("/periode", requireAuth, requireRole("AKUNTAN"), async (req, res) =>
 
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat periode baru" });
   }
 });
@@ -473,7 +474,7 @@ router.post("/periode/:id/tutup-periode", requireAuth, requireRole("AKUNTAN"), a
       data: result
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menutup periode" });
   }
 });
@@ -510,7 +511,7 @@ router.put("/periode/:id", requireAuth, requireRole("AKUNTAN"), async (req, res)
 
     res.json({ success: true, data: updated });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui data periode" });
   }
 });
@@ -533,7 +534,7 @@ router.get("/jenis-pekerjaan", requireAuth, requireRole("AKUNTAN"), async (req, 
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar jenis pekerjaan" });
   }
 });
@@ -569,7 +570,7 @@ router.post("/jenis-pekerjaan", requireAuth, requireRole("AKUNTAN"), async (req,
     });
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(400).json({ error: "Jenis pekerjaan dengan nama tersebut sudah terdaftar" });
     }
@@ -614,7 +615,7 @@ router.put("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async (r
     });
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(400).json({ error: "Jenis pekerjaan dengan nama tersebut sudah terdaftar" });
     }
@@ -640,7 +641,7 @@ router.delete("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async
     });
     res.json({ success: true, message: "Jenis pekerjaan berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Jenis pekerjaan tidak ditemukan" });
     }
@@ -660,7 +661,7 @@ router.get("/hari-libur", requireAuth, requireRole("AKUNTAN"), async (req, res) 
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar hari libur" });
   }
 });
@@ -693,7 +694,7 @@ router.post("/hari-libur", requireAuth, requireRole("AKUNTAN"), async (req, res)
     });
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(400).json({ error: "Tanggal libur tersebut sudah terdaftar" });
     }
@@ -716,7 +717,7 @@ router.delete("/hari-libur/:id", requireAuth, requireRole("AKUNTAN"), async (req
     });
     res.json({ success: true, message: "Hari libur berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Hari libur tidak ditemukan" });
     }
@@ -855,7 +856,7 @@ router.post("/po", requireAuth, requireRole("AKUNTAN"), validate(schemas.poSchem
 
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message && error.message.startsWith("[VALIDASI]")) {
       return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
     }
@@ -981,7 +982,7 @@ router.get("/kebutuhan-hitungan", requireAuth, requireRole("AKUNTAN", "KEPALA_SP
 
     res.json({ success: true, data: result });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil kebutuhan hitungan" });
   }
 });
@@ -1026,7 +1027,7 @@ router.post("/bahan-pokok", requireAuth, requireRole("AKUNTAN"), async (req, res
 
     res.status(201).json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat bahan pokok" });
   }
 });

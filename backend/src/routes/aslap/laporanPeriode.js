@@ -12,6 +12,7 @@ const {
 } = require("../../constants/kategori");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLembaga, authMiddleware } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -474,7 +475,7 @@ router.get(["/laporan/periode", "/laporan/per-periode", "/api/aslap/laporan/peri
     });
 
   } catch (error) {
-    console.error("Error get laporan periode aslap:", error);
+    logger.error("Error get laporan periode aslap:", error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil laporan periode aslap" });
   }
 });
@@ -511,7 +512,7 @@ router.get(["/laporan/periode/pdf", "/laporan/per-periode/pdf", "/api/aslap/lapo
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[laporan/periode/pdf]", error);
+    logger.error("[laporan/periode/pdf]", error);
     const message = error.message && error.message.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat PDF Laporan Per Periode";

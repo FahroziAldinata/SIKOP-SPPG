@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
 const { requireAuth } = require("../middleware/auth");
+const { logger } = require("../lib/logger");
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.get("/", requireAuth, async (req, res) => {
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil notifikasi" });
   }
 });
@@ -28,7 +29,7 @@ router.patch("/mark-read", requireAuth, async (req, res) => {
     });
     res.json({ success: true });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Gagal menandai notifikasi sebagai dibaca" });
   }
 });

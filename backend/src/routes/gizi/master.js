@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router.get("/kelompok-umur-menu", requireAuth, requireRole("ASLAP", "KEPALA_SPPG
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data kelompok umur menu" });
   }
 });

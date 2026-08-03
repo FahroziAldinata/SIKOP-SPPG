@@ -7,6 +7,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderGiziRekapMenuHtml } = require("../../templates/dokumen/giziRekapMenu");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { HARI_MAP } = require("../../lib/accountingHelper");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -149,7 +150,7 @@ router.get("/laporan/rekap-menu", requireAuth, requireRole("AHLI_GIZI", "KEPALA_
     const data = await getRekapMenuData(tanggalMulai, tanggalSelesai, blokKode, tanggalList);
     res.json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil laporan rekap menu" });
   }
 });
@@ -222,7 +223,7 @@ router.get("/laporan/rekap-menu/pdf", requireAuth, requireRole("AHLI_GIZI", "KEP
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[laporan/rekap-menu/pdf]", error);
+    logger.error("[laporan/rekap-menu/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Laporan Rekap Menu" });
   } finally {
     if (browser) await browser.close();

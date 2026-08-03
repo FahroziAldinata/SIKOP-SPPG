@@ -9,6 +9,7 @@ const { renderStockBarangHtml } = require("../../templates/dokumen/stockBarang")
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
 const { getStockBarangData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -108,7 +109,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Periode tidak ditemukan" });
     }
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses stock barang" });
   }
 });
@@ -121,7 +122,6 @@ router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), 
       return res.status(400).json({ error: "tanggal wajib disertakan" });
     }
 
-    const { normalizeDateUTC } = require("../../lib/accountingHelper");
     const targetTanggal = normalizeDateUTC(tanggal);
     if (isNaN(targetTanggal.getTime())) {
       return res.status(400).json({ error: "Format tanggal tidak valid" });
@@ -187,7 +187,7 @@ router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), 
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Periode tidak ditemukan" });
     }
-    console.error("[stock-barang/export-excel]", error);
+    logger.error("[stock-barang/export-excel]", error);
     res.status(500).json({ error: "Gagal membuat Excel Stock Barang" });
   }
 });
@@ -207,7 +207,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     res.set({ "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="Stock-Barang.pdf"`, "Content-Length": pdfBuffer.length });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[stock-barang/pdf]", error);
+    logger.error("[stock-barang/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Stock Barang" });
   } finally {
     if (browser) await browser.close();

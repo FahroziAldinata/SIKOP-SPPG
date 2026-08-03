@@ -15,6 +15,7 @@ const { launchPuppeteer } = require('../lib/launchPuppeteer');
 const { getPemeriksaanBahanData } = require('../lib/pemeriksaanBahanHelper');
 const { renderPemeriksaanBahanHtml } = require('../templates/dokumen/pemeriksaanBahan');
 const { injectTtdImages } = require('../templates/dokumen/shared');
+const { logger } = require('../lib/logger');
 
 const router = express.Router();
 
@@ -58,7 +59,7 @@ router.get(
 
       return res.json({ success: true, data });
     } catch (error) {
-      console.error('[pemeriksaan-bahan]', error);
+      logger.error('[pemeriksaan-bahan]', error);
       if (error.message?.startsWith('[NOT_FOUND]')) {
         return res.status(404).json({
           success: false,
@@ -122,7 +123,7 @@ router.get(
       res.setHeader('Content-Length', buffer.length);
       return res.end(buffer);
     } catch (error) {
-      console.error('[pemeriksaan-bahan/pdf] Detail error:', error);
+      logger.error('[pemeriksaan-bahan/pdf] Detail error:', error);
       if (error.message?.startsWith('[NOT_FOUND]')) {
         return res.status(404).json({
           success: false,

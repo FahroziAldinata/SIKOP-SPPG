@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -168,7 +169,7 @@ router.get("/master-menu", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPAL
     const list = await getApprovedMasterMenuReferences({ periodeId, jalur, hari });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message?.startsWith("[VALIDASI]")) {
       return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
     }
@@ -210,7 +211,7 @@ router.get("/master-menu/by-hari", requireAuth, requireRole("AHLI_GIZI", "ASLAP"
 
     res.json(row);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data master menu by hari" });
   }
 });
@@ -239,7 +240,7 @@ router.get("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "K
     if (!data) return res.status(404).json({ error: "Data master menu tidak ditemukan" });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail master menu" });
   }
 });
@@ -299,7 +300,7 @@ router.post("/master-menu", requireAuth, requireRole("AHLI_GIZI"), validate(sche
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(400).json({ error: "Master menu untuk periode, jalur, hari, dan minggu ini sudah ada" });
     }
@@ -343,7 +344,7 @@ router.put("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI"), validate(s
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(400).json({ error: "Master menu untuk periode, jalur, hari, dan minggu ini sudah ada" });
     }
@@ -363,7 +364,7 @@ router.delete("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI"), async (
     await prisma.masterMenuMingguan.delete({ where: { id } });
     res.json({ success: true, message: "Master menu berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus master menu" });
   }
 });

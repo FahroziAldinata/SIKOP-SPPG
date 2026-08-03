@@ -6,6 +6,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderLaporanHarianHtml } = require("../../templates/dokumen/laporanHarian");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLaporanHarianData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
     const data = await getLaporanHarianData(periodeId, tanggal);
     res.json({ success: true, data });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     const message = error.message && error.message.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Terjadi kesalahan server saat memproses laporan harian";
@@ -52,7 +53,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[harian/pdf]", error);
+    logger.error("[harian/pdf]", error);
     const message = error.message && error.message.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat PDF Laporan Harian";

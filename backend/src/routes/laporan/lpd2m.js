@@ -9,6 +9,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderLpd2mHtml } = require("../../templates/dokumen/lpd2m");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLpd2mData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
     const data = await getLpd2mData(periodeIds);
     res.json({ success: true, data });
   } catch (error) {
-    console.error("[lpd2m]", error);
+    logger.error("[lpd2m]", error);
     const message = error.message?.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Terjadi kesalahan server saat memproses LPD2M";
@@ -67,7 +68,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
           const fileBuffer = fs.readFileSync(absolutePath);
           base64Data = `data:${b.mimeType};base64,${fileBuffer.toString('base64')}`;
         } catch (err) {
-          console.error("[lpd2m/pdf] Gagal membaca file bukti:", absolutePath, err);
+          logger.error("[lpd2m/pdf] Gagal membaca file bukti:", absolutePath, err);
         }
       }
       return {
@@ -102,7 +103,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
           try {
             fs.unlinkSync(absolutePath);
           } catch (unlinkErr) {
-            console.error("[lpd2m/pdf] Gagal hapus file bukti:", absolutePath, unlinkErr);
+            logger.error("[lpd2m/pdf] Gagal hapus file bukti:", absolutePath, unlinkErr);
           }
         }
       }
@@ -118,7 +119,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[lpd2m/pdf]", error);
+    logger.error("[lpd2m/pdf]", error);
     const message = error.message?.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat PDF LPD2M";

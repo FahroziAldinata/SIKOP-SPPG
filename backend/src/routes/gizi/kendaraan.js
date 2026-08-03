@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ router.get("/kendaraan", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_
     const list = await prisma.kendaraan.findMany();
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar kendaraan" });
   }
 });
@@ -23,7 +24,7 @@ router.get("/kendaraan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEP
     if (!data) return res.status(404).json({ error: "Data kendaraan tidak ditemukan" });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail kendaraan" });
   }
 });

@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get("/pengiriman", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar pengiriman" });
   }
 });
@@ -38,7 +39,7 @@ router.get("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KE
     if (!data) return res.status(404).json({ error: "Data pengiriman tidak ditemukan" });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil detail pengiriman" });
   }
 });
@@ -89,7 +90,7 @@ router.post("/pengiriman", requireAuth, requireRole("AHLI_GIZI"), validate(schem
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2003") {
       return res.status(404).json({ error: "Menu harian or kendaraan tidak ditemukan di database" });
     }
@@ -163,7 +164,7 @@ router.put("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI"), validate(sc
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2003") {
       return res.status(404).json({ error: "Menu harian or kendaraan tidak ditemukan di database" });
     }
@@ -185,7 +186,7 @@ router.delete("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI"), async (r
     await prisma.pengirimanHarian.delete({ where: { id } });
     res.json({ success: true, message: "Data pengiriman berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") return res.status(404).json({ error: "Data pengiriman tidak ditemukan" });
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus pengiriman" });
   }

@@ -3,6 +3,7 @@ const router = express.Router();
 const prisma = require('../lib/prisma');
 const { requireAuth } = require('../middleware/auth');
 const { Prisma } = require('@prisma/client');
+const { logger } = require('../lib/logger');
 
 router.get('/summary', requireAuth, async (req, res) => {
   const { periodeId } = req.query;
@@ -193,7 +194,7 @@ router.get('/summary', requireAuth, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error on /api/dashboard/summary:', error);
+    logger.error('Error on /api/dashboard/summary:', error);
     res.status(500).json({
       error: 'Terjadi kesalahan internal server saat memuat ringkasan'
     });

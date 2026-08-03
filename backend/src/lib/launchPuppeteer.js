@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium').default || require('@sparticuz/chromium');
 const fs = require('fs');
+const { logger } = require('./logger');
 
 async function launchPuppeteer() {
   let executablePath;
@@ -38,7 +39,7 @@ async function launchPuppeteer() {
         executablePath = execPath;
       }
     } catch (err) {
-      console.warn('[launchPuppeteer] chromium.executablePath() error:', err.message);
+      logger.warn('[launchPuppeteer] chromium.executablePath() error:', err.message);
     }
   }
 

@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const prisma = require("../lib/prisma");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { logger } = require("../lib/logger");
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.get("/users", async (req, res) => {
     });
     res.json(users);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Gagal mengambil daftar user" });
   }
 });
@@ -71,7 +72,7 @@ router.post("/users", async (req, res) => {
 
     res.status(201).json(newUser);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === 'P2002') {
       return res.status(409).json({ error: "Username sudah digunakan oleh user lain" });
     }
@@ -119,7 +120,7 @@ router.put("/users/:id", async (req, res) => {
 
     res.json(updatedUser);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === 'P2025') {
       return res.status(404).json({ error: "User tidak ditemukan" });
     }
@@ -146,7 +147,7 @@ router.delete("/users/:id", async (req, res) => {
 
     res.json({ success: true, message: `User ${disabledUser.nama} berhasil dinonaktifkan`, user: disabledUser });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === 'P2025') {
       return res.status(404).json({ error: "User tidak ditemukan" });
     }

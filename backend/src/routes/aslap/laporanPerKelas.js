@@ -6,6 +6,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderAslapPerKelasHtml } = require("../../templates/dokumen/aslapPerKelas");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLembaga, authMiddleware } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -103,7 +104,7 @@ router.get(["/laporan/per-kelas", "/api/aslap/laporan/per-kelas"], authMiddlewar
 
     res.json(Object.values(grouped));
   } catch (error) {
-    console.error("Error get laporan per kelas:", error);
+    logger.error("Error get laporan per kelas:", error);
     res.status(500).json({ error: "Gagal mengambil laporan per kelas" });
   }
 });
@@ -141,7 +142,7 @@ router.get(["/laporan/per-kelas/pdf", "/api/aslap/laporan/per-kelas/pdf"], authM
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[laporan/per-kelas/pdf]", error);
+    logger.error("[laporan/per-kelas/pdf]", error);
     const message = error.message && error.message.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat PDF Laporan Per Kelas";

@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const prisma = require("../lib/prisma");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { logger } = require("../lib/logger");
 
 const router = express.Router();
 
@@ -78,7 +79,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), upload.sing
 
     res.status(201).json({ success: true, data: bukti });
   } catch (error) {
-    console.error("[bukti-lpd2m post]", error);
+    logger.error("[bukti-lpd2m post]", error);
     if (req.file && fs.existsSync(req.file.path)) {
       try { fs.unlinkSync(req.file.path); } catch {}
     }
@@ -106,7 +107,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
 
     res.json({ success: true, data: buktiList });
   } catch (error) {
-    console.error("[bukti-lpd2m get]", error);
+    logger.error("[bukti-lpd2m get]", error);
     res.status(500).json({ error: "Gagal mengambil daftar bukti LPD2M" });
   }
 });
@@ -132,7 +133,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async 
       try {
         fs.unlinkSync(absolutePath);
       } catch (err) {
-        console.error("Gagal menghapus file bukti fisik:", err);
+        logger.error("Gagal menghapus file bukti fisik:", err);
       }
     }
 
@@ -142,7 +143,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async 
 
     res.json({ success: true, message: "Bukti LPD2M berhasil dihapus" });
   } catch (error) {
-    console.error("[bukti-lpd2m delete]", error);
+    logger.error("[bukti-lpd2m delete]", error);
     res.status(500).json({ error: "Gagal menghapus bukti LPD2M" });
   }
 });

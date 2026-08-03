@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanAnggaranSchema } = require("../../validators/laporan");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -59,7 +60,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses ringkasan anggaran" });
   }
 });

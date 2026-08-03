@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get("/periode", requireAuth, requireRole("ASLAP", "MITRA", "KEPALA_SPPG",
 
     res.json(formatted);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data periode" });
   }
 });
@@ -35,7 +36,7 @@ router.get("/kategori", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_G
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data kategori" });
   }
 });
@@ -48,7 +49,7 @@ router.get("/sekolah", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GI
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data sekolah" });
   }
 });
@@ -82,7 +83,7 @@ router.post("/sekolah", requireAuth, requireRole("ASLAP"), validate(schemas.seko
     });
     res.status(201).json({ success: true, data: sekolah });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat menyimpan data sekolah" });
   }
 });
@@ -127,7 +128,7 @@ router.put("/sekolah/:id", requireAuth, requireRole("ASLAP"), validate(schemas.s
     });
     res.json({ success: true, data: sekolah });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui data sekolah" });
   }
 });
@@ -140,7 +141,7 @@ router.get("/posyandu", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_G
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data posyandu" });
   }
 });

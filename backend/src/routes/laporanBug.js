@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { logger } = require("../lib/logger");
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ router.post("/submit", requireAuth, async (req, res) => {
 
     res.status(201).json(laporan);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Gagal mengirim laporan bug" });
   }
 });
@@ -75,7 +76,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
 
     res.json(laporan);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Gagal mengambil daftar laporan bug" });
   }
 });
@@ -104,7 +105,7 @@ router.patch("/:id/status", requireAuth, requireRole("ADMIN"), async (req, res) 
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Laporan tidak ditemukan" });
     }

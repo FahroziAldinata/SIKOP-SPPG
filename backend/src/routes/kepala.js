@@ -1,6 +1,7 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
 const { requireAuth, requireRole } = require("../middleware/auth");
+const { logger } = require("../lib/logger");
 
 const router = express.Router();
 
@@ -118,7 +119,7 @@ async function handlePostApproval(req, res) {
 
         if (creatorIds.length === 0) {
           // [ASUMSI] Jika MenuHarian tidak memiliki blok sama sekali, lewati pembuatan notifikasi
-          console.warn(`[NOTIFIKASI] MenuHarian ID ${targetId} tidak memiliki blok, lewati pengiriman notifikasi.`);
+          logger.warn(`[NOTIFIKASI] MenuHarian ID ${targetId} tidak memiliki blok, lewati pengiriman notifikasi.`);
         } else {
           const notifData = creatorIds.map((creatorId) => ({
             userId: creatorId,
@@ -174,7 +175,7 @@ async function handlePostApproval(req, res) {
 
     res.status(201).json(result);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     // Tangkap error dengan status code terdefinisi dari lockAndVerifyTarget (400/404, abaikan 500)
     if (error.statusCode && error.statusCode !== 500) {
       return res.status(error.statusCode).json({ error: error.message });
@@ -276,7 +277,7 @@ async function handleGetApprovals(req, res) {
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil riwayat approval" });
   }
 }

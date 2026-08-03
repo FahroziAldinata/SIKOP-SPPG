@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { getPenerimaBlok } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get("/alergi-catatan", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KE
     });
     res.json(list);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar catatan alergi" });
   }
 });
@@ -31,7 +32,7 @@ router.get("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP",
     if (!data) return res.status(404).json({ error: "Data catatan alergi tidak ditemukan" });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil catatan alergi" });
   }
 });
@@ -80,7 +81,7 @@ router.post("/alergi-catatan", requireAuth, requireRole("AHLI_GIZI"), validate(s
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
       if (error.message.startsWith("[VALIDASI]")) return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
@@ -146,7 +147,7 @@ router.put("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI"), validat
 
     res.json(updated);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
       if (error.message.startsWith("[VALIDASI]")) return res.status(400).json({ error: error.message.replace("[VALIDASI] ", "") });
@@ -165,7 +166,7 @@ router.delete("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI"), asyn
     await prisma.alergiCatatan.delete({ where: { id } });
     res.json({ success: true, message: "Data catatan alergi berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") return res.status(404).json({ error: "Data catatan alergi tidak ditemukan" });
     res.status(500).json({ error: "Terjadi kesalahan server saat menghapus catatan alergi" });
   }

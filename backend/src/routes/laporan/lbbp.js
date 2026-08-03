@@ -6,6 +6,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderLbbpHtml } = require("../../templates/dokumen/lbbp");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLbbpData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
     }
     res.json({ success: true, data });
   } catch (error) {
-    console.error("[lbbp]", error);
+    logger.error("[lbbp]", error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat LBBP" });
   }
 });
@@ -54,7 +55,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[lbbp/pdf]", error);
+    logger.error("[lbbp/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF LBBP" });
   } finally {
     if (browser) await browser.close();

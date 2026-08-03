@@ -10,6 +10,7 @@ const {
   generateBAPSD,
   dokumenResmiSnapshot
 } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -36,7 +37,7 @@ router.get("/generate", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), asyn
 
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.message) {
       if (error.message.startsWith("[NOT_FOUND]")) {
         return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
@@ -66,7 +67,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
     });
     res.json(data);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat mengambil daftar dokumen resmi" });
   }
 });
@@ -120,7 +121,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.dokumenRe
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Dokumen resmi jenis ini sudah diterbitkan untuk periode terpilih" });
     }
@@ -160,7 +161,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
     });
     res.json({ success: true, message: "Dokumen resmi berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025" || (error.message && error.message.startsWith("[NOT_FOUND]"))) {
       return res.status(404).json({ error: "Dokumen resmi tidak ditemukan" });
     }

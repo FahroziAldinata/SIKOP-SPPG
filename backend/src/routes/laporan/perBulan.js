@@ -7,6 +7,7 @@ const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderPerBulanHtml } = require("../../templates/dokumen/perBulan");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getPerBulanData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       data: Object.values(dataBulanan).sort((a, b) => a.key.localeCompare(b.key))
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat memproses laporan per bulan" });
   }
 });
@@ -60,7 +61,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     res.set({ "Content-Type": "application/pdf", "Content-Disposition": `inline; filename="Per-Bulan.pdf"`, "Content-Length": pdfBuffer.length });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[per-bulan/pdf]", error);
+    logger.error("[per-bulan/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF Laporan Per Bulan" });
   } finally {
     if (browser) await browser.close();

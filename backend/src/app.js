@@ -17,6 +17,9 @@ const laporanBugRoutes = require('./routes/laporanBug');
 const pemeriksaanBahanRoutes = require('./routes/pemeriksaan-bahan');
 const buktiLpd2mRoutes = require('./routes/bukti-lpd2m');
 
+const { httpLogger } = require('./lib/logger');
+const errorHandler = require('./middleware/errorHandler');
+
 const app = express();
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS 
@@ -25,6 +28,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(httpLogger);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/aslap', aslapRoutes);
@@ -44,11 +48,7 @@ app.use('/api/laporan/pemeriksaan-bahan', pemeriksaanBahanRoutes);
 // app.js ada di backend/src, jadi ../uploads = backend/uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// 500 catch-all — biar error gak pernah bocor stack trace ke client
-app.use((err, req, res, _next) => {
-  console.error(err);
-  res.status(500).json({ success: false, error: 'Terjadi kesalahan di server' });
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 

@@ -8,6 +8,7 @@ const { exportLraXlsx } = require("../../lib/exportExcel");
 const { renderLraHtml } = require("../../templates/dokumen/lra");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
 const { getLraData } = require("./_helpers");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
     const data = await getLraData(periodeIds);
     res.json({ success: true, data });
   } catch (error) {
-    console.error("[lra]", error);
+    logger.error("[lra]", error);
     const message = error.message?.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Terjadi kesalahan server saat memproses LRA";
@@ -66,7 +67,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[lra/pdf]", error);
+    logger.error("[lra/pdf]", error);
     const message = error.message?.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat PDF LRA";
@@ -101,7 +102,7 @@ router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.end(buffer);
   } catch (error) {
-    console.error("[lra/export-excel]", error);
+    logger.error("[lra/export-excel]", error);
     const message = error.message?.startsWith("[VALIDASI]")
       ? error.message.replace("[VALIDASI] ", "")
       : "Gagal membuat Excel LRA";

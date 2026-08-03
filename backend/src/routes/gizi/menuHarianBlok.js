@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -67,12 +68,12 @@ router.post("/menu-harian-blok", requireAuth, requireRole("AHLI_GIZI"), validate
         });
       }
     } catch (e) {
-      console.error('Auto-populate target gizi gagal:', e.message);
+      logger.error('Auto-populate target gizi gagal:', e.message);
     }
 
     res.status(201).json(created);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2002") {
       return res.status(409).json({ error: "Blok kelompok umur ini sudah terdaftar pada menu harian terpilih" });
     }
@@ -105,7 +106,7 @@ router.delete("/menu-harian-blok/:id", requireAuth, requireRole("AHLI_GIZI"), as
 
     res.json({ success: true, message: "Data blok menu harian berhasil dihapus" });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data blok menu harian tidak ditemukan" });
     }

@@ -6,6 +6,7 @@ const { laporanBapsdSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderBapsdHtml } = require("../../templates/dokumen/bapsd");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -53,7 +54,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       }
     });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     res.status(500).json({ error: "Terjadi kesalahan server saat membuat BAPSD" });
   }
 });
@@ -118,7 +119,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[bapsd/pdf]", error);
+    logger.error("[bapsd/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF BAPSD" });
   } finally {
     if (browser) await browser.close();

@@ -6,6 +6,7 @@ const { laporanBttSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
 const { renderBttHtml, formatTerbilang } = require("../../templates/dokumen/btt");
 const { injectTtdImages } = require("../../templates/dokumen/shared");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -59,7 +60,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
       }
     });
   } catch (error) {
-    console.error("[btt]", error);
+    logger.error("[btt]", error);
     res.status(500).json({ error: "Gagal mengambil data BTT" });
   }
 });
@@ -129,7 +130,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error("[btt/pdf]", error);
+    logger.error("[btt/pdf]", error);
     res.status(500).json({ error: "Gagal membuat PDF BTT" });
   } finally {
     if (browser) await browser.close();
