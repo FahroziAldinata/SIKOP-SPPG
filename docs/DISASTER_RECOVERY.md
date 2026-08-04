@@ -65,12 +65,27 @@ pg_restore --clean --if-exists --single-transaction -h <host> -p 5432 -U <user> 
 
 ## Status Otomatisasi
 
-**Status: backup manual/on-demand, otomatisasi terjadwal MENUNGGU keputusan platform production final.**
+**Status: backup manual/on-demand (aktif). Otomatisasi terjadwal: panduan local di bawah — belum dipasang (keputusan Rozi: tanpa scheduler nyata, scope local).**
 
-- Saat ini belum ada cron job atau scheduler otomatis yang berjalan di repo ini.
-- Opsi otomatisasi yang dapat dipilih saat platform production final ditentukan:
-  - Cron job di platform PaaS (misal: Railway Cron Jobs).
-  - Workflow terjadwal GitHub Actions (Scheduled Workflows).
-  - Layanan backup otomatis terkelola dari penyedia database (misal: Supabase Daily Backups paid plan).
-  - Scheduler OS pada VPS/server mandiri (misal: Linux `crontab` atau Windows Task Scheduler).
-- Script `backend/scripts/backup-db.js` dirancang modular dan siap diintegrasikan dengan alat penjadwalan apa pun (mengembalikan exit code `0` saat sukses dan exit code `1` saat gagal).
+## Panduan Otomatisasi (Local Windows)
+
+- **Catatan:** Script `backend/scripts/backup-db.js` siap dijadwalkan (exit code 0 = sukses, non-0 = gagal). Pastikan `node` + `pg_dump` (`D:\Tools_Project\PostgreSQL\18\bin`) tersedia di PATH ketika task scheduler menjalankan script.
+- **Opsi A — Windows Task Scheduler (`schtasks`)**
+  Contoh perintah (dengan `DATABASE_URL` di-set di environment script atau `.bat` wrapper; JANGAN tulis password di baris perintah task):
+  ```cmd
+  schtasks /Create /TN "SPPG-BackupDB" /TR "\"C:\Program Files\nodejs\node.exe\" \"D:\Project\Sistem\Sistem_SPPG\backend\scripts\backup-db.js\"" /SC DAILY /ST 03:00
+  ```
+  *(Catatan: path node sesuai instalasi; `DATABASE_URL` harus tersedia untuk proses task — set via System Environment Variables atau wrapper `.bat` yang membaca `.env`; dokumentasikan tanpa menyertakan nilai sebenarnya.)*
+- **Opsi B — Alternatif cron/bash (Git Bash / WSL)**
+  Contoh crontab line (dokumentatif):
+  ```bash
+  0 3 * * * cd /d/Project/Sistem/Sistem_SPPG/backend && DATABASE_URL="postgresql://user:***@localhost:5432/sppg" node scripts/backup-db.js >> /tmp/sppg-backup.log 2>&1
+  ```
+  *(placeholder `user:***` — jangan isi kredensial asli di dokumentasi.)*
+- **Retensi (Opsional, Dokumentatif)**
+  Hapus dump lebih dari 7 hari — contoh Windows:
+  ```cmd
+  forfiles /P "D:\Project\Sistem\Sistem_SPPG\backend\backups" /M *.dump /D -7 /C "cmd /c del @path"
+  ```
+
+Scheduler TIDAK dipasang saat ini (keputusan Rozi 2026-08-05 — scope local, panduan saja).
