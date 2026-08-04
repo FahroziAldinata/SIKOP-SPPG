@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const prisma = require("../lib/prisma");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { logger } = require("../lib/logger");
+const { logAudit } = require("../lib/auditHelper");
 
 const router = express.Router();
 
@@ -52,22 +53,38 @@ router.post("/users", async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const newUser = await prisma.user.create({
-      data: {
-        nama,
-        username,
-        passwordHash,
-        role,
-        aktif: true
-      },
-      select: {
-        id: true,
-        nama: true,
-        username: true,
-        role: true,
-        aktif: true,
-        createdAt: true
-      }
+    const newUser = await prisma.$transaction(async (tx) => {
+      const userRec = await tx.user.create({
+        data: {
+          nama,
+          username,
+          passwordHash,
+          role,
+          aktif: true
+        },
+        select: {
+          id: true,
+          nama: true,
+          username: true,
+          role: true,
+          aktif: true,
+          createdAt: true
+        }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "User",
+        entityId: userRec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          nama: userRec.nama,
+          username: userRec.username,
+          role: userRec.role,
+          aktif: userRec.aktif
+        }
+      });
+      return userRec;
     });
 
     res.status(201).json(newUser);
@@ -97,7 +114,8 @@ router.put("/users/:id", async (req, res) => {
       data.role = role;
     }
 
-    if (password !== undefined && password !== "") {
+    const isPasswordChanged = password !== undefined && password !== "";
+    if (isPasswordChanged) {
       if (password.length < 6) {
         return res.status(400).json({ error: "Password minimal 6 karakter" });
       }
@@ -106,18 +124,44 @@ router.put("/users/:id", async (req, res) => {
       data.tokenVersion = { increment: 1 };
     }
 
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data,
-      select: {
-        id: true,
-        nama: true,
-        username: true,
-        role: true,
-        aktif: true,
-        createdAt: true,
-        updatedAt: true
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      const existing = await tx.user.findUniqueOrThrow({ where: { id } });
+      const rec = await tx.user.update({
+        where: { id },
+        data,
+        select: {
+          id: true,
+          nama: true,
+          username: true,
+          role: true,
+          aktif: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+      const dataBaruObj = {
+        nama: rec.nama,
+        username: rec.username,
+        role: rec.role,
+        aktif: rec.aktif
+      };
+      if (isPasswordChanged) {
+        dataBaruObj.passwordChanged = true;
       }
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "User",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: {
+          nama: existing.nama,
+          username: existing.username,
+          role: existing.role,
+          aktif: existing.aktif
+        },
+        dataBaru: dataBaruObj
+      });
+      return rec;
     });
 
     res.json(updatedUser);
@@ -135,16 +179,38 @@ router.delete("/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
     
-    const disabledUser = await prisma.user.update({
-      where: { id },
-      data: { aktif: false },
-      select: {
-        id: true,
-        nama: true,
-        username: true,
-        role: true,
-        aktif: true
-      }
+    const disabledUser = await prisma.$transaction(async (tx) => {
+      const existing = await tx.user.findUniqueOrThrow({ where: { id } });
+      const rec = await tx.user.update({
+        where: { id },
+        data: { aktif: false },
+        select: {
+          id: true,
+          nama: true,
+          username: true,
+          role: true,
+          aktif: true
+        }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "User",
+        entityId: rec.id,
+        aksi: "DELETE",
+        dataLama: {
+          nama: existing.nama,
+          username: existing.username,
+          role: existing.role,
+          aktif: existing.aktif
+        },
+        dataBaru: {
+          nama: rec.nama,
+          username: rec.username,
+          role: rec.role,
+          aktif: rec.aktif
+        }
+      });
+      return rec;
     });
 
     res.json({ success: true, message: `User ${disabledUser.nama} berhasil dinonaktifkan`, user: disabledUser });

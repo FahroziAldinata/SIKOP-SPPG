@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
 const { logger } = require("../../lib/logger");
+const { logAudit } = require("../../lib/auditHelper");
 
 const router = express.Router();
 
@@ -99,7 +100,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
       }
 
       // 4. Create record
-      return await tx.daftarNominatifUpah.create({
+      const rec = await tx.daftarNominatifUpah.create({
         data: {
           periodeId,
           jenisPekerjaan,
@@ -118,6 +119,25 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
           detailHarian: true
         }
       });
+
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "DaftarNominatifUpah",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          periodeId: rec.periodeId,
+          jenisPekerjaan: rec.jenisPekerjaan,
+          namaRelawan: rec.namaRelawan,
+          danaKesehatan: rec.danaKesehatan,
+          tk: rec.tk,
+          pj: rec.pj,
+          tarifHarian: rec.tarifHarian
+        }
+      });
+
+      return rec;
     });
 
     res.status(201).json(created);
@@ -327,10 +347,21 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
         }
       }
 
-      return await tx.daftarNominatifUpah.findUnique({
+      const rec = await tx.daftarNominatifUpah.findUnique({
         where: { id },
         include: { detailHarian: true }
       });
+
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "DaftarNominatifUpah",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: existing,
+        dataBaru: rec
+      });
+
+      return rec;
     });
 
     res.json(updated);
@@ -352,8 +383,21 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.daftarNominatifUpah.delete({
-      where: { id }
+    await prisma.$transaction(async (tx) => {
+      const existing = await tx.daftarNominatifUpah.findUniqueOrThrow({
+        where: { id }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "DaftarNominatifUpah",
+        entityId: existing.id,
+        aksi: "DELETE",
+        dataLama: existing,
+        dataBaru: null
+      });
+      await tx.daftarNominatifUpah.delete({
+        where: { id }
+      });
     });
     res.json({ success: true, message: "Daftar nominatif upah berhasil dihapus" });
   } catch (error) {

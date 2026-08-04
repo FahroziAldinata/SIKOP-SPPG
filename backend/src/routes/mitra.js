@@ -9,6 +9,7 @@ const { renderNotaPesananHtml } = require("../templates/dokumen/notaPesanan");
 const { renderPoRealisasiHtml } = require("../templates/dokumen/poRealisasi");
 const { injectTtdImages } = require("../templates/dokumen/shared");
 const { logger } = require("../lib/logger");
+const { logAudit } = require("../lib/auditHelper");
 
 const router = express.Router();
 
@@ -36,16 +37,34 @@ router.put("/bahan-pokok/:id", requireAuth, requireRole("MITRA"), validate(schem
     const { id } = req.params;
     const { konversiPerKg, satuanHitungan } = req.body;
 
-    const data = await prisma.bahanPokok.update({
-      where: { id },
-      data: {
-        konversiPerKg: konversiPerKg !== undefined && konversiPerKg !== null && konversiPerKg !== "" ? parseFloat(konversiPerKg) : null,
-        satuanHitungan: satuanHitungan !== undefined && satuanHitungan !== null && satuanHitungan !== "" ? satuanHitungan.toUpperCase() : null
+    const data = await prisma.$transaction(async (tx) => {
+      const existing = await tx.bahanPokok.findUnique({ where: { id } });
+      if (!existing) {
+        throw new Error("[NOT_FOUND] Bahan pokok tidak ditemukan");
       }
+      const updated = await tx.bahanPokok.update({
+        where: { id },
+        data: {
+          konversiPerKg: konversiPerKg !== undefined && konversiPerKg !== null && konversiPerKg !== "" ? parseFloat(konversiPerKg) : null,
+          satuanHitungan: satuanHitungan !== undefined && satuanHitungan !== null && satuanHitungan !== "" ? satuanHitungan.toUpperCase() : null
+        }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "BahanPokok",
+        entityId: updated.id,
+        aksi: "UPDATE",
+        dataLama: existing,
+        dataBaru: updated
+      });
+      return updated;
     });
     res.json({ success: true, data });
   } catch (error) {
     logger.error(error);
+    if (error.message && error.message.startsWith("[NOT_FOUND]")) {
+      return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
+    }
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui data bahan pokok" });
   }
 });
@@ -88,12 +107,23 @@ router.post("/kendaraan", requireAuth, requireRole("MITRA"), validate(schemas.ke
   try {
     const { namaKendaraan, platNomor, aktif } = req.body || {};
 
-    const created = await prisma.kendaraan.create({
-      data: {
-        namaKendaraan,
-        platNomor,
-        aktif: aktif !== undefined ? Boolean(aktif) : true
-      }
+    const created = await prisma.$transaction(async (tx) => {
+      const rec = await tx.kendaraan.create({
+        data: {
+          namaKendaraan,
+          platNomor,
+          aktif: aktif !== undefined ? Boolean(aktif) : true
+        }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Kendaraan",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: rec
+      });
+      return rec;
     });
     res.status(201).json(created);
   } catch (error) {
@@ -108,20 +138,36 @@ router.put("/kendaraan/:id", requireAuth, requireRole("MITRA"), validate(schemas
     const { id } = req.params;
     const { namaKendaraan, platNomor, aktif } = req.body || {};
 
-    const existing = await prisma.kendaraan.findUnique({ where: { id } });
-    if (!existing) return res.status(404).json({ error: "Data kendaraan tidak ditemukan" });
-
-    const updated = await prisma.kendaraan.update({
-      where: { id },
-      data: {
-        namaKendaraan: namaKendaraan !== undefined ? namaKendaraan : undefined,
-        platNomor: platNomor !== undefined ? platNomor : undefined,
-        aktif: aktif !== undefined ? Boolean(aktif) : undefined
+    const updated = await prisma.$transaction(async (tx) => {
+      const existing = await tx.kendaraan.findUnique({ where: { id } });
+      if (!existing) {
+        throw new Error("[NOT_FOUND] Data kendaraan tidak ditemukan");
       }
+
+      const rec = await tx.kendaraan.update({
+        where: { id },
+        data: {
+          namaKendaraan: namaKendaraan !== undefined ? namaKendaraan : undefined,
+          platNomor: platNomor !== undefined ? platNomor : undefined,
+          aktif: aktif !== undefined ? Boolean(aktif) : undefined
+        }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Kendaraan",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: existing,
+        dataBaru: rec
+      });
+      return rec;
     });
     res.json(updated);
   } catch (error) {
     logger.error(error);
+    if (error.message && error.message.startsWith("[NOT_FOUND]")) {
+      return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
+    }
     res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui kendaraan" });
   }
 });
@@ -130,13 +176,27 @@ router.put("/kendaraan/:id", requireAuth, requireRole("MITRA"), validate(schemas
 router.delete("/kendaraan/:id", requireAuth, requireRole("MITRA"), async (req, res) => {
   try {
     const { id } = req.params;
-    const exists = await prisma.kendaraan.findUnique({ where: { id } });
-    if (!exists) return res.status(404).json({ error: "Data kendaraan tidak ditemukan" });
-
-    await prisma.kendaraan.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      const exists = await tx.kendaraan.findUnique({ where: { id } });
+      if (!exists) {
+        throw new Error("[NOT_FOUND] Data kendaraan tidak ditemukan");
+      }
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Kendaraan",
+        entityId: exists.id,
+        aksi: "DELETE",
+        dataLama: exists,
+        dataBaru: null
+      });
+      await tx.kendaraan.delete({ where: { id } });
+    });
     res.json({ success: true, message: "Data kendaraan berhasil dihapus" });
   } catch (error) {
     logger.error(error);
+    if (error.message && error.message.startsWith("[NOT_FOUND]")) {
+      return res.status(404).json({ error: error.message.replace("[NOT_FOUND] ", "") });
+    }
     if (error.code === "P2025") return res.status(404).json({ error: "Data kendaraan tidak ditemukan" });
     if (error.code === "P2003" || error.message?.includes("23001") || error.message?.includes("foreign key constraint")) {
       return res.status(409).json({ error: "Kendaraan tidak dapat dihapus karena masih digunakan pada data pengiriman" });
@@ -236,7 +296,7 @@ router.post("/harga-bahan", requireAuth, requireRole("MITRA"), validate(schemas.
       }
 
       // 5. Create in database
-      return await tx.hargaBahanPeriode.create({
+      const rec = await tx.hargaBahanPeriode.create({
         data: {
           periodeId,
           bahanPokokId,
@@ -248,6 +308,17 @@ router.post("/harga-bahan", requireAuth, requireRole("MITRA"), validate(schemas.
           bahanPokok: true
         }
       });
+
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "HargaBahanPeriode",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: rec
+      });
+
+      return rec;
     });
 
     res.status(201).json(created);
@@ -325,7 +396,7 @@ router.put("/harga-bahan/:id", requireAuth, requireRole("MITRA"), validate(schem
       }
 
       // Update
-      return await tx.hargaBahanPeriode.update({
+      const rec = await tx.hargaBahanPeriode.update({
         where: { id },
         data: {
           periodeId: targetPeriodeId,
@@ -337,6 +408,17 @@ router.put("/harga-bahan/:id", requireAuth, requireRole("MITRA"), validate(schem
           bahanPokok: true
         }
       });
+
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "HargaBahanPeriode",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: existingRecord,
+        dataBaru: rec
+      });
+
+      return rec;
     });
 
     res.json(updated);
@@ -365,20 +447,34 @@ router.delete("/harga-bahan/:id", requireAuth, requireRole("MITRA"), async (req,
   try {
     const { id } = req.params;
 
-    const exists = await prisma.hargaBahanPeriode.findUnique({
-      where: { id }
-    });
-    if (!exists) {
-      return res.status(404).json({ error: "Data harga bahan pokok tidak ditemukan" });
-    }
+    await prisma.$transaction(async (tx) => {
+      const exists = await tx.hargaBahanPeriode.findUnique({
+        where: { id }
+      });
+      if (!exists) {
+        throw new Error("[NOT_FOUND] Data harga bahan pokok tidak ditemukan");
+      }
 
-    await prisma.hargaBahanPeriode.delete({
-      where: { id }
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "HargaBahanPeriode",
+        entityId: exists.id,
+        aksi: "DELETE",
+        dataLama: exists,
+        dataBaru: null
+      });
+
+      await tx.hargaBahanPeriode.delete({
+        where: { id }
+      });
     });
 
     res.json({ success: true, message: "Data harga bahan pokok berhasil dihapus" });
   } catch (error) {
     logger.error(error);
+    if (error.message && error.message.startsWith("[NOT_FOUND]")) {
+      return res.status(404).json({ error: "Data harga bahan pokok tidak ditemukan" });
+    }
     if (error.code === "P2025") {
       return res.status(404).json({ error: "Data harga bahan pokok tidak ditemukan" });
     }
@@ -636,7 +732,7 @@ router.put("/po/:id/realisasi", requireAuth, requireRole("MITRA"), validate(sche
       const allRealized = allItems.every(i => i.qtyRealisasi !== null);
       const newStatus = allRealized ? "DIREALISASI" : "DIAJUKAN";
 
-      return await tx.transaksiPembelian.update({
+      const updatedPo = await tx.transaksiPembelian.update({
         where: { id },
         data: { status: newStatus },
         include: {
@@ -644,6 +740,17 @@ router.put("/po/:id/realisasi", requireAuth, requireRole("MITRA"), validate(sche
           supplier: true
         }
       });
+
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "TransaksiPembelian",
+        entityId: id,
+        aksi: "UPDATE",
+        dataLama: { status: po.status },
+        dataBaru: { status: updatedPo.status }
+      });
+
+      return updatedPo;
     });
 
     res.json({ success: true, data: result });

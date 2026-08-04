@@ -5,6 +5,7 @@ const fs = require("fs");
 const prisma = require("../lib/prisma");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { logger } = require("../lib/logger");
+const { logAudit } = require("../lib/auditHelper");
 
 const router = express.Router();
 
@@ -61,20 +62,37 @@ router.post("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), upload.sing
 
     const relativePath = path.relative(path.join(__dirname, "../../"), req.file.path).replace(/\\/g, "/");
 
-    const bukti = await prisma.dokumenBuktiLpd2m.create({
-      data: {
-        periodeId,
-        namaBukti,
-        jenis,
-        filePath: relativePath,
-        mimeType: req.file.mimetype,
-        uploadedById: req.user.sub
-      },
-      include: {
-        uploadedBy: {
-          select: { id: true, nama: true, username: true }
+    const bukti = await prisma.$transaction(async (tx) => {
+      const rec = await tx.dokumenBuktiLpd2m.create({
+        data: {
+          periodeId,
+          namaBukti,
+          jenis,
+          filePath: relativePath,
+          mimeType: req.file.mimetype,
+          uploadedById: req.user.sub
+        },
+        include: {
+          uploadedBy: {
+            select: { id: true, nama: true, username: true }
+          }
         }
-      }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "DokumenBuktiLpd2m",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          periodeId: rec.periodeId,
+          namaBukti: rec.namaBukti,
+          jenis: rec.jenis,
+          filePath: rec.filePath,
+          mimeType: rec.mimeType
+        }
+      });
+      return rec;
     });
 
     res.status(201).json({ success: true, data: bukti });
@@ -137,8 +155,18 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async 
       }
     }
 
-    await prisma.dokumenBuktiLpd2m.delete({
-      where: { id }
+    await prisma.$transaction(async (tx) => {
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "DokumenBuktiLpd2m",
+        entityId: bukti.id,
+        aksi: "DELETE",
+        dataLama: bukti,
+        dataBaru: null
+      });
+      await tx.dokumenBuktiLpd2m.delete({
+        where: { id }
+      });
     });
 
     res.json({ success: true, message: "Bukti LPD2M berhasil dihapus" });
