@@ -48,3 +48,4 @@ Excel sppg
 # Test coverage
 backend/coverage/
 frontend/coverage/
+backend/backups/
