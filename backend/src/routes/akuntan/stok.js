@@ -371,22 +371,46 @@ mutasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas
       // [ASUMSI] Saldo tidak divalidasi (bisa minus), sistem hanya melakukan pencatatan mutasi.
     }
 
-    const created = await prisma.mutasiStok.create({
-      data: {
-        bahanPokokId,
-        tanggal: targetTanggal,
-        jenis,
-        qty: Math.round(parsedQty * 1000) / 1000,
-        keterangan: keterangan || null,
-        supplierId: targetSupplierId,
-        hargaBeli: targetHargaBeli,
-        kelompokPenerima: targetKelompokPenerima,
-        createdById: req.user.sub
-      },
-      include: {
-        bahanPokok: true,
-        supplier: true
-      }
+    const created = await prisma.$transaction(async (tx) => {
+      const rec = await tx.mutasiStok.create({
+        data: {
+          bahanPokokId,
+          tanggal: targetTanggal,
+          jenis,
+          qty: Math.round(parsedQty * 1000) / 1000,
+          keterangan: keterangan || null,
+          supplierId: targetSupplierId,
+          hargaBeli: targetHargaBeli,
+          kelompokPenerima: targetKelompokPenerima,
+          createdById: req.user.sub
+        },
+        include: {
+          bahanPokok: true,
+          supplier: true
+        }
+      });
+
+      // Audit log — CREATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "MutasiStok",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          id: rec.id,
+          bahanPokokId,
+          tanggal: targetTanggal,
+          jenis,
+          qty: rec.qty,
+          keterangan: rec.keterangan,
+          supplierId: rec.supplierId,
+          hargaBeli: rec.hargaBeli,
+          kelompokPenerima: rec.kelompokPenerima
+        }
+      });
+
+      return rec;
     });
 
     res.status(201).json(created);
@@ -465,16 +489,38 @@ validasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), async (req, re
     // Hitung selisih server-side (derived value): selisih = qtyDibeli - qtyTerpakai
     const selisih = Number(qtyDibeli) - Number(qtyTerpakai);
 
-    const created = await prisma.validasiStok.create({
-      data: {
-        bahanPokokId,
-        tanggal: targetTanggal,
-        qtyDibeli: Number(qtyDibeli),
-        qtyTerpakai: Number(qtyTerpakai),
-        selisih: selisih,
-        catatan: catatan ? String(catatan).trim() : null,
-        validatedById: req.user.sub
-      }
+    const created = await prisma.$transaction(async (tx) => {
+      const rec = await tx.validasiStok.create({
+        data: {
+          bahanPokokId,
+          tanggal: targetTanggal,
+          qtyDibeli: Number(qtyDibeli),
+          qtyTerpakai: Number(qtyTerpakai),
+          selisih: selisih,
+          catatan: catatan ? String(catatan).trim() : null,
+          validatedById: req.user.sub
+        }
+      });
+
+      // Audit log — CREATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "ValidasiStok",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          id: rec.id,
+          bahanPokokId,
+          tanggal: targetTanggal,
+          qtyDibeli: rec.qtyDibeli,
+          qtyTerpakai: rec.qtyTerpakai,
+          selisih: rec.selisih,
+          catatan: rec.catatan
+        }
+      });
+
+      return rec;
     });
 
     res.status(201).json(created);

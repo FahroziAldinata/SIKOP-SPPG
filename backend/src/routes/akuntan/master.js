@@ -69,12 +69,24 @@ router.post("/supplier", requireAuth, requireRole("AKUNTAN"), async (req, res) =
     if (!nama) {
       return res.status(400).json({ error: "Nama supplier wajib diisi" });
     }
-    const created = await prisma.supplier.create({
-      data: {
-        nama,
-        kontak,
-        aktif: true
-      }
+    const created = await prisma.$transaction(async (tx) => {
+      const rec = await tx.supplier.create({
+        data: {
+          nama,
+          kontak,
+          aktif: true
+        }
+      });
+      // Audit log — CREATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Supplier",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: { nama: rec.nama, kontak: rec.kontak, aktif: rec.aktif }
+      });
+      return rec;
     });
     res.status(201).json(created);
   } catch (error) {
@@ -192,6 +204,21 @@ router.post("/periode", requireAuth, requireRole("AKUNTAN"), async (req, res) =>
           }
         },
         include: { setupLembaga: true }
+      });
+      // Audit log — CREATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Periode",
+        entityId: newPeriode.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          id: newPeriode.id,
+          tanggalMulai: newPeriode.tanggalMulai,
+          tanggalSelesai: newPeriode.tanggalSelesai,
+          anggaranAlokasi: newPeriode.anggaranAlokasi,
+          totalDanaDiterima: newPeriode.totalDanaDiterima
+        }
       });
       return newPeriode;
     });
@@ -504,9 +531,29 @@ router.put("/periode/:id", requireAuth, requireRole("AKUNTAN"), async (req, res)
       data.totalDanaDiterima = totalDanaDiterima ? parseFloat(totalDanaDiterima) : null;
     }
 
-    const updated = await prisma.periode.update({
-      where: { id },
-      data
+    const updated = await prisma.$transaction(async (tx) => {
+      const rec = await tx.periode.update({
+        where: { id },
+        data
+      });
+      // Audit log — UPDATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Periode",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: {
+          status: existing.status,
+          anggaranAlokasi: existing.anggaranAlokasi,
+          totalDanaDiterima: existing.totalDanaDiterima
+        },
+        dataBaru: {
+          status: rec.status,
+          anggaranAlokasi: rec.anggaranAlokasi,
+          totalDanaDiterima: rec.totalDanaDiterima
+        }
+      });
+      return rec;
     });
 
     res.json({ success: true, data: updated });
@@ -561,12 +608,24 @@ router.post("/jenis-pekerjaan", requireAuth, requireRole("AKUNTAN"), async (req,
       return res.status(400).json({ error: "Jenis pekerjaan dengan nama tersebut sudah terdaftar" });
     }
 
-    const created = await prisma.jenisPekerjaan.create({
-      data: {
-        nama,
-        tarifHarian: Math.round(parsedTarif * 100) / 100,
-        aktif: aktif !== undefined ? Boolean(aktif) : true
-      }
+    const created = await prisma.$transaction(async (tx) => {
+      const rec = await tx.jenisPekerjaan.create({
+        data: {
+          nama,
+          tarifHarian: Math.round(parsedTarif * 100) / 100,
+          aktif: aktif !== undefined ? Boolean(aktif) : true
+        }
+      });
+      // Audit log — CREATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "JenisPekerjaan",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: { nama: rec.nama, tarifHarian: rec.tarifHarian, aktif: rec.aktif }
+      });
+      return rec;
     });
     res.status(201).json(created);
   } catch (error) {
@@ -609,9 +668,21 @@ router.put("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async (r
       updateData.aktif = Boolean(aktif);
     }
 
-    const updated = await prisma.jenisPekerjaan.update({
-      where: { id },
-      data: updateData
+    const updated = await prisma.$transaction(async (tx) => {
+      const rec = await tx.jenisPekerjaan.update({
+        where: { id },
+        data: updateData
+      });
+      // Audit log — UPDATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "JenisPekerjaan",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: { nama: existing.nama, tarifHarian: existing.tarifHarian, aktif: existing.aktif },
+        dataBaru: { nama: rec.nama, tarifHarian: rec.tarifHarian, aktif: rec.aktif }
+      });
+      return rec;
     });
     res.json(updated);
   } catch (error) {
@@ -636,8 +707,19 @@ router.delete("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async
     if (!existing) {
       return res.status(404).json({ error: "Jenis pekerjaan tidak ditemukan" });
     }
-    await prisma.jenisPekerjaan.delete({
-      where: { id }
+    await prisma.$transaction(async (tx) => {
+      // Audit log — DELETE (dataLama = data yang dihapus)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "JenisPekerjaan",
+        entityId: existing.id,
+        aksi: "DELETE",
+        dataLama: { nama: existing.nama, tarifHarian: existing.tarifHarian, aktif: existing.aktif },
+        dataBaru: null
+      });
+      await tx.jenisPekerjaan.delete({
+        where: { id }
+      });
     });
     res.json({ success: true, message: "Jenis pekerjaan berhasil dihapus" });
   } catch (error) {
@@ -686,11 +768,23 @@ router.post("/hari-libur", requireAuth, requireRole("AKUNTAN"), async (req, res)
       return res.status(400).json({ error: "Tanggal libur tersebut sudah terdaftar" });
     }
 
-    const created = await prisma.hariLibur.create({
-      data: {
-        tanggal: targetDate,
-        keterangan: keterangan || null
-      }
+    const created = await prisma.$transaction(async (tx) => {
+      const rec = await tx.hariLibur.create({
+        data: {
+          tanggal: targetDate,
+          keterangan: keterangan || null
+        }
+      });
+      // Audit log — CREATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "HariLibur",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: { tanggal: rec.tanggal, keterangan: rec.keterangan }
+      });
+      return rec;
     });
     res.status(201).json(created);
   } catch (error) {
@@ -712,8 +806,19 @@ router.delete("/hari-libur/:id", requireAuth, requireRole("AKUNTAN"), async (req
     if (!existing) {
       return res.status(404).json({ error: "Hari libur tidak ditemukan" });
     }
-    await prisma.hariLibur.delete({
-      where: { id }
+    await prisma.$transaction(async (tx) => {
+      // Audit log — DELETE (dataLama = data yang dihapus)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "HariLibur",
+        entityId: existing.id,
+        aksi: "DELETE",
+        dataLama: { tanggal: existing.tanggal, keterangan: existing.keterangan },
+        dataBaru: null
+      });
+      await tx.hariLibur.delete({
+        where: { id }
+      });
     });
     res.json({ success: true, message: "Hari libur berhasil dihapus" });
   } catch (error) {
@@ -843,6 +948,23 @@ router.post("/po", requireAuth, requireRole("AKUNTAN"), validate(schemas.poSchem
           }
         });
       }
+
+      // Audit log — CREATE (PO)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "TransaksiPembelian",
+        entityId: tp.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          id: tp.id,
+          rabHarianId,
+          supplierId,
+          tanggal: targetDate,
+          catatan: catatan || null,
+          jumlahItem: items.length
+        }
+      });
 
       return await tx.transaksiPembelian.findUnique({
         where: { id: tp.id },
@@ -1015,14 +1137,32 @@ router.post("/bahan-pokok", requireAuth, requireRole("AKUNTAN"), async (req, res
       validTipe = "HABIS_HARI_ITU";
     }
 
-    const data = await prisma.bahanPokok.create({
-      data: {
-        nama: cleanNama,
-        satuan: cleanSatuan,
-        tipePenyimpanan: validTipe,
-        konversiPerKg: konversiPerKg !== undefined && konversiPerKg !== null && konversiPerKg !== "" ? parseFloat(konversiPerKg) : null,
-        satuanHitungan: satuanHitungan !== undefined && satuanHitungan !== null && satuanHitungan !== "" ? satuanHitungan.toUpperCase().trim() : null
-      }
+    const data = await prisma.$transaction(async (tx) => {
+      const rec = await tx.bahanPokok.create({
+        data: {
+          nama: cleanNama,
+          satuan: cleanSatuan,
+          tipePenyimpanan: validTipe,
+          konversiPerKg: konversiPerKg !== undefined && konversiPerKg !== null && konversiPerKg !== "" ? parseFloat(konversiPerKg) : null,
+          satuanHitungan: satuanHitungan !== undefined && satuanHitungan !== null && satuanHitungan !== "" ? satuanHitungan.toUpperCase().trim() : null
+        }
+      });
+      // Audit log — CREATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "BahanPokok",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          nama: rec.nama,
+          satuan: rec.satuan,
+          tipePenyimpanan: rec.tipePenyimpanan,
+          konversiPerKg: rec.konversiPerKg,
+          satuanHitungan: rec.satuanHitungan
+        }
+      });
+      return rec;
     });
 
     res.status(201).json({ success: true, data });

@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { logger } = require("../../lib/logger");
+const { logAudit } = require("../../lib/auditHelper");
 
 const router = express.Router();
 
@@ -59,6 +60,16 @@ router.put("/po/:id/approve", requireAuth, requireRole("ASLAP"), validate(schema
           });
         }
       }
+
+      // Audit log — APPROVE (PO diterima fisik oleh Aslap)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "TransaksiPembelian",
+        entityId: id,
+        aksi: "APPROVE",
+        dataLama: { status: po.status },
+        dataBaru: { status: "DITERIMA", diterimaOlehId: req.user.sub, diterimaAt: new Date() }
+      });
 
       return await tx.transaksiPembelian.update({
         where: { id },

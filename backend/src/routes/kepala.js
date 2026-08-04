@@ -2,6 +2,7 @@ const express = require("express");
 const prisma = require("../lib/prisma");
 const { requireAuth, requireRole } = require("../middleware/auth");
 const { logger } = require("../lib/logger");
+const { logAudit } = require("../lib/auditHelper");
 
 const router = express.Router();
 
@@ -106,6 +107,16 @@ async function handlePostApproval(req, res) {
       await tx[modelName].update({
         where: { id: targetId },
         data: { status }
+      });
+
+      // Audit log — APPROVE/REJECT (keputusan Kepala SPPG)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: targetType === "MENU" ? "MenuHarian" : "RabHarian",
+        entityId: targetId,
+        aksi: status === "DISETUJUI" ? "APPROVE" : "REJECT",
+        dataLama: { status: "DIAJUKAN" },
+        dataBaru: { status, catatan: catatan ? catatan.trim() : null }
       });
 
       // 8. Kirim Notifikasi kepada Pembuat Dokumen

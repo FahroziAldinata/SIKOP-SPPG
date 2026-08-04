@@ -285,6 +285,25 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabSchema
         data: { totalKebutuhan, totalPagu, selisih }
       });
 
+      // Audit log — CREATE (RAB harian + items)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "RabHarian",
+        entityId: rabHarian.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: {
+          id: rabHarian.id,
+          periodeId,
+          tanggal: targetTanggal,
+          status: rabHarian.status,
+          totalKebutuhan,
+          totalPagu,
+          selisih,
+          jumlahItem: items && Array.isArray(items) ? items.length : 0
+        }
+      });
+
       return await tx.rabHarian.findUnique({
         where: { id: rabHarian.id },
         include: {
@@ -465,7 +484,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabHari
         }
       }
 
-      return await tx.rabHarian.update({
+      const rec = await tx.rabHarian.update({
         where: { id },
         data: {
           tanggal: tanggal !== undefined ? targetTanggal : undefined,
@@ -486,6 +505,30 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabHari
           }
         }
       });
+
+      // Audit log — UPDATE
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "RabHarian",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: {
+          tanggal: existing.tanggal,
+          status: existing.status,
+          totalKebutuhan: existing.totalKebutuhan,
+          totalPagu: existing.totalPagu,
+          selisih: existing.selisih
+        },
+        dataBaru: {
+          tanggal: rec.tanggal,
+          status: rec.status,
+          totalKebutuhan: rec.totalKebutuhan,
+          totalPagu: rec.totalPagu,
+          selisih: rec.selisih
+        }
+      });
+
+      return rec;
     });
 
     res.json(updated);
@@ -661,7 +704,7 @@ router.put("/:id/verify", requireAuth, requireRole("AKUNTAN"), async (req, res) 
         });
       }
 
-      return await tx.rabHarian.update({
+      const rec = await tx.rabHarian.update({
         where: { id },
         data: {
           verifiedAt: new Date(),
@@ -673,6 +716,18 @@ router.put("/:id/verify", requireAuth, requireRole("AKUNTAN"), async (req, res) 
           menuHarian: true
         }
       });
+
+      // Audit log — UPDATE (verifikasi RAB)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "RabHarian",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: { status: existing.status, verifiedAt: existing.verifiedAt, totalKebutuhan: existing.totalKebutuhan, totalPagu: existing.totalPagu },
+        dataBaru: { status: rec.status, verifiedAt: rec.verifiedAt, totalKebutuhan: rec.totalKebutuhan, totalPagu: rec.totalPagu }
+      });
+
+      return rec;
     });
 
     res.json(updated);
@@ -722,6 +777,24 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
       // 3. Delete associated transaksiPembelian (which cascades to TransaksiPembelianItem in DB schema)
       await tx.transaksiPembelian.deleteMany({
         where: { rabHarianId: id }
+      });
+
+      // Audit log — DELETE (dataLama = data yang dihapus)
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "RabHarian",
+        entityId: exists.id,
+        aksi: "DELETE",
+        dataLama: {
+          id: exists.id,
+          periodeId: exists.periodeId,
+          tanggal: exists.tanggal,
+          status: exists.status,
+          totalKebutuhan: exists.totalKebutuhan,
+          totalPagu: exists.totalPagu,
+          selisih: exists.selisih
+        },
+        dataBaru: null
       });
 
       // 4. Delete parent RabHarian
