@@ -1,14 +1,32 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
-const prisma = require("../lib/prisma");
-const { requireAuth, JWT_SECRET } = require("../middleware/auth");
-const { logger } = require("../lib/logger");
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+const rateLimit = require('express-rate-limit');
+const prisma = require('../lib/prisma');
+const { requireAuth, JWT_SECRET } = require('../middleware/auth');
+const { logger } = require('../lib/logger');
 
 const router = express.Router();
+
+// Rate limiter untuk POST /login — maks 5 percobaan per 15 menit per IP.
+// skip dievaluasi PER-REQUEST: aktif hanya jika NODE_ENV !== 'test',
+// ATAU jika flag RATE_LIMIT_TEST di-set (untuk test 429 khusus).
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  skip: (_req) => {
+    if (process.env.NODE_ENV !== 'test') return false;
+    return !process.env.RATE_LIMIT_TEST;
+  },
+  handler: (req, res) => {
+    res.status(429).json({ error: 'Terlalu banyak percobaan login, coba lagi dalam 15 menit' });
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const TOKEN_EXPIRY = "8h"; // 1 shift kerja. Sesuaikan kalau perlu.
 
@@ -45,7 +63,7 @@ const upload = multer({
 });
 
 // POST /api/auth/login  { username, password }
-router.post("/login", async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { username, password } = req.body || {};
 
   if (!username || !password) {
@@ -232,3 +250,4 @@ router.delete("/ttd", requireAuth, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.loginLimiter = loginLimiter;
