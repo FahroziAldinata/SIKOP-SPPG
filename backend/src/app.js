@@ -24,6 +24,7 @@ const { swaggerSpec } = require('./docs/openapi');
 const { requireAuth, requireRole } = require('./middleware/auth');
 
 const app = express();
+app.set('trust proxy', 1);
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',') 
