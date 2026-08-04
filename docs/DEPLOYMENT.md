@@ -119,6 +119,22 @@ npx prisma migrate deploy   # apply migrasi ke database production
 npx prisma db seed          # opsional, seed data awal
 ```
 
+> **PENTING — guard seed production:** `seed.js` menolak berjalan saat `NODE_ENV=production`
+> (exit tanpa mengubah data) kecuali ada override eksplisit `ALLOW_PROD_SEED=true` atau argumen
+> `--force`. Seed membuat akun dengan password default `ganti-password-ini` yang ada di repo
+> publik, jadi:
+>
+> ```bash
+> # First deploy yang disengaja — pakai SALAH SATU override:
+> ALLOW_PROD_SEED=true npx prisma db seed
+> # ATAU
+> npx prisma db seed --force
+> ```
+>
+> **WAJIB setelah seed pertama:** ganti password **SELURUH akun** (admin, aslap, mitra,
+> ahligizi, akuntan, kepalasppg) via halaman admin atau `PUT /api/admin/users/:id` segera
+> setelah seed selesai. Jangan biarkan akun apa pun memakai password default.
+
 ### 2. Backend (Railway / Nixpacks)
 
 1. Push repo ke Git provider (GitHub).

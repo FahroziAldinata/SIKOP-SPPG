@@ -2,6 +2,27 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const XLSX = require("xlsx");
 
+// ---------------------------------------------------------------------------
+// GUARD PRODUKSI — seed TIDAK boleh jalan di production tanpa override eksplisit.
+// Seed membuat akun dengan password default ("ganti-password-ini") yang ada di
+// repo publik; dijalankan tanpa sadar di production = semua akun (termasuk admin)
+// pakai kredensial yang diketahui publik.
+// Override aman HANYA untuk first deploy: ALLOW_PROD_SEED=true ATAU argumen --force.
+// ---------------------------------------------------------------------------
+if (process.env.NODE_ENV === "production") {
+  const allowed = process.env.ALLOW_PROD_SEED === "true" || process.argv.includes("--force");
+  if (!allowed) {
+    console.error(
+      "[SEED] DITOLAK: NODE_ENV=production tanpa override.\n" +
+      "  Seed membuat akun dengan password default 'ganti-password-ini' (dikenal publik).\n" +
+      "  Jika ini first deploy yang disengaja, jalankan dengan ALLOW_PROD_SEED=true atau --force,\n" +
+      "  lalu WAJIB segera ganti password SELURUH akun setelah seed selesai.\n" +
+      "  Tidak ada data yang diubah (proses berhenti di sini)."
+    );
+    process.exit(1);
+  }
+}
+
 const prisma = new PrismaClient();
 
 async function main() {

@@ -53,6 +53,9 @@ cp backend/.env.example backend/.env && isi value sesuai kebutuhan
 npx prisma migrate deploy
 npx prisma db seed
 
+# Catatan: seed menolak jalan saat NODE_ENV=production tanpa ALLOW_PROD_SEED=true
+# atau --force (guard keamanan — seed memakai password default). Lihat docs/DEPLOYMENT.md.
+
 # 5. Jalankan
 npm run dev            # backend (port default 3000)
 cd ../frontend
