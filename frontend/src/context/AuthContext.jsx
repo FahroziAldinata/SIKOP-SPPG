@@ -23,7 +23,24 @@ export const AuthProvider = ({ children }) => {
     setUser(newUser);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const currentToken = token || localStorage.getItem('token');
+    if (currentToken) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        await fetch(`${import.meta.env.VITE_API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentToken}`
+          },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+      } catch (e) {
+        // Gagal / 401 / timeout -> TETAP hapus token lokal
+      }
+    }
     localStorage.removeItem('token');
     setTokenState(null);
     setUser(null);

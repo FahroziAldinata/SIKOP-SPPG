@@ -137,8 +137,8 @@ export const Layout = () => {
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

@@ -29,17 +29,21 @@ async function requireAuth(req, res, next) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.sub },
-      select: { aktif: true }
+      select: { aktif: true, tokenVersion: true }
     });
 
     if (!user || !user.aktif) {
-      return res.status(401).json({ error: "Akun tidak aktif atau tidak ditemukan, silakan hubungi admin" });
+      return res.status(401).json({ error: 'Akun tidak aktif atau tidak ditemukan, silakan hubungi admin' });
+    }
+
+    if (payload.tokenVersion !== user.tokenVersion) {
+      return res.status(401).json({ error: 'Sesi tidak valid, silakan login kembali' });
     }
 
     next();
   } catch (err) {
     logger.error(err);
-    return res.status(500).json({ error: "Terjadi kesalahan server saat verifikasi akun" });
+    return res.status(500).json({ error: 'Terjadi kesalahan server saat verifikasi akun' });
   }
 }
 

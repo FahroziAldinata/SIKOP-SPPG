@@ -84,7 +84,7 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 
   const token = jwt.sign(
-    { sub: user.id, username: user.username, role: user.role, nama: user.nama },
+    { sub: user.id, username: user.username, role: user.role, nama: user.nama, tokenVersion: user.tokenVersion },
     JWT_SECRET,
     { expiresIn: TOKEN_EXPIRY },
   );
@@ -93,6 +93,20 @@ router.post('/login', loginLimiter, async (req, res) => {
     token,
     user: { id: user.id, nama: user.nama, username: user.username, role: user.role },
   });
+});
+
+// POST /api/auth/logout — Invalidasi token dengan increment tokenVersion
+router.post("/logout", requireAuth, async (req, res) => {
+  try {
+    await prisma.user.update({
+      where: { id: req.user.sub },
+      data: { tokenVersion: { increment: 1 } },
+    });
+    res.json({ success: true });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ error: "Terjadi kesalahan server saat logout" });
+  }
 });
 
 // GET /api/auth/me — cek token masih valid + data user terbaru (mis. kalau aktif di-nonaktifkan)
@@ -134,6 +148,7 @@ router.put("/profile", requireAuth, async (req, res) => {
         return res.status(400).json({ error: "Password minimal 6 karakter" });
       }
       data.passwordHash = await bcrypt.hash(password, 10);
+      data.tokenVersion = { increment: 1 };
     }
 
     const updated = await prisma.user.update({
