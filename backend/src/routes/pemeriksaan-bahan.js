@@ -135,7 +135,6 @@ router.get(
         .json({
           success: false,
           error: 'Gagal membuat PDF Pemeriksaan Bahan',
-          details: error.message,
         });
     } finally {
       if (browser) await browser.close();

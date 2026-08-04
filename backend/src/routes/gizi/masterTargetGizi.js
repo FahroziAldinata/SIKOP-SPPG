@@ -3,6 +3,7 @@ const prisma = require("../../lib/prisma");
 const { requireAuth, requireRole } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
+const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
@@ -14,7 +15,10 @@ router.get('/master-target', requireAuth, requireRole('AHLI_GIZI', 'KEPALA_SPPG'
       orderBy: { kelompokUmurMenu: { kode: 'asc' } }
     });
     res.json(data);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    logger.error(e);
+    res.status(500).json({ error: "Terjadi kesalahan server saat mengambil data master target gizi" });
+  }
 });
 
 router.put('/master-target/:id', requireAuth, requireRole('AHLI_GIZI'), validate(schemas.masterTargetGiziSchema), async (req, res) => {
@@ -25,7 +29,10 @@ router.put('/master-target/:id', requireAuth, requireRole('AHLI_GIZI'), validate
       data: { energiKkal, proteinGr, lemakGr, karbohidratGr, seratGr }
     });
     res.json(updated);
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    logger.error(e);
+    res.status(500).json({ error: "Terjadi kesalahan server saat memperbarui data master target gizi" });
+  }
 });
 
 module.exports = router;
