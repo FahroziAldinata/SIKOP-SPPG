@@ -14,6 +14,7 @@ const notifikasiRoutes = require('./routes/notifikasi');
 const dashboardRoutes = require('./routes/dashboard');
 const adminRoutes = require('./routes/admin');
 const laporanBugRoutes = require('./routes/laporanBug');
+const auditLogRoutes = require('./routes/auditLog');
 const pemeriksaanBahanRoutes = require('./routes/pemeriksaan-bahan');
 const buktiLpd2mRoutes = require('./routes/bukti-lpd2m');
 
@@ -46,6 +47,7 @@ app.use('/api/notifikasi', notifikasiRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/laporan-bug', laporanBugRoutes);
+app.use('/api/audit-log', auditLogRoutes);
 app.use('/api/laporan/pemeriksaan-bahan', pemeriksaanBahanRoutes);
 
 // Static serving untuk file upload (TTD, bukti, dll)

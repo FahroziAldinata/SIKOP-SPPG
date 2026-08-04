@@ -336,7 +336,23 @@ const routeDefinitions = [
     summary: 'Upload dokumen bukti LPD2M'
   },
   { method: 'get', path: '/api/laporan/lpd2m/bukti', module: 'laporan', target: 'query', schema: z.object({ periodeId: z.string() }), summary: 'Get daftar dokumen bukti LPD2M' },
-  { method: 'delete', path: '/api/laporan/lpd2m/bukti/{id}', module: 'laporan', summary: 'Hapus dokumen bukti LPD2M' }
+  { method: 'delete', path: '/api/laporan/lpd2m/bukti/{id}', module: 'laporan', summary: 'Hapus dokumen bukti LPD2M' },
+  {
+    method: 'get',
+    path: '/api/audit-log',
+    module: 'audit-log',
+    target: 'query',
+    schema: z.object({
+      tanggalMulai: z.string().optional().openapi({ description: 'Filter awal rentang tanggal (ISO date)' }),
+      tanggalSelesai: z.string().optional().openapi({ description: 'Filter akhir rentang tanggal (ISO date)' }),
+      userId: z.string().optional().openapi({ description: 'Filter id user pelaku' }),
+      aksi: z.enum(['CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'KOREKSI']).optional().openapi({ description: 'Filter jenis aksi' }),
+      resource: z.string().optional().openapi({ description: 'Filter entityType (nama model)' }),
+      page: z.string().optional().openapi({ description: 'Nomor halaman (default 1)' }),
+      limit: z.string().optional().openapi({ description: 'Jumlah per halaman (default 20, maks 100)' })
+    }),
+    summary: 'Get daftar AuditLog (filter + pagination) — akses AKUNTAN, MITRA, ADMIN'
+  }
 ];
 
 routeDefinitions.forEach(route => {

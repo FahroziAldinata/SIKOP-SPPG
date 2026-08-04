@@ -30,6 +30,7 @@ import MasterTargetGiziPage from './pages/gizi/MasterTargetGiziPage';
 import { LaporanGiziPage } from './pages/gizi/LaporanGiziPage';
 import { ApprovalPage } from './pages/kepala/ApprovalPage';
 import { SettingPage } from './pages/shared/SettingPage';
+import { AuditLogPage } from './pages/shared/AuditLogPage';
 
 // Akuntan — Halaman Terpisah
 import { JurnalTransaksiPage } from './pages/akuntan/JurnalTransaksiPage';
@@ -409,6 +410,14 @@ function App() {
             />
 
             {/* ===== SHARED Routes ===== */}
+            <Route
+              path="audit-log"
+              element={
+                <ProtectedRoute allowedRoles={['AKUNTAN', 'MITRA', 'ADMIN']}>
+                  <AuditLogPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="setting"
               element={

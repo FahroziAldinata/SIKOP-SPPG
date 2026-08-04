@@ -25,7 +25,8 @@ import {
   Users,
   CheckSquare,
   Bell,
-  Bug
+  Bug,
+  History
 } from 'lucide-react';
 
 
@@ -516,6 +517,7 @@ export const Layout = () => {
                 {renderLink('/mitra/po', 'Nota Pesanan (PO)', ClipboardCheck)}
                 {renderLink('/mitra/kendaraan', 'Kendaraan Operasional', Truck)}
                 {renderLink('/mitra/laporan', 'Laporan', FileText)}
+                {renderLink('/audit-log', 'Audit Log', History)}
               </>
             )}
 
@@ -556,6 +558,7 @@ export const Layout = () => {
                   Laporan
                 </li>
                 {renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
+                {renderLink('/audit-log', 'Audit Log', History)}
               </>
             )}
 
@@ -580,6 +583,7 @@ export const Layout = () => {
                 {renderLink('/admin', 'Beranda / Dashboard', Home)}
                 {renderLink('/admin/users', 'Kelola User', Users)}
                 {renderLink('/admin/laporan-bug', 'Laporan Bug', Bug)}
+                {renderLink('/audit-log', 'Audit Log', History)}
               </>
             )}
 
