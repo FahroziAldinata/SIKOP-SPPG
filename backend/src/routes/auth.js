@@ -83,6 +83,17 @@ router.post('/login', loginLimiter, async (req, res) => {
     return res.status(401).json({ error: "Username atau password salah" });
   }
 
+  // Rehash otomatis: hash lama ber-cost < 12 (mis. dari era cost 10) di-upgrade
+  // transparan saat login sukses. Hanya update passwordHash — TIDAK menyentuh
+  // tokenVersion (token di bawah di-sign dgn tokenVersion yang baru saja dibaca).
+  if (bcrypt.getRounds(user.passwordHash) < 12) {
+    const upgradedHash = await bcrypt.hash(password, 12);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: upgradedHash },
+    });
+  }
+
   const token = jwt.sign(
     { sub: user.id, username: user.username, role: user.role, nama: user.nama, tokenVersion: user.tokenVersion },
     JWT_SECRET,
@@ -147,7 +158,7 @@ router.put("/profile", requireAuth, async (req, res) => {
       if (password.length < 6) {
         return res.status(400).json({ error: "Password minimal 6 karakter" });
       }
-      data.passwordHash = await bcrypt.hash(password, 10);
+      data.passwordHash = await bcrypt.hash(password, 12);
       data.tokenVersion = { increment: 1 };
     }
 

@@ -177,7 +177,7 @@ async function main() {
     { username: "kepalasppg", nama: "Kepala SPPG", role: "KEPALA_SPPG" },
   ];
 
-  const defaultPasswordHash = await bcrypt.hash("ganti-password-ini", 10);
+  const defaultPasswordHash = await bcrypt.hash("ganti-password-ini", 12);
   for (const u of userData) {
     await prisma.user.upsert({
       where: { username: u.username },

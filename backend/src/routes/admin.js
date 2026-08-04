@@ -50,7 +50,7 @@ router.post("/users", async (req, res) => {
       return res.status(400).json({ error: "Password minimal 6 karakter" });
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 12);
 
     const newUser = await prisma.user.create({
       data: {
@@ -101,7 +101,7 @@ router.put("/users/:id", async (req, res) => {
       if (password.length < 6) {
         return res.status(400).json({ error: "Password minimal 6 karakter" });
       }
-      data.passwordHash = await bcrypt.hash(password, 10);
+      data.passwordHash = await bcrypt.hash(password, 12);
       // Reset password oleh admin → invalidasi semua sesi lama user target (pola C1, sinkron dgn PUT /api/auth/profile)
       data.tokenVersion = { increment: 1 };
     }
