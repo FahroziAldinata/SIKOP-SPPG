@@ -17,6 +17,7 @@ const laporanBugRoutes = require('./routes/laporanBug');
 const auditLogRoutes = require('./routes/auditLog');
 const pemeriksaanBahanRoutes = require('./routes/pemeriksaan-bahan');
 const buktiLpd2mRoutes = require('./routes/bukti-lpd2m');
+const myPermissionsRoutes = require('./routes/myPermissions');
 
 const { httpLogger } = require('./lib/logger');
 const errorHandler = require('./middleware/errorHandler');
@@ -36,6 +37,7 @@ app.use(express.json());
 app.use(httpLogger);
 
 app.use('/api/auth', authRoutes);
+app.use('/api/my-permissions', myPermissionsRoutes);
 app.use('/api/aslap', aslapRoutes);
 app.use('/api/mitra', mitraRoutes);
 app.use('/api/gizi', giziRoutes);

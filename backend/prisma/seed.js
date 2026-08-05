@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const XLSX = require("xlsx");
+const { seedRbacPermissions } = require("../src/lib/rbacSeeder");
 
 // ---------------------------------------------------------------------------
 // GUARD PRODUKSI — seed TIDAK boleh jalan di production tanpa override eksplisit.
@@ -1460,6 +1461,8 @@ async function migrateFromExcel() {
       }
     }
 
+    await seedRbacPermissions(prisma);
+
     console.log("Migration completed successfully!");
   } catch (e) {
     console.error("Migration error:", e);
@@ -1481,6 +1484,7 @@ if (process.argv.includes("--migrate")) {
     });
 } else {
   main()
+    .then(() => seedRbacPermissions(prisma))
     .then(() => seedTransaksi())
     .catch((e) => {
       console.error(e);
