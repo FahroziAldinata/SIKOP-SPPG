@@ -1,16 +1,13 @@
-# CURRENT TASK — 2026-08-04 (sesi 36)
+# CURRENT TASK — 2026-08-05 (sesi 40, lanjutan)
 
-## Status: ✅ CYCLE_END — V2 Bagian A-G SELESAI + APPROVED + ARCHIVED. Tag v2.0.0 dibuat + pushed. Task selesai semua.
+## Status: 🔍 FASE 3 DYNAMIC RBAC — MODE INVESTIGASI (tanpa perubahan file, tunggu keputusan desain Rozi)
 
-- **A** ✅ Vitest — `be5d967`, `6201e45`
-- **B** ✅ CI/CD — `a8b6b6e`, `ba23398`, `b5af929`; debug steps dihapus `74da21d`
-- **C** ✅ oxlint 0/0 — `d5c7ce2`
-- **D** ✅ error handler + Pino — `71d754e` (validasi runtime PASS)
-- **E** ✅ OpenAPI/Swagger /api-docs 126 path — `d5b2877` (validasi runtime PASS)
-- **F** ✅ smoke test 13/13 modul, 89/89 2x — `231f8cc` (representative coverage 27/225; sisa → backlog non-blocker)
-- **G** ✅ AGENTS.md ×3 + CHANGELOG [2.0.0] — `e40044b`; revisi `8fdbe8d`
-- ✅ Approval final Rozi diterima. Arsip selesai (DOCUMENTATION.md entry + cleanup prompts/).
-- ✅ Tag `v2.0.0` dibuat + pushed (release draft GitHub jika dibuat).
+- Verifikasi independen `git log origin/main -10`: cycle 2 `682da6c` + cycle 3 `cb2803b` SUDAH pushed → state files disinkronkan (GF-012)
+- Fase 2 Data Safety SELESAI TOTAL (backup script + DR doc + errorHandler guard + leak fix + panduan local) — semua pushed
+- Coverage cycle 1-3 SELESAI + pushed: `69d10e5` `682da6c` `cb2803b` — total 558 PASS
+- Insiden GF-011 (TASK A hilang → re-apply) — resolved
 
 ## Next Step
-- Kosong — V2 tuntas. Backlog berikutnya: Perluasan Test Coverage (non-blocker, bertahap setelah v2.0.0 — lihat TODO.md).
+- Fase 3 RBAC: inventaris requireRole/requireAuth (OpenCode) → tabel endpoint + kombinasi role → audit FE role logic → 23 opsi desain + trade-off → **BERHENTI, tunggu keputusan Rozi**
+- Sisa endpoint minor coverage — backlog non-blocker
+- V3 Fase 4-8 (docs end-user, deployment, legal, AI chatbot, notifikasi) — backlog

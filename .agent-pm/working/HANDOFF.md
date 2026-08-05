@@ -1,32 +1,28 @@
-# Handoff — 2026-08-04 — Sesi 36 (V2 TUNTAS: D-G APPROVED + ARCHIVED, tag v2.0.0, CYCLE_END)
+# Handoff — 2026-08-05 — Sinkronisasi state files (GF-012) + Fase 2 Data Safety SELESAI TOTAL + Fase 3 RBAC INVESTIGASI
 
 ## Status Terakhir
-- **V2 Infra/Docs/Finalisasi Bagian A-G: SEMUA SELESAI + APPROVED Rozi.** Tag `v2.0.0` dibuat + pushed (`e42e051`). CYCLE_END.
-- Arsip selesai: DOCUMENTATION.md entry 2026-08-04, cleanup prompts/, state files final.
-- **Backlog V3** (Production Readiness + Fitur Lanjutan, 8 fase) ditambahkan ke TODO.md + commit `eec6b1c` — BACKLOG murni, belum dikerjakan, menunggu instruksi.
-- HEAD `eec6b1c` == origin/main, tree BERSIH.
+- **✅ State files DISINKRONKAN dengan git remote (2026-08-05)**: verifikasi `git log origin/main -10` membuktikan coverage cycle 2 (`682da6c`) + cycle 3 (`cb2803b`) SUDAH pushed — state files lama klaim "BELUM push" (GF-012). HEAD == origin/main `cb2803b`.
+- **Fase 2 Data Safety SELESAI TOTAL + pushed**: `9dc3c7f` (leak fix) | `343b2b0` (backup script + DISASTER_RECOVERY.md) | `92fcba5` (errorHandler NODE_ENV guard) | `cff9bab` (panduan otomatisasi local — keputusan Rozi: scope LOCAL, tanpa scheduler nyata).
+- **Coverage cycle 1-3 SELESAI + pushed**: `69d10e5` (30 endpoint) | `682da6c` (45 endpoint) | `cb2803b` (216 test) — total 558 PASS. Sisa endpoint minor = backlog non-blocker.
+- **Insiden GF-011 (RESOLVED)**: TASK A sempat hilang dari working copy → re-apply diff verbatim, commit `92fcba5`.
 
-## Task Selesai (Sesi 36)
-1. **D** `71d754e` — global error handler + Pino (227 console → logger, 63 file). Validasi runtime PASS (pino-http log aktif).
-2. **E** `d5b2877` — OpenAPI/Swagger /api-docs 126 path. Validasi runtime PASS (/api-docs 200, docs.json 77.5KB openapi 3.1.0).
-3. **F** `231f8cc` — smoke test 13/13 modul, 89/89 2x. SELESAI representative coverage (27/225 + 62 integration).
-4. **G** `e40044b` + `8fdbe8d` — AGENTS.md ×3 + CHANGELOG [2.0.0] + revisi (cara tambah endpoint/halaman, daftar role lengkap enum Prisma).
-5. **ci.yml** `74da21d` — debug steps issue-post dihapus (keputusan pending sesi 35 TUNTAS).
-6. **Tag v2.0.0** pushed. **Draft GitHub Release TIDAK dibuat** — gh CLI tidak terpasang (`gh: command not found`). Kalau Rozi mau release resmi: install gh CLI (`winget install GitHub.cli`) + `gh auth login`, lalu `gh release create v2.0.0 --title "v2.0.0" --notes "..." --draft` ATAU buat manual di github.com/FahroziAldinata/SIKOP-SPPG/releases.
+## Next Step — FASE 3 DYNAMIC RBAC (MODE INVESTIGASI, arahan Rozi 2026-08-05)
+- **HANYA investigasi, TANPA mengubah file**: inventaris seluruh pemakaian `requireRole(...)` + `requireAuth` tanpa requireRole (tabel file/method+path/roles), analisis pola kombinasi role per modul, audit FE logic role-based (menu, route guard), lapor data mentah (jumlah endpoint, distribusi per role, variasi kombinasi).
+- Susun 23 opsi desain RBAC dinamis + trade-off (skema Prisma, middleware + caching tanpa query DB tiap request, strategi migrasi ~265 pemanggilan existing, dampak FE) — minimal Opsi A (role tetap 6 enum, permission dinamis) + Opsi B (role & permission sepenuhnya dinamis).
+- **BERHENTI setelah opsi tersusun — tunggu keputusan Rozi sebelum implementasi.**
+- Opsi lain (non-aktif): backup otomatis terjadwal (keputusan Rozi 2026-08-05: scope LOCAL, panduan di DISASTER_RECOVERY.md — SELESAI), sisa endpoint minor coverage (non-blocker), V3 Fase 4-8.
 
-## Task Pending / Next Step
-- **KOSONG untuk V2** — CYCLE_END.
-- Backlog berikutnya (non-blocker, setelah v2.0.0): **Backlog Perluasan Test Coverage** (TODO.md) — ±198 endpoint belum diuji individual, belum ada PDF/Puppeteer E2E; plus fix teknis menyatu: testDate laporan tanpa guard ketersediaan, rabHarian 2026-07-26 tak dihapus di pemeriksaan-bahan.test.js, deleteMany laporan filter (periodeId,tanggal).
-- Item kecil opsional: draft GitHub Release (butuh gh CLI atau manual).
-
-## Pola yang Terbukti Sesi 36
-- **AGY timeout = tool JALAN** (3x: D, E1, E2; + 1x network error → retry sukses). Timeout ≠ gagal — cek git status/diff, bukan teks balasan. Model id: `claude-sonnet-4-6` (dash).
-- **OpenCode rtk intercept** npm/rtk lint → jalankan `--auto --pure` + binary `backend/node_modules/.bin/*`.
-- **GF-009 konsisten**: verifikasi independen menemukan bug yang lolos test (ReferenceError scope require dalam fungsi). Verifikasi = baca struktur + run test, bukan cuma run.
-- **Stale server**: /api-docs 404 padahal kode benar = server start sebelum commit (PID start vs mtime file). Fix = restart, bukan edit kode.
-- **MSYS quirk**: curl -o /tmp/... menulis ke path Windows → baca via pipe langsung, bukan file /tmp.
-- **write_file nyasar ke backend/.agent-pm/** kalau cwd di backend/ — cek pwd sebelum tulis prompt.
+## Pola yang Terbukti (sesi 40)
+- **AGY timeout ≠ gagal**: cek git status/diff. Model: `claude-sonnet-4-6` (dash), `gemini-3.6-flash-medium`.
+- **OpenCode CLI**: prompt via file (`.agent-pm/prompts/*.txt`) + `"$(cat file)" --auto --pure`.
+- **⚠️ GF-011 — OpenCode bisa me-revert uncommitted changes secara tak sengaja** (reset/restore) → WAJIB: cek `git status`/diff SEBELUM dan SESUDAH tiap session agent; jangan asumsikan file modified masih ada.
+- **PostgreSQL lokal**: bin di `D:\Tools_Project\PostgreSQL\18\bin` (pg_dump/pg_restore/psql/initdb/pg_ctl — TIDAK di PATH). Koneksi 5432 pakai kredensial Rozi. Test DB terpisah (bukan `sppg`) + drop setelah selesai.
+- **Test backup E2E**: initdb --auth=trust port baru (bebas kredensial) ATAU DB test di instance existing + PGPASSWORD env (jangan di argv).
+- **git apply patch**: verifikasi isi patch dulu (read_file), `git apply --check`, lalu `git apply`.
+- **Review Rozi suka bukti fisik**: output command verbatim, ukuran file, exit code, TOC dump.
 
 ## Risiko / Pitfall
-- Server BE sekarang jalan dari proc terminal Hermes (PID 15704) — kalau sesi ditutup, BE ikut mati. Rozi: start manual `npm run dev` di backend kalau mau server persisten.
-- Test 89 (62 + 27 smoke) butuh DB seeded + JWT_SECRET + Chrome.
+- Jangan commit dump backup (`backend/backups/` — .gitignore aktif).
+- Kredensial DB: jangan print ke laporan/chat.
+- Test butuh DB seeded + JWT_SECRET + Chrome; `fileParallelism: false`.
+- Fase 2 otomatisasi backup TERBLOKIR keputusan platform — jangan mulai tanpa arahan.

@@ -15,6 +15,24 @@
 | GF-008 | 2026-08-02 | Process Violation | FINALIZE commit via AGY — seharusnya OpenCode ("commit tugas opencode", koreksi Rozi) | RESOLVED |
 | GF-009 | 2026-08-03 | QA Gap | Klaim "semua test PASS" wajib verifikasi independen — self-report AI bisa keliru (race condition) | RESOLVED (aturan diadopsi) |
 | GF-010 | 2026-08-04 | Source Attribution | Frasa "12 jam + refresh token" (instruksi STEP 3 V3 F1) TIDAK punya sumber di riwayat/sesi/prompt/file state — hanya muncul di pesan Rozi sendiri; "refresh token" bersumber dari backlog V3 FASE 1 (TODO.md:79) tanpa angka durasi | RESOLVED (dokumentasi) |
+| GF-011 | 2026-08-05 | Process Violation | Perubahan uncommitted TASK A (errorHandler.js) HILANG dari working copy saat session OpenCode leak fix — tidak di reflog/stash/commit; kemungkinan `git reset`/`restore` tak sengaja oleh agent. Terdeteksi saat FINALIZE (OpenCode lapor "identik HEAD"). Recovery: re-apply diff verbatim (index hash identik), verifikasi 123/123 + lint 0/0, commit `92fcba5`. Plus file stray `"how 9dc3c7f --stat"` di root (untracked sampah) | RESOLVED (aturan diadopsi) |
+| GF-012 | 2026-08-05 | Source of Truth | State files (CURRENT_STATE/TODO/HANDOFF) klaim "commit BELUM push" padahal `git log origin/main` menunjukkan SUDAH pushed — state files tertinggal dari kondisi git remote. Aturan: setiap awal sesi, `git log origin/main` = sumber kebenaran PRIMARY; state files = referensi SEKUNDER | RESOLVED (aturan diadopsi) |
+
+## Detail GF-012 — State files tertinggal dari git remote (2026-08-05)
+
+- **Kategori**: Source of Truth (integritas status project).
+- **Deskripsi**: CURRENT_STATE.md, TODO.md, HANDOFF.md mencatat commit coverage cycle 2 (`682da6c`) dan cycle 3 (`cb2803b`) sebagai "BELUM push — menunggu review Rozi + Claude", padahal verifikasi independen `git log origin/main -10 --oneline` menunjukkan KEDUANYA SUDAH di remote (push sudah terjadi di luar sesi). State files menyimpan status basi → informasi salah ke Rozi.
+- **Akar masalah (probable)**: state files di-update saat commit dibuat, tapi tidak diverifikasi ulang terhadap remote setelah push; asumsi "belum push" dipertahankan dari teks lama tanpa cek git.
+- **Pelajaran aktif**: (1) SETIAP awal sesi, jalankan `git log origin/main -N --oneline` (dan `git rev-parse HEAD origin/main`) SEBELUM mempercayai klaim push/pending di state files; (2) `git remote` = sumber kebenaran PRIMARY untuk status commit; state files = referensi SEKUNDER yang boleh tertinggal; (3) klaim "BELUM push"/"menunggu approval" di state files harus diverifikasi ulang ke remote sebelum dijadikan dasar keputusan/blocker.
+- **Status**: RESOLVED (aturan diadopsi 2026-08-05). Sinkronisasi state files → commit `docs: sinkronisasi state file dengan kondisi git remote aktual`.
+
+## Detail GF-011 — Uncommitted changes hilang oleh session agent (2026-08-05)
+
+- **Kategori**: Process Violation (integritas working copy).
+- **Deskripsi**: Setelah TASK A (errorHandler NODE_ENV guard) diverifikasi (5/5 behavior + 123/123 test), session OpenCode leak-fix (git apply + commit `9dc3c7f`) secara tak sengaja menghilangkan perubahan uncommitted errorHandler.js — status pasca-session: file identik HEAD, tidak ada di reflog/stash/commit mana pun. Di luar itu, muncul file untracked aneh bernama `"how 9dc3c7f --stat"` (sampah, dihapus).
+- **Akar masalah (probable)**: agent session yang menjalankan command git recovery/cleanup (reset/restore/checkout) tanpa scope eksplisit, atau command malformed yang diinterpretasikan sebagai operasi git. Tidak ada bukti commit ilegal (git log errorHandler hanya `71d754e`).
+- **Pelajaran aktif**: (1) SEBELUM tiap agent session: catat `git status --short` baseline (file modified + hash diff); (2) SESUDAH tiap session: verifikasi file yang diharapkan MASIH modified (`git diff HEAD -- <file>`); (3) jangan pernah instruksikan agent melakukan `git reset`/`git restore`/`git checkout` di working copy yang punya uncommitted changes selain file scope task; (4) prompt agent WAJIB menyebut "JANGAN jalankan git reset/restore/checkout/stash"; (5) diff TASK A tersimpan verbatim di state files → recovery cepat via re-apply.
+- **Status**: RESOLVED (aturan diadopsi 2026-08-05). Commit `92fcba5` = hasil re-apply.
 
 ## Detail GF-010 — Frasa "12 jam + refresh token" tanpa sumber riwayat (2026-08-04)
 

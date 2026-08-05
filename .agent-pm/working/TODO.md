@@ -60,7 +60,11 @@
 - ✅ **F — smoke test semua modul**: smoke-modul.test.js 27 endpoint, 13/13 modul bersih, 0 bug baru. `231f8cc`. Total 89/89 2x. **SELESAI (representative coverage 27/225 + 62 integration test modul kritis)** — sisa ~198 endpoint → Backlog Perluasan Test Coverage (non-blocker).
 - ✅ **G — AGENTS.md ×3 + CHANGELOG [2.0.0]**: `e40044b`. Revisi `8fdbe8d` (cara tambah endpoint/halaman + daftar role lengkap). **Tag `v2.0.0` DIBUAT + pushed** (`e42e051`) — draft GitHub Release tidak dibuat (gh CLI tidak terpasang di device ini).
 
-## Backlog Perluasan Test Coverage (2026-08-04) — BUKAN BLOCKER RILIS
+## Backlog Perluasan Test Coverage (2026-08-04) — ✅ CYCLE 1-3 SELESAI + PUSHED (2026-08-05, verified via git log origin/main); sisa = endpoint minor non-blocker
+- **✅ CYCLE 1 SELESAI (2026-08-05)**: 30 endpoint baru (6 file) — commit `69d10e5` (pushed). Suite 123 → 210.
+- **✅ CYCLE 2 SELESAI (2026-08-05)**: 45 endpoint baru (11 file) — commit `682da6c` (pushed). Suite 210 → 342.
+- **✅ CYCLE 3 SELESAI (2026-08-05)**: 216 test baru (6 file: laporan/* data+pdf+excel, gizi sub-modul + laporan, aslap laporan, top-level notifikasi/laporanBug/dashboard/bukti/rab-harian) — commit `cb2803b` (pushed). Suite 342 → **558**.
+- **Sisa (BACKLOG NON-BLOCKER)**: endpoint yang belum ter-cover individu tersisa minor (beberapa matcher-longgar utk PDF body; beberapa conservative). PDF/Puppeteer E2E screenshot comparison belum — butuh keputusan pendekatan saat dikerjakan.
 - **Latar**: smoke test Bagian F = cakupan REPRESENTATIF, bukan penuh. Total endpoint backend ±225 (213 router.* + 12 sub-router).
 - **Cakupan saat ini**: 27 endpoint smoke (13/13 modul) + 62 integration test modul kritis = 89 test PASS stabil.
 - **Gap**:
@@ -82,10 +86,17 @@
 - Audit logging password: pastikan tidak ada password/log sensitif tercatat di log mana pun (Pino, error handler, pino-http)
 - Audit fitur reset password (ada/tidak, alur, keamanan)
 
+### Backlog Audit Log (STEP 4 audit, sesi 2026-08-04 — lihat CURRENT_STATE.md sesi 38-39 untuk detail lengkap)
+- ✅ **[PRIORITAS TINGGI] SELESAI** — GET /api/audit-log (filter tanggal/user/aksi/resource + pagination, akses AKUNTAN/MITRA/ADMIN) + FE AuditLogPage + registrasi OpenAPI + 9 test — commit `1e3b08c`
+- ✅ **[PRIORITAS TINGGI] SELESAI** — tutup gap logAudit: kepala/approval, poApprove, akuntan/master (10/11), akuntan/rabHarian (4/5), + temuan tersembunyi mutasiStok/validasiStok — commit `a98d236` (16 titik + 14 test)
+- ✅ **[PRIORITAS SEDANG] SELESAI** — STEP C logAudit 16 endpoint: nominatifUpah (3), mitra (8), bukti-lpd2m (2), admin (3) — commit `6b4645f` + test audit-log-stepc.test.js (7 test, 16/16 endpoint). 123/123 PASS, lint 0/0 (sesi 40, 2026-08-05)
+  - ⚠️ **KNOWN RISK (keputusan Rozi: jangan diperbaiki sekarang)**: bukti-lpd2m DELETE — `fs.unlinkSync` file fisik di luar `$transaction` (best-effort, error ditelan). Jika tx rollback setelah unlink (mis. logAudit gagal), file fisik bisa tersisa tanpa record DB. Catatan: pola existing sejak awal, STEP C tidak mengubahnya.
+
 ### FASE 2 — Data Safety
-- Backup PostgreSQL otomatis (jadwal + retensi + lokasi off-site)
-- Dokumentasi `docs/DISASTER_RECOVERY.md` (prosedur restore, RPO/RTO)
-- Audit kebocoran data pribadi di log/error/Swagger (redaksi field sensitif di response error & dokumentasi)
+- ✅ Backup script `backend/scripts/backup-db.js` (pg_dump -Fc, PGPASSWORD env, timestamp, E2E TESTED) — commit `343b2b0`
+- ✅ `docs/DISASTER_RECOVERY.md` (prosedur restore, RPO 24h/RTO 4h rekomendasi bukan SLA) — commit `343b2b0`
+- ✅ Backup PostgreSQL OTOMATIS — **keputusan Rozi 2026-08-05: scope LOCAL saja, tanpa scheduler nyata** — panduan jadwal (Windows Task Scheduler schtasks + alternatif cron/bash + retensi forfiles 7 hari) ditambahkan ke `docs/DISASTER_RECOVERY.md` section "Panduan Otomatisasi (Local Windows)". Script `backend/scripts/backup-db.js` siap diintegrasikan (exit 0/1).
+- ✅ Audit kebocoran data: TASK A errorHandler NODE_ENV guard (`92fcba5`) + leak fix `.message` 3 titik (`9dc3c7f`). Temuan audit: 95 titik, 92 AMAN, 3 BERISIKO — SEMUA di-fix.
 
 ### FASE 3 — Dynamic RBAC
 - Model Prisma: `Resource` & `RolePermission` (permission matrix di DB, bukan hardcode)

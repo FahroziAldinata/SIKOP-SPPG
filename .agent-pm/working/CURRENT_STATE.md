@@ -1,6 +1,171 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: V2 Infra/Docs/Finalisasi — Bagian A-G SELESAI + APPROVED Rozi (2026-08-04, sesi 36). Tag v2.0.0 dibuat. V2 TUNTAS → CYCLE_END.**
+**Scope Aktif: Fase 3 Dynamic RBAC — MODE INVESTIGASI (2026-08-05, arahan Rozi — tanpa perubahan file, tunggu keputusan desain). Fase 2 Data Safety SELESAI TOTAL + coverage cycle 1-3 committed + pushed.**
+
+## Sesi 40 (2026-08-05) — Sinkronisasi state files dengan git remote aktual (GF-012) ✅ COMMITTED + PUSHED
+- **Verifikasi independen** `git log origin/main -10 --oneline`: `682da6c` (cycle 2) + `cb2803b` (cycle 3) **SUDAH di origin/main** — state files lama (klaim "BELUM push") TERTINGGAL dari kondisi remote. HEAD == origin/main `cb2803b`.
+- Update: CURRENT_STATE.md, CURRENT_TASK.md, TODO.md, HANDOFF.md + entri GF-012 di GOVERNANCE_FINDINGS.md.
+- **Aturan baru (GF-012)**: setiap awal sesi, `git log origin/main` = sumber kebenaran PRIMARY; state files = referensi SEKUNDER.
+- Commit `docs: sinkronisasi state file dengan kondisi git remote aktual` (OpenCode).
+
+## Sesi 40 (2026-08-05) — Perluasan Test Coverage CYCLE 3: 216 test baru (laporan/gizi/aslap/top-level) ✅ COMMITTED + PUSHED (gate review selesai)
+- **Inventaris (OpenCode)**: total backend ~222 endpoint. UNCOVERED dikelompokkan P1 (laporan/*), P2 (gizi sub-modul + gizi laporan), P3 (aslap laporan), P4 (top-level). Cycle 1+2 sudah cover mitra/master/rabHarian/jurnal/stok/nominatifUpah/auth/admin + modul gizi/aslap CRUD inti.
+- **BUILD (AGY, 3 run) + VERIFY (OpenCode)**: 6 file test baru coverage3-*.test.js (2929 baris, 216 test) — laporan-data 42, laporan-pdf 39, toplevel 22, giziMenu 65, giziLaporan 21, aslapLaporan 27. Full suite 30→36 files / **558 PASS** (342+216), lint 0/0, 0 production file diubah. PDF laporan/gizi/aslap happy 200 + content-type ter-cover.
+- **Commit** `cb2803b` (pushed — verified via `git log origin/main` 2026-08-05). Catatan: beberapa laporan-pdf hanya assert 200+application/pdf (tanpa body); trivially tak ada .skip().
+- Output mentah: /tmp/cov3-verif-test.txt. Prompts: .agent-pm/prompts/coverage3-*.txt.
+
+## Sesi 40 (2026-08-05) — Perluasan Test Coverage CYCLE 2: 45 endpoint baru ✅ COMMITTED + PUSHED (gate review selesai)
+- **Inventaris (OpenCode)**: scope 58 endpoint (11 file) → 13 COVERED (auth login/logout/me/profile, admin users 4, aslap master periode/kategori, menuHarian PUT, sekolahKelas POST detail, penerimaManfaat POST) + 45 UNCOVERED.
+- **BUILD (AGY, timeout — kerja di disk) + VERIFY (OpenCode)**: 10 file test baru coverage2-*.test.js (2138 baris, 132 test) — 45/45 endpoint ter-cover, 0 duplikasi. Full suite 20→30 files / **342 PASS** (210+132), lint 0/0 (fix 2 warning unused-var di dokumenResmi via AGY). auth TTD cleanup file + tanpa log token; kendaraan G3-G5 stub 410 di-assert; cleanup tanpa catch{}.
+- **Commit** `682da6c` (pushed — verified via `git log origin/main` 2026-08-05). Scope cycle 2: 13/58 → 58/58.
+- Catatan fakta: GET master-menu/:id hanya 2 skenario (tanpa happy — butuh data berat); beberapa matcher fleksibel utk endpoint state-dependent (tercantum di laporan).
+- Output test mentah: /tmp/cov2-verif-test.txt. Prompts: .agent-pm/prompts/coverage2-*.txt.
+
+## Sesi 40 (2026-08-05) — Perluasan Test Coverage: 30 endpoint baru ✅ COMMITTED + PUSHED (gate review selesai)
+- **Inventaris (OpenCode)**: scope 6 file = 62 endpoint → 32 COVERED (smoke-modul, audit-log-stepb/stepc, endpoints-kritis) + 30 UNCOVERED. Baseline backend: 215 (router.*) / 227 (semua incl. sub-router).
+- **BUILD (AGY) + VERIFY (OpenCode)**: 6 file test baru (coverage-{mitra,master,rabHarian,jurnal,stok,nominatifUpah}.test.js, 1393 baris, 87 test) — 30/30 endpoint ter-cover. Full suite 20 files / 210 PASS (123+87), lint 0/0, 0 file production diubah. POST /api/mitra/po assert 410. Cleanup tanpa catch{}.
+- **Commit** `69d10e5` (pushed). Scope 6 file: coverage 32/62 → 62/62.
+- **Catatan fakta (bukan kegagalan)**: po/:id/pdf tanpa happy-200 (chain data berat); POST mitra/po = stub 410 (2 skenario); rab-harian GET & saldo-awal GET = 2 skenario; 401 hanya di 2 file; 2 happy-path matcher fleksibel [200,400] (po/kebutuhan, kebutuhan-hitungan).
+- Output test mentah: /tmp/cov-verif-test.txt. Prompts: .agent-pm/prompts/coverage-*.txt.
+
+## Sesi 40 (2026-08-05) — Fase 2 Data Safety TUNTAS: keputusan Rozi = otomatisasi scope LOCAL, tanpa scheduler nyata
+- **Keputusan Rozi (clarify)**: "abaikan platform production, scope only local saja" + pilihan = "cukup script + panduan cara jadwal di DISASTER_RECOVERY.md — tanpa bikin scheduler nyata".
+- `docs/DISASTER_RECOVERY.md` section "## Status Otomatisasi" → diganti "## Panduan Otomatisasi (Local Windows)": status "backup manual/on-demand (aktif), otomatisasi terjadwal = panduan local — belum dipasang"; opsi A schtasks DAILY 03:00 (contoh), opsi B cron/bash Git Bash, retensi forfiles -7 hari, penutup "Scheduler TIDAK dipasang saat ini". Section lain tidak diubah.
+- Commit doc update: `cff9bab` (docs: panduan otomatisasi backup local) — pushed, HEAD == origin/main.
+
+## Sesi 40 (2026-08-05) — Fase 2 Data Safety: investigasi ✅ + TASK A/B ✅ + leak fix ✅ (3 commit)
+- **Commit Fase 2**: `9dc3c7f` fix leak error.message (masterTargetGizi x2 + pemeriksaan-bahan:138, via git apply patch) | `343b2b0` script backup-db.js + docs/DISASTER_RECOVERY.md + .gitignore | `92fcba5` errorHandler NODE_ENV guard (production → pesan generik, 4xx tetap asli). Semua pushed, HEAD == origin/main.
+- **Investigasi Fase 2 (OpenCode)**: DB prod = Supabase (pooler 6543 runtime / direct 5432 migrasi) — Railway plan + backup otomatis TIDAK dapat dipastikan dari repo (butuh dashboard). Audit kebocoran: 229 logger.error (167 raw object, server-side OK), errorHandler lama kirim err.message mentah tanpa NODE_ENV guard, /api-docs AMAN (0 .example(), NIK tidak ada di sistem). Audit lanjutan .message → client: 95 temuan, 92 AMAN, 3 BERISIKO (masterTargetGizi x2 + pemeriksaan-bahan:138 — semua di-fix).
+- **Backup E2E TEST PASS**: PostgreSQL 18.4 di D:\Tools_Project\PostgreSQL\18\bin (bukan PATH — export PATH). DB test sppg_bak_test (2 tabel dummy + 3+3 baris) → backup-db.js exit 0, file sppg-backup-20260805022824.dump 5.241 bytes → pg_restore --list exit 0 (18 TOC entries, format CUSTOM gzip, TABLE DATA ada). DB test dropped, /tmp/pgtest dihapus. Kredensial 5432 dari Rozi.
+- **⚠️ INSIDEN GF-011**: perubahan TASK A (errorHandler guard) HILANG dari working copy saat session leak fix OpenCode — tidak di reflog/stash/commit mana pun (kemungkinan reset/restore tak sengaja). Terdeteksi saat FINALIZE (OpenCode lapor "identik HEAD"). Recovery: re-apply diff verbatim via AGY (diff index identik `379d88a..b1efad9`), 123/123 test + lint 0/0, commit `92fcba5`. File stray `"how 9dc3c7f --stat"` (untracked sampah) dihapus. Pelajaran → GF-011.
+- **Status Fase 2**: backup manual/on-demand + doc RPO 24h/RTO 4h (rekomendasi) selesai; otomatisasi terjadwal MENUNGGU keputusan platform production final (Railway/Supabase plan — belum dikonfirmasi Rozi).
+
+## Sesi 40 (2026-08-05) — STEP C: logAudit 16 endpoint prioritas SEDANG ✅ + APPROVED + COMMITTED
+- **Commit** `6b4645f`: 4 route (nominatifUpah 3, mitra 8, bukti-lpd2m 2, admin 3) + test `audit-log-stepc.test.js` (7 test, 16/16 endpoint). HEAD == origin/main (rev-parse identik).
+- **2 syarat Rozi terpenuhi**: (1) admin users dataLama/dataBaru tanpa passwordHash/tokenVersion, `passwordChanged: true` saat PUT ganti password (assert test baris 348-363); (2) bukti-lpd2m DELETE wrap HANYA delete DB + logAudit — fs.unlinkSync tetap di luar tx, urutan tidak berubah.
+- **Verifikasi OpenCode independen**: 123/123 test (116 + 7 baru), 48.74s, lint 0/0, node --check 5 file PASS, scope bersih (4 route + 1 test baru). Output mentah: /tmp/stepc-verif-test.txt.
+- **Proses**: AGY claude-sonnet-4-6 timeout (kerja selesai di disk, pola dikenal) → verifikasi OpenCode jadi bukti final. CODE_INVESTIGATION OpenCode konfirmasi inventaris 11 belum tx / 5 sudah (100% cocok).
+- **Known risk dicatat TODO.md**: bukti-lpd2m DELETE — file fisik bisa tersisa jika tx rollback (unlink di luar tx, best-effort — keputusan Rozi: jangan diperbaiki sekarang).
+- **Observasi disetujui Rozi**: PUT /bahan-pokok/:id kini 404 utk record tak ada (sebelumnya 500 P2025) — arah memperbaiki, 0 test lama terdampak. dataLama PUT nominatifUpah asimetris (tanpa include detailHarian — query existing memang tanpa include sejak awal). Cleanup test pakai catch{} (konsisten pola STEP B).
+- **Status akhir backlog**: AuditLog TINGGI (GET /api/audit-log + FE + gap 16) + SEDANG (nominatifUpah 3, mitra 8, bukti-lpd2m 2, admin 3) TUNTAS. Semua prioritas AuditLog selesai.
+- Plan: `.agent-pm/plans/2026-08-05-stepc-auditlog-sedang.md`. Prompts: `.agent-pm/prompts/stepc-{investigate,build,verify}.txt` (cleanup saat archive).
+
+## Sesi 39 (2026-08-04) — CATAT SESI: backlog prioritas tinggi TUNTAS, review independen selesai
+- **STEP B committed** `a98d236` (16 endpoint logAudit + 14 test) — pushed, HEAD == origin/main verified.
+- **Review independen Rozi**: diminta bukti fisik raw output (git status/stat, full diff 5 file, isi lengkap test, npm test tee, lint, analisis rollback-critical + field detail APPROVE + rekonstruksi kasus sisa data) — semua terkirim verbatim; lalu diminta ekstrak kode verbatim 6 item (kepala.js approval handler, poApprove.js handler, auditHelper.js logAudit, master.js supplier, rabHarian.js verify, chain test) — terkirim verbatim + nomor baris. **APPROVED → commit.**
+- **Status akhir**: backlog AuditLog prioritas TINGGI selesai (GET /api/audit-log + FE + 16 gap endpoint + mutasiStok tersembunyi). Prioritas SEDANG tetap TODO.md (nominatifUpah, mitra, bukti-lpd2m, admin).
+- HEAD `a98d236` == origin/main. Working tree: state files modified only (CURRENT_STATE, HANDOFF, TODO) — by design.
+
+## Sesi 38 (2026-08-04) — STEP B COMMITTED ✅ (backlog AuditLog prioritas tinggi TUNTAS)
+- **STEP B COMMITTED + PUSHED**: `a98d236` `feat: tambah logAudit pada 16 endpoint keuangan/approval (tutup gap audit STEP 4)` (6 files, +717/-63). HEAD `a98d236` == origin/main (rev-parse identik).
+- **Bukti fisik sebelum commit** (diminta Rozi): git status/stat, full diff 5 file kode, isi lengkap test file, `npm test` 116/116 (tee /tmp/test-output-stepb.txt), lint 0/0, analisis rollback-critical logAudit (auditHelper.js:39-42 throw → Prisma rollback), field detail APPROVE/REJECT = snapshot status before/after minimal (bukan full row) + contoh row nyata, rekonstruksi kasus sisa data 2032 + perintah cleanup. Semua tercatat di sesi ini.
+- **Status akhir backlog**: prioritas TINGGI (GET /api/audit-log + FE + gap 16 endpoint + mutasiStok tersembunyi) SELESAI. Prioritas SEDANG tetap di TODO.md: nominatifUpah (3), mitra (9), bukti-lpd2m (2), admin (3) — BELUM dikerjakan.
+
+## Sesi 38 (2026-08-04) — STEP B: logAudit 16 endpoint ✅ (menunggu approval, jangan commit)
+- **Perubahan** (pola logAudit existing — dipanggil dari DALAM $transaction, atomik):
+  - `akuntan/master.js` 10 titik: supplier POST, periode POST (dalam tx existing), periode PUT, jenis-pekerjaan POST/PUT/DELETE, hari-libur POST/DELETE, po POST (dalam tx existing, entityType TransaksiPembelian), bahan-pokok POST — route create/update/delete sederhana di-wrap $transaction baru agar atomik dgn logAudit.
+  - `akuntan/rabHarian.js` 4 titik: POST / (CREATE), PUT /:id (UPDATE), PUT /:id/verify (UPDATE + verifiedAt), DELETE /:id (DELETE).
+  - `akuntan/stok.js` 2 titik (gap tersembunyi temuan STEP A): mutasiStok POST (CREATE MutasiStok), validasiStok POST (CREATE ValidasiStok).
+  - `kepala.js` 1 titik: POST /approval → aksi `APPROVE`/`REJECT` (entityType MenuHarian/RabHarian sesuai target) + import logAudit.
+  - `aslap/poApprove.js` 1 titik: PUT /po/:id/approve → aksi `APPROVE` TransaksiPembelian + import logAudit.
+- **Test baru** `backend/src/routes/__tests__/audit-log-stepb.test.js` (14 test): verifikasi row AuditLog per endpoint — user (username pelaku), aksi, timestamp, entityType, dataBaru detail benar. Termasuk chain penuh RAB → verify → DIAJUKAN → approval Kepala (APPROVE) → PO → DIREALISASI → terima Aslap (APPROVE) → DELETE. **14/14 PASS isolasi**.
+- **Full suite: 13 files / 116 passed (116)** (102 + 14 baru), 44s. **Lint 0/0**.
+- Pitfall yang diatasi: Express 5 `req.body` undefined tanpa body → zod 400 (poApprove test kirim items eksplisit); cleanup periode perlu hapus setupLembaga dulu (relasi 1-1); periode 2032 overlap dgn seed → pakai 2032/2033 dipindah ke 2032 test memakai rentang unik (seed punya 2030).
+- **Uncommitted (STEP B)**: 6 file (master.js, rabHarian.js, stok.js, kepala.js, poApprove.js, audit-log-stepb.test.js baru) — JANGAN commit sampai approval.
+
+## Sesi 38 (2026-08-04) — STEP A: endpoint GET /api/audit-log + halaman FE ✅ (menunggu approval, jangan commit)
+- **Backend**:
+  - `backend/src/routes/auditLog.js` (BARU): GET /api/audit-log — guard `requireRole('AKUNTAN','MITRA','ADMIN')`, filter `tanggalMulai`, `tanggalSelesai`, `userId`, `aksi` (enum CREATE/UPDATE/DELETE/APPROVE/REJECT/KOREKSI, validasi 400), `resource` (entityType), pagination `page`/`limit` (max 100) pola jurnal, response `{ data, pagination: { page, limit, total, totalPages } }` + include user (nama/username/role).
+  - `backend/src/app.js`: mount `/api/audit-log`.
+  - `backend/src/docs/openapi.js`: registerPath GET /api/audit-log + query schema (7 param, tag audit-log).
+  - Test `backend/src/routes/__tests__/audit-log.test.js` (BARU, 9 test): AKUNTAN/MITRA/ADMIN → 200; ASLAP/AHLI_GIZI/KEPALA_SPPG → 403; tanpa token → 401; filter aksi+userId+resource; filter tanggal; pagination limit=1; aksi invalid → 400. **9/9 PASS**.
+- **Frontend**:
+  - `frontend/src/pages/shared/AuditLogPage.jsx` (BARU): tabel (Waktu, User, Aksi badge warna, Resource, Entity ID, ringkasan perubahan) + filter (dari/sampai tanggal, user ID, aksi select, resource) + pagination Prev/Next + Skeleton loading.
+  - `frontend/src/App.jsx`: route `audit-log` → ProtectedRoute `['AKUNTAN','MITRA','ADMIN']`.
+  - `frontend/src/components/layout/Layout.jsx`: menu "Audit Log" (icon History) di section AKUNTAN, MITRA, ADMIN.
+  - Build PASS, lint 0 errors (2 warnings exhaustive-deps = pola repo existing, UserManagementPage juga 2).
+- **Verifikasi**: full suite **12 files / 102 passed (102)** (93 + 9 baru), 34.5s. BE lint 0/0. Live: GET /api/audit-log akuntan → 200 + pagination; aslap → 403 ✓.
+- **⚠️ TEMUAN TAMBAHAN (gap tersembunyi STEP 4)**: `mutasiStokRouter.post("/")` (akuntan/stok.js:306) dan `validasiStokRouter.post("/")` (stok.js:437) **TIDAK menulis logAudit** — audit STEP 4 keliru mengira "stok lengkap" (logAudit stok.js hanya utk saldoAwalBarang create/update/delete + bulk). Mutasi stok = data keuangan. **Keputusan Rozi: masukkan ke scope STEP B atau backlog?**
+- **Catatan**: AuditLog count 0 di DB dev = wajar (test suite tidak memanggil route ber-audit dgn sukses).
+- **Uncommitted (STEP A)**: auditLog.js (baru), app.js, openapi.js, audit-log.test.js (baru), AuditLogPage.jsx (baru), App.jsx, Layout.jsx — JANGAN commit sampai approval.
+
+## Sesi 38 (2026-08-04) — FASE 1 TUNTAS ✅ (FIX 3 committed)
+- **FIX 3 COMMITTED + PUSHED**: `bd1c58b` `fix: naikkan bcrypt cost factor 10 ke 12 + rehash otomatis saat login (hash lama ter-upgrade transparan)` (3 files, +15/-4). HEAD `bd1c58b` == origin/main (rev-parse identik).
+- **Fase 1 selesai sepenuhnya**: STEP 1-5 + FIX 1-3. Ringkasan lengkap + tabel seluruh commit di HANDOFF.md (9 commit: `49ccbb5` `efac375` `c9fd190` `77e95bd` `581faed` `97d725e` `49d62cf` `b1d57d0` `bd1c58b`).
+- Verifikasi akhir: 93/93 test + lint 0/0. Invalidasi sesi tokenVersion 3/3 jalur. bcrypt cost 12 + rehash-on-login aktif.
+- **JANGAN mulai Fase 2 tanpa arahan eksplisit Rozi.**
+
+## Sesi 38 (2026-08-04) — FIX 3 bcrypt cost 12 + rehash-on-login ✅ (menunggu approval, jangan commit)
+- **Perubahan** (cost 10 → 12 di SEMUA pembuatan hash baru):
+  - `backend/src/routes/admin.js:53` (create user), `admin.js:104` (admin reset password)
+  - `backend/src/routes/auth.js:150` (ganti password sendiri)
+  - `backend/prisma/seed.js:178` (seed default)
+  - `bcrypt.compare` TIDAK diubah. Test files restore tetap cost 10 (bukan production).
+- **Rehash-on-login** (`auth.js` login handler, setelah compare sukses): `bcrypt.getRounds(user.passwordHash) < 12` → `bcrypt.hash(password, 12)` + `prisma.user.update` HANYA passwordHash (TIDAK menyentuh tokenVersion — token di-sign dgn tokenVersion yang sudah dibaca).
+- **Bukti uji (supertest, NODE_ENV=test)**:
+  - User lama hash cost 10 → LOGIN 200 (491ms) → hash DB berubah getRounds **10 → 12 PASS**
+  - POST /api/admin/users → 201 → hash user baru getRounds **12 PASS**
+  - Login user baru → 200 (323ms); login ulang user lama (cost 12) → 200 (323ms) — tidak ada lonjakan tidak wajar (323-491ms, sesuai ekspektasi ~200-400ms bcryptjs cost 12)
+  - Cleanup user test selesai.
+- `npm test` = 11 files / 93 passed (93), 30.19s (naik ~4s dari rehash cost 12 di login test — wajar). `npm run lint` = 0 warnings / 0 errors.
+- **Uncommitted (FIX 3)**: `backend/src/routes/admin.js`, `backend/src/routes/auth.js`, `backend/prisma/seed.js` — JANGAN commit sampai approval. Nanti jadi commit terpisah.
+
+## Sesi 38 (2026-08-04) — FIX 2 pino redact authorization/cookie ✅ (menunggu approval, jangan commit)
+- **Perubahan**: `backend/src/lib/logger.js` — `redact: { paths: ['req.headers.authorization','req.headers.cookie','res.headers["set-cookie"]'], censor: '[Redacted]' }`. Berjalan setelah serializer (wrapRequestSerializer) — terbukti efektif.
+- **Bukti (server HTTP nyata, token dummy `Bearer DUMMY_TOKEN_123` + cookie `session=abc123`)**:
+  - SEBELUM: `req.headers.authorization: "Bearer DUMMY_TOKEN_123"`, `req.headers.cookie: "session=abc123"`, `res.headers["set-cookie"]: ["session=abc123; Path=/"]` → semua bocor
+  - SESUDAH: `authorization: "[Redacted]"`, `cookie: "[Redacted]"`, `set-cookie: "[Redacted]"` — host/connection/remoteAddress tetap utuh (debugging lain tidak terganggu)
+- `npm test` = 11 files / 93 passed (93), 26.25s. `npm run lint` = 0 warnings / 0 errors.
+- **Uncommitted (FIX 2)**: `backend/src/lib/logger.js` — JANGAN commit sampai approval. Nanti jadi commit terpisah.
+
+## Sesi 38 (2026-08-04) — FIX 1 guard seed.js ✅ (menunggu approval, jangan commit)
+- **Perubahan**: `backend/prisma/seed.js` — guard di awal (sebelum PrismaClient): `NODE_ENV === "production"` → exit(1) + pesan jelas, kecuali `ALLOW_PROD_SEED=true` ATAU argumen `--force`. Docs: `docs/DEPLOYMENT.md` (section Database — cara override first deploy + WAJIB ganti password seluruh akun) + `README.md` (catatan di langkah seed).
+- **Uji**:
+  - TEST 1: `NODE_ENV=production node prisma/seed.js` → exit code 1, pesan "[SEED] DITOLAK...", tidak ada insert ✓
+  - TEST 1b: `NODE_ENV=production ... --force` → guard bypass, seed jalan ✓
+  - TEST 2: `NODE_ENV=development` → exit 0, "seedTransaksi BERHASIL!" + hash aslap SEBELUM == SESUDAH (`$2b$10$...` identik) → upsert `update:{}` TIDAK overwrite password ✓
+  - `npm test` = 11 files / 93 passed (93), 24.95s. `npm run lint` = 0 warnings / 0 errors (124 files).
+- **Uncommitted (FIX 1)**: `backend/prisma/seed.js`, `docs/DEPLOYMENT.md`, `README.md` — JANGAN commit sampai approval. Nanti jadi commit terpisah.
+
+## Sesi 38 (2026-08-04) — STEP 5 audit bcrypt/logging/reset-password/seed ✅ (AUDIT ONLY, menunggu review Rozi)
+- **Titik bcrypt**: 7 titik hash/compare, SEMUA cost 10, konsisten (tabel lengkap di HANDOFF): admin.js:53 (create user), admin.js:104 (admin reset password), auth.js:81 (compare login), auth.js:150 (ganti password sendiri), seed.js:159 (seed default), 2x test restore. Library bcryptjs (pure JS). TIDAK ada hashing lain (0 crypto/md5/sha/argon).
+- **Rekomendasi cost** (tanpa perubahan): cost 10 → masih aman tapi di bawah baseline industri 2026 (OWASP merekomendasikan 12). Sistem internal 6 user load rendah → naik ke **12** layak; catatan: bcryptjs pure-JS lebih lambat (~4x per naik 1 cost), pertimbangkan bcrypt native + rehash-on-login bertahap. Keputusan Rozi.
+- **Logging**: 0 logger call yang mencatat req.body/password/user object. Login handler tanpa logger; pesan 401 uniform anti-enumeration ✓. errorHandler hanya log err object. **⚠️ TEMUAN SEDANG: pino-http default serializer meng-log HEADERS lengkap tiap request (TERBUKTI via node test: `authorization: Bearer xxx`, `cookie`, `x-api-key` tetap muncul) — src/lib/logger.js:10-13 tanpa redact → JWT token sesi (8h) tercatat di log tiap request. Body tidak di-log (password aman).** Rekomendasi fix (nanti, perlu approval): pino `redact` utk `req.headers.authorization`/`req.headers.cookie` atau custom serializer.
+- **Reset/ganti password**: TIDAK ADA fitur forgot-password berbasis email/token (grep kosong) — reset HANYA via admin PUT /users/:id. Password input MANUAL admin + validasi min 6 karakter (admin.js:101-103). Tidak ada password plaintext di response (select tanpa passwordHash), log, maupun email (modul email belum ada — Fase 8 backlog). ✅
+- **seed.js:159**: upsert `update: {}` → TIDAK overwrite password user existing. ⚠️ TANPA guard NODE_ENV → kalau seed dijalankan di production dengan DB kosong, 6 akun (termasuk admin) = default `ganti-password-ini` (repo publik → attacker tahu). Severity: TINGGI-kondisional. Rekomendasi: guard `NODE_ENV=production` di seed atau dokumentasi keras di DEPLOYMENT.md. Keputusan Rozi.
+
+## Sesi 38 (2026-08-04) — STEP B ✅ + C1 committed + STEP 4 audit ✅ + BAGIAN 1-2 ✅ (FASE 1 STEP 1-4 TUNTAS)
+- **BAGIAN 1 — Patch admin reset password → invalidasi sesi** ✅ COMMITTED + PUSHED `97d725e` `fix: increment tokenVersion saat admin reset password user lain (invalidasi sesi lama)` (2 files, +70):
+  - `backend/src/routes/admin.js` PUT /users/:id: `data.tokenVersion = { increment: 1 }` di blok ganti password — pola sama persis PUT /api/auth/profile (auth.js:151).
+  - Test `backend/src/routes/__tests__/admin-reset-password.test.js`: TOKEN_LAMA → 401 setelah reset ✓ + login password baru 200 ✓ + afterAll restore.
+  - **`npm test` 11 files / 93 passed (93)**, **lint 0 warnings / 0 errors**. **HEAD == origin/main verified** (rev-parse identik).
+- **BAGIAN 2 — Backlog audit log dicatat** ✅: TODO.md section baru "Backlog Audit Log (STEP 4 audit, sesi 2026-08-04...)" — 3 item prioritas: [TINGGI] GET /api/audit-log (filter tanggal/role/user/aksi, akses Akuntan & Mitra); [TINGGI] tutup gap kepala/approval + poApprove + akuntan/master (10/11) + akuntan/rabHarian (4/5); [SEDANG] nominatifUpah (3), mitra (9), bukti-lpd2m (2), admin (3). Tanpa implementasi kode.
+- **STEP B — Smoke test manual C1 tokenVersion** ✅ SEMUA PASS (6/6 langkah, user test `aslap`, BE nyala manual Rozi):
+  - (a) login → 200 + token A | (b) `GET /api/auth/me` [A] → 200 | (c) `POST /api/auth/logout` [A] → 200 `{"success":true}` | (d) `GET /api/auth/me` [A lama] → **401** `{"error":"Sesi tidak valid, silakan login kembali"}` ✓
+  - (e) ganti password: login B → PUT /auth/profile {password:baru} → 200, me [B lama] → 401 ✓; login dgn password baru → 200, PUT kembalikan password → 200, me [C lama] → 401 ✓. Password aslap RESTORED `ganti-password-ini` (login 200 terverifikasi).
+  - Catatan: rate limiter aktif (5/15 mnt/IP) — total login dipakai 5 (probe 401 + 4 skenario), pas batas. tokenVersion aslap = 2 di DB (akibat langkah e) — normal, payload cocok saat login berikutnya.
+- **C1 COMMITTED + PUSHED**: `581faed` `feat: tokenVersion untuk pencabutan sesi JWT (logout server-side + invalidasi saat ganti password)` — 7 files, +127/-7. HEAD `581faed` == origin/main.
+- **STEP 4 — Audit AuditLog (AUDIT ONLY, 0 perubahan kode)**:
+  - **Struktur**: model AuditLog (schema.prisma:1161) + helper `lib/auditHelper.js` logAudit() (dipanggil DALAM transaksi, atomik). **Pemanggilan aktual 13** di 5 file akuntan: jurnal 4/4 route (create/bulk/update/delete), stok 5 (create/update/delete/mutasi items), dokumenResmi 2/2 (create/delete), master 1 (HANYA tutup-periode), rabHarian 1 (HANYA PUT /:id/items override harga).
+  - **⚠️ TEMUAN STRUKTURAL: AuditLog WRITE-ONLY** — TIDAK ADA endpoint baca (0 GET, 0 mount app.js, 0 UI FE — grep "audit" di FE = kosong). 13 baris ditulis per aksi tapi tak bisa dilihat user/Akuntan/Mitra. Komentar schema "visible hanya Akuntan & Mitra (app-layer)" tidak terpenuhi sisi baca.
+  - **GAP endpoint mutasi TANPA logAudit** (prioritas): (1) `kepala.js` POST /approval — approve/tolak menuHarian/rabHarian (approval tertinggi); (2) `aslap/poApprove.js` PUT /po/:id/approve — PO DIREALISASI→DITERIMA; (3) `akuntan/master.js` 10/11 mutasi (POST /po akuntan, POST/PUT /periode, POST/DELETE /hari-libur, POST/PUT/DELETE /jenis-pekerjaan, POST /supplier, POST /bahan-pokok); (4) `akuntan/rabHarian.js` 4/5 (POST /, PUT /:id, PUT /:id/verify, DELETE /:id); (5) `akuntan/nominatifUpah.js` POST/PUT/DELETE upah; (6) `mitra.js` 9 mutasi (harga-bahan, kendaraan, po POST, PUT /po/:id/realisasi); (7) `bukti-lpd2m.js` POST/DELETE bukti; (8) `admin.js` POST/PUT/DELETE /users.
+  - **Temuan samping keamanan (cross STEP 3/C1)**: `admin.js` PUT /users/:id BISA reset password (`passwordHash` di-update) TANPA increment `tokenVersion` → sesi lama user tetap valid setelah admin ganti password (inkonsisten dengan C1 di PUT /auth/profile). Perlu keputusan Rozi.
+  - Non-keuangan (gizi/* 20 mutasi, aslap/* 11 mutasi, laporanBug, notifikasi) TIDAK masuk daftar gap (scope audit = modul keuangan/approval, sesuai helper A-6).
+- **Catatan proses**: smoke test via script python temp (`stepb_smoke.py`, luar repo). Tool search_files regex rusak untuk parens → fallback grep terminal.
+
+## Sesi 37 (2026-08-04) — V3 F1 STEP 1-3 + C1 tokenVersion (PAUSED — gate STEP B)
+- **STEP 1 — Rate limiting login** ✅ SELESAI + APPROVED + commit `49ccbb5`: express-rate-limit ^8.6.1, loginLimiter 5 percobaan/15 menit/IP di POST /api/auth/login, 429 `{ error }`, skip test-safe (NODE_ENV=test + RATE_LIMIT_TEST), rate-limit.test.js (6x gagal → ke-6 429). 90/90 test + lint 0/0, verifikasi OpenCode 2x.
+- **STEP 2 — Audit deployment/HTTPS** ✅ SELESAI + APPROVED: HTTPS otomatis platform (Vercel FE + Railway BE via nixpacks.toml), docs/DEPLOYMENT.md BARU (commit `efac375`), fix trust proxy `c9fd190` (1 baris app.js — rate limiter baca IP asli di belakang proxy).
+- **STEP 3 — Audit JWT (audit-only)** ✅ SELESAI: expiry 8h (TOKEN_EXPIRY auth.js:31, komentar "1 shift kerja"), TIDAK ada logout server/blacklist, TIDAK ada auto-refresh, payload `{ sub, username, role, nama }` tanpa data sensitif. Keputusan Rozi: **expiry TETAP 8h**; "12 jam + refresh token" = usulan agent salah diatribusi → **GF-010** dicatat + committed `77e95bd`.
+- **C1 — tokenVersion (pencabutan sesi)** 🔨 TERIMPLEMENTASI + VERIFIED (7 poin PASS, 92/92 test) **TAPI BELUM COMMIT** (gate: STEP B):
+  - schema.prisma `tokenVersion Int @default(0)`, migration `20260804111206_add_token_version` (created+applied), payload jwt.sign + tokenVersion, requireAuth cek `payload.tokenVersion !== user.tokenVersion` → 401, POST /api/auth/logout (increment), increment saat ganti password (PUT /api/auth/profile), FE logout panggil endpoint sebelum hapus localStorage (fallback tetap hapus lokal).
+  - Uncommitted: `backend/prisma/schema.prisma`, `backend/src/middleware/auth.js`, `backend/src/routes/auth.js`, `backend/prisma/migrations/20260804111206_add_token_version/`, `backend/src/routes/__tests__/token-version.test.js` (baru), `frontend/src/context/AuthContext.jsx`, `frontend/src/components/layout/Layout.jsx` — **JANGAN commit sampai STEP B selesai + approval Rozi**.
+  - Test: `npm test` = 10 files / **92 passed** (90 lama + 2 token-version: logout→401, ganti password→401), lint 0/0, node --check OK.
+  - **DB drift cleanup tanpa data loss**: resolve --applied `20260802220000_add_minggu_ke_master_menu` + `20260803000000_add_gruphari_mastertarget_dokumenbukti` (efek sudah ada dari db push), lalu migrate dev apply ttd_path_user + add_token_version. **STEP A (bukti) SELESAI BERSIH + APPROVED Rozi**: `migrate status` = 20 migrations "Database schema is up to date!", `migrate diff` = "No difference detected.", kolom User = aktif,createdAt,id,nama,passwordHash,role,tokenVersion,ttdPath,updatedAt,username.
+  - ⚠️ Temuan samping: kolom `ttdPath` TIDAK ada di DB device ini sebelumnya (fitur TTD V2-1 sempat rusak tersembunyi) — teratasi kebetulan via migrate dev (kolom ada sekarang).
+- **STEP B — Smoke test manual login→logout→401** ⏳ **BELUM DIJALANKAN**: menunggu Rozi menyalakan backend `cd backend && npm run dev`, lalu: login → token A → GET /api/auth/me = 200 → POST /api/auth/logout (token A) → GET /api/auth/me (token A) = 401 `{ error: 'Sesi tidak valid, silakan login kembali' }`. Bersih → commit C1 (pesan: `feat: tokenVersion untuk pencabutan sesi JWT (logout server-side + invalidasi saat ganti password)`) → lanjut STEP 4 (audit AuditLog saja, tanpa logging baru).
+- **Catatan proses**: AGY claude-sonnet-4-6 **QUOTA HABIS** (reset ~40 jam) → fallback AGY gemini-3.6-flash-medium (model id valid: `gemini-3.6-flash-medium`). AGY 6x timeout pola "tool jalan, teks mati" — semua pekerjaan nyata selesai di disk. OpenCode hang 2x pada perintah prisma (migrate status jalan normal via terminal langsung). BE server DIMATIKAN Hermes (PID 17056, kill untuk prisma generate EPERM) — **Rozi nyalakan ulang manual**.
+- HEAD `77e95bd` == origin/main, working tree: 7 file uncommitted C1 (lihat atas).
 
 ## Sesi 36 (2026-08-04) — V2 Bagian D-G: APPROVED + ARCHIVED ✅ (CYCLE_END)
 - **Approval final Rozi**: diberikan (instruksi "approval final Bagian DG telah diberikan").
