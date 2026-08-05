@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { logger } = require("../../lib/logger");
@@ -13,7 +13,7 @@ function isOverlap(hariAktifA, hariAktifB) {
 }
 
 // GET /api/aslap/grup-hari - List all GrupHari for a period
-router.get("/grup-hari", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/grup-hari", requireAuth, requirePermission("aslap-master", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await prisma.grupHari.findMany({
@@ -44,7 +44,7 @@ router.get("/grup-hari", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_
 });
 
 // POST /api/aslap/grup-hari - Create new GrupHari
-router.post("/grup-hari", requireAuth, requireRole("ASLAP"), validate(schemas.grupHariSchema), async (req, res) => {
+router.post("/grup-hari", requireAuth, requirePermission("aslap-master", "CREATE"), validate(schemas.grupHariSchema), async (req, res) => {
   try {
     const { label, hariAktif, periodeId } = req.body || {};
 
@@ -86,7 +86,7 @@ router.post("/grup-hari", requireAuth, requireRole("ASLAP"), validate(schemas.gr
 });
 
 // PUT /api/aslap/grup-hari/:id - Update GrupHari
-router.put("/grup-hari/:id", requireAuth, requireRole("ASLAP"), validate(schemas.grupHariUpdateSchema), async (req, res) => {
+router.put("/grup-hari/:id", requireAuth, requirePermission("aslap-master", "UPDATE"), validate(schemas.grupHariUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { label, hariAktif } = req.body || {};
@@ -146,7 +146,7 @@ router.put("/grup-hari/:id", requireAuth, requireRole("ASLAP"), validate(schemas
 });
 
 // DELETE /api/aslap/grup-hari/:id - Delete GrupHari
-router.delete("/grup-hari/:id", requireAuth, requireRole("ASLAP"), async (req, res) => {
+router.delete("/grup-hari/:id", requireAuth, requirePermission("aslap-master", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const existingGroup = await prisma.grupHari.findUnique({ where: { id } });

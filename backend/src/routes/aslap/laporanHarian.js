@@ -219,7 +219,7 @@ async function getLaporanHarianAslapData(periodeId) {
 }
 
 // LAPORAN HARIAN ASLAP (PENERIMA MANFAAT PER GRUP HARI)
-router.get(["/laporan/harian", "/api/aslap/laporan/harian"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"]), validate(schemas.laporanHarianSchema, "query"), async (req, res) => {
+router.get(["/laporan/harian", "/api/aslap/laporan/harian"], authMiddleware("aslap-laporan", "READ"), validate(schemas.laporanHarianSchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
 
@@ -437,7 +437,7 @@ router.get(["/laporan/harian", "/api/aslap/laporan/harian"], authMiddleware(["AS
 });
 
 // GET /api/aslap/laporan/harian/pdf - PDF Laporan Harian
-router.get(["/laporan/harian/pdf", "/api/aslap/laporan/harian/pdf"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"]), validate(schemas.laporanHarianSchema, "query"), async (req, res) => {
+router.get(["/laporan/harian/pdf", "/api/aslap/laporan/harian/pdf"], authMiddleware("aslap-laporan", "EXPORT"), validate(schemas.laporanHarianSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId } = req.query;

@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { KATEGORI_PESERTA_DIDIK, KATEGORI_NON_PESERTA_DIDIK } = require("../../constants/kategori");
@@ -9,7 +9,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/aslap/laporan/aggregate?periodeId=X
-router.get(["/laporan/aggregate", "/api/aslap/laporan/aggregate"], requireAuth, validate(schemas.laporanPeriodeSchema, "query"), async (req, res) => {
+router.get(["/laporan/aggregate", "/api/aslap/laporan/aggregate"], requireAuth, requirePermission("aslap-laporan", "READ"), validate(schemas.laporanPeriodeSchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
 

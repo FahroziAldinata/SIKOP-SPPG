@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { logger } = require("../../lib/logger");
@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/aslap/periode - List all periods
-router.get("/periode", requireAuth, requireRole("ASLAP", "MITRA", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/periode", requireAuth, requirePermission("aslap-master", "READ"), async (req, res) => {
   try {
     const data = await prisma.periode.findMany({
       orderBy: { tanggalMulai: "desc" },
@@ -29,7 +29,7 @@ router.get("/periode", requireAuth, requireRole("ASLAP", "MITRA", "KEPALA_SPPG",
 });
 
 // GET /api/aslap/kategori - List all categories
-router.get("/kategori", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/kategori", requireAuth, requirePermission("aslap-master", "READ"), async (req, res) => {
   try {
     const data = await prisma.kategoriPenerima.findMany({
       orderBy: { urutan: "asc" }
@@ -42,7 +42,7 @@ router.get("/kategori", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_G
 });
 
 // GET /api/aslap/sekolah - List all schools
-router.get("/sekolah", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/sekolah", requireAuth, requirePermission("aslap-master", "READ"), async (req, res) => {
   try {
     const data = await prisma.sekolah.findMany({
       orderBy: { nama: "asc" }
@@ -55,7 +55,7 @@ router.get("/sekolah", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GI
 });
 
 // POST /api/aslap/sekolah - Create a new school
-router.post("/sekolah", requireAuth, requireRole("ASLAP"), validate(schemas.sekolahSchema), async (req, res) => {
+router.post("/sekolah", requireAuth, requirePermission("aslap-master", "CREATE"), validate(schemas.sekolahSchema), async (req, res) => {
   try {
     const { nama, jenjang, npsn, alamat } = req.body;
 
@@ -89,7 +89,7 @@ router.post("/sekolah", requireAuth, requireRole("ASLAP"), validate(schemas.seko
 });
 
 // PUT /api/aslap/sekolah/:id - Update a school
-router.put("/sekolah/:id", requireAuth, requireRole("ASLAP"), validate(schemas.sekolahUpdateSchema), async (req, res) => {
+router.put("/sekolah/:id", requireAuth, requirePermission("aslap-master", "UPDATE"), validate(schemas.sekolahUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { nama, jenjang, npsn, alamat } = req.body;
@@ -134,7 +134,7 @@ router.put("/sekolah/:id", requireAuth, requireRole("ASLAP"), validate(schemas.s
 });
 
 // GET /api/aslap/posyandu - List all posyandus
-router.get("/posyandu", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/posyandu", requireAuth, requirePermission("aslap-master", "READ"), async (req, res) => {
   try {
     const data = await prisma.posyandu.findMany({
       orderBy: { nama: "asc" }

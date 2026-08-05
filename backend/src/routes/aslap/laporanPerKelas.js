@@ -65,7 +65,7 @@ async function getLaporanPerKelasAslapData(periodeId, sekolahId) {
 }
 
 // LAPORAN PER KELAS
-router.get(["/laporan/per-kelas", "/api/aslap/laporan/per-kelas"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AKUNTAN"]), validate(schemas.laporanPerKelasSchema, "query"), async (req, res) => {
+router.get(["/laporan/per-kelas", "/api/aslap/laporan/per-kelas"], authMiddleware("aslap-laporan", "READ"), validate(schemas.laporanPerKelasSchema, "query"), async (req, res) => {
   try {
     const { periodeId, sekolahId } = req.query;
 
@@ -110,7 +110,7 @@ router.get(["/laporan/per-kelas", "/api/aslap/laporan/per-kelas"], authMiddlewar
 });
 
 // GET /api/aslap/laporan/per-kelas/pdf - PDF Laporan Per Kelas
-router.get(["/laporan/per-kelas/pdf", "/api/aslap/laporan/per-kelas/pdf"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AKUNTAN"]), validate(schemas.laporanPerKelasSchema, "query"), async (req, res) => {
+router.get(["/laporan/per-kelas/pdf", "/api/aslap/laporan/per-kelas/pdf"], authMiddleware("aslap-laporan", "EXPORT"), validate(schemas.laporanPerKelasSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId, sekolahId } = req.query;

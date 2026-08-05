@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { logger } = require("../../lib/logger");
@@ -9,7 +9,7 @@ const { logAudit } = require("../../lib/auditHelper");
 const router = express.Router();
 
 // PUT /api/aslap/po/:id/approve - Aslap konfirmasi penerimaan fisik
-router.put("/po/:id/approve", requireAuth, requireRole("ASLAP"), validate(schemas.poApproveSchema), async (req, res) => {
+router.put("/po/:id/approve", requireAuth, requirePermission("kepala-approval", "APPROVE"), validate(schemas.poApproveSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { items } = req.body;

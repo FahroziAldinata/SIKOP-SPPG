@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { inferJenjang } = require("./_helpers");
@@ -9,7 +9,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/aslap/sekolah-kelas-detail - Get list of sekolah kelas detail
-router.get("/sekolah-kelas-detail", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/sekolah-kelas-detail", requireAuth, requirePermission("aslap-input", "READ"), async (req, res) => {
   try {
     const { periodeId, sekolahId } = req.query;
     const data = await prisma.sekolahKelasDetail.findMany({
@@ -33,7 +33,7 @@ router.get("/sekolah-kelas-detail", requireAuth, requireRole("ASLAP", "KEPALA_SP
 });
 
 // GET /api/aslap/sekolah-kelas-detail/:id - Get single sekolah kelas detail
-router.get("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/sekolah-kelas-detail/:id", requireAuth, requirePermission("aslap-input", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.sekolahKelasDetail.findUnique({
@@ -55,7 +55,7 @@ router.get("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP", "KEPAL
 });
 
 // POST /api/aslap/sekolah-kelas-detail - Create new sekolah kelas detail
-router.post("/sekolah-kelas-detail", requireAuth, requireRole("ASLAP"), validate(schemas.grupKelasSchema), async (req, res) => {
+router.post("/sekolah-kelas-detail", requireAuth, requirePermission("aslap-input", "CREATE"), validate(schemas.grupKelasSchema), async (req, res) => {
   try {
     const { periodeId, sekolahId, sekolahNama, namaKelas, jumlah } = req.body || {};
 
@@ -199,7 +199,7 @@ router.post("/sekolah-kelas-detail", requireAuth, requireRole("ASLAP"), validate
 });
 
 // PUT /api/aslap/sekolah-kelas-detail/:id - Update existing sekolah kelas detail
-router.put("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP"), validate(schemas.grupKelasUpdateSchema), async (req, res) => {
+router.put("/sekolah-kelas-detail/:id", requireAuth, requirePermission("aslap-input", "UPDATE"), validate(schemas.grupKelasUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { periodeId, sekolahId, sekolahNama, namaKelas, jumlah } = req.body || {};
@@ -364,7 +364,7 @@ router.put("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP"), valid
 });
 
 // DELETE /api/aslap/sekolah-kelas-detail/:id - Delete sekolah kelas detail
-router.delete("/sekolah-kelas-detail/:id", requireAuth, requireRole("ASLAP"), async (req, res) => {
+router.delete("/sekolah-kelas-detail/:id", requireAuth, requirePermission("aslap-input", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

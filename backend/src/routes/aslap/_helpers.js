@@ -1,7 +1,8 @@
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 
 function inferJenjang(nama) {
+  if (!nama || typeof nama !== "string") return "SD";
   const upper = nama.toUpperCase();
   if (upper.includes("SD") || upper.includes("MIN") || upper.includes("ELEMENTARY")) return "SD";
   if (upper.includes("SMP") || upper.includes("MTS") || upper.includes("JUNIOR")) return "SMP";
@@ -18,10 +19,11 @@ async function getLembaga(periodeId) {
   };
 }
 
-const authMiddleware = (roles) => [requireAuth, requireRole(...(Array.isArray(roles) ? roles : [roles]))];
+const authMiddleware = (resourceKode, aksi = "READ") => [requireAuth, requirePermission(resourceKode, aksi)];
 
 module.exports = {
   inferJenjang,
   getLembaga,
   authMiddleware,
 };
+

@@ -156,7 +156,7 @@ async function getLaporanBulananAslapData(bulan, tahun) {
 }
 
 // LAPORAN BULANAN ASLAP
-router.get(["/laporan/bulanan", "/laporan/per-bulan", "/api/aslap/laporan/bulanan", "/api/aslap/laporan/per-bulan"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"]), validate(schemas.laporanBulananSchema, "query"), async (req, res) => {
+router.get(["/laporan/bulanan", "/laporan/per-bulan", "/api/aslap/laporan/bulanan", "/api/aslap/laporan/per-bulan"], authMiddleware("aslap-laporan", "READ"), validate(schemas.laporanBulananSchema, "query"), async (req, res) => {
   try {
     const bulan = typeof req.query.bulan === "number" ? req.query.bulan : parseInt(req.query.bulan);
     const tahun = typeof req.query.tahun === "number" ? req.query.tahun : parseInt(req.query.tahun);
@@ -316,7 +316,7 @@ router.get(["/laporan/bulanan", "/laporan/per-bulan", "/api/aslap/laporan/bulana
 });
 
 // GET /api/aslap/laporan/bulanan/pdf - PDF Laporan Bulanan
-router.get(["/laporan/bulanan/pdf", "/laporan/per-bulan/pdf", "/api/aslap/laporan/bulanan/pdf", "/api/aslap/laporan/per-bulan/pdf"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"]), validate(schemas.laporanBulananSchema, "query"), async (req, res) => {
+router.get(["/laporan/bulanan/pdf", "/laporan/per-bulan/pdf", "/api/aslap/laporan/bulanan/pdf", "/api/aslap/laporan/per-bulan/pdf"], authMiddleware("aslap-laporan", "EXPORT"), validate(schemas.laporanBulananSchema, "query"), async (req, res) => {
   let browser;
   try {
     const bulan = typeof req.query.bulan === "number" ? req.query.bulan : parseInt(req.query.bulan);

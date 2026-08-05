@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { inferJenjang } = require("./_helpers");
@@ -9,7 +9,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/aslap/penerima-manfaat - Get list of penerima manfaat
-router.get("/penerima-manfaat", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/penerima-manfaat", requireAuth, requirePermission("aslap-input", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await prisma.inputPenerimaManfaat.findMany({
@@ -37,7 +37,7 @@ router.get("/penerima-manfaat", requireAuth, requireRole("ASLAP", "KEPALA_SPPG",
 });
 
 // GET /api/aslap/penerima-manfaat/:id - Get single penerima manfaat
-router.get("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/penerima-manfaat/:id", requireAuth, requirePermission("aslap-input", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.inputPenerimaManfaat.findUnique({
@@ -69,7 +69,7 @@ router.get("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP", "KEPALA_SP
 });
 
 // POST /api/aslap/penerima-manfaat - Create new penerima manfaat
-router.post("/penerima-manfaat", requireAuth, requireRole("ASLAP"), validate(schemas.penerimaManfaatSchema), async (req, res) => {
+router.post("/penerima-manfaat", requireAuth, requirePermission("aslap-input", "CREATE"), validate(schemas.penerimaManfaatSchema), async (req, res) => {
   try {
     const { periodeId: rawPeriodeId, grupHariId: rawGrupHariId, hariAktif, detail } = req.body || {};
 
@@ -309,7 +309,7 @@ router.post("/penerima-manfaat", requireAuth, requireRole("ASLAP"), validate(sch
 });
 
 // PUT /api/aslap/penerima-manfaat/:id - Update existing penerima manfaat
-router.put("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP"), validate(schemas.penerimaManfaatUpdateSchema), async (req, res) => {
+router.put("/penerima-manfaat/:id", requireAuth, requirePermission("aslap-input", "UPDATE"), validate(schemas.penerimaManfaatUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { grupHariId, hariAktif, detail } = req.body || {};
@@ -521,7 +521,7 @@ router.put("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP"), validate(
 });
 
 // DELETE /api/aslap/penerima-manfaat/:id - Delete penerima manfaat
-router.delete("/penerima-manfaat/:id", requireAuth, requireRole("ASLAP"), async (req, res) => {
+router.delete("/penerima-manfaat/:id", requireAuth, requirePermission("aslap-input", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

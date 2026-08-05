@@ -243,7 +243,7 @@ async function getLaporanPeriodeAslapData(periodeId) {
 }
 
 // LAPORAN PER PERIODE ASLAP
-router.get(["/laporan/periode", "/laporan/per-periode", "/api/aslap/laporan/periode", "/api/aslap/laporan/per-periode"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"]), validate(schemas.laporanPeriodeSchema, "query"), async (req, res) => {
+router.get(["/laporan/periode", "/laporan/per-periode", "/api/aslap/laporan/periode", "/api/aslap/laporan/per-periode"], authMiddleware("aslap-laporan", "READ"), validate(schemas.laporanPeriodeSchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
 
@@ -481,7 +481,7 @@ router.get(["/laporan/periode", "/laporan/per-periode", "/api/aslap/laporan/peri
 });
 
 // GET /api/aslap/laporan/periode/pdf - PDF Laporan Per Periode
-router.get(["/laporan/periode/pdf", "/laporan/per-periode/pdf", "/api/aslap/laporan/periode/pdf", "/api/aslap/laporan/per-periode/pdf"], authMiddleware(["ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"]), validate(schemas.laporanPeriodeSchema, "query"), async (req, res) => {
+router.get(["/laporan/periode/pdf", "/laporan/per-periode/pdf", "/api/aslap/laporan/periode/pdf", "/api/aslap/laporan/per-periode/pdf"], authMiddleware("aslap-laporan", "EXPORT"), validate(schemas.laporanPeriodeSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId } = req.query;
