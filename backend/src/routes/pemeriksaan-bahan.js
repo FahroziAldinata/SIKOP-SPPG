@@ -7,10 +7,10 @@
  * GET /api/laporan/pemeriksaan-bahan/pdf?poId=xxx[&nomorUrut=N]
  *   → PDF binary (application/pdf, inline)
  *
- * Auth: requireAuth + requireRole ASLAP, AKUNTAN, KEPALA_SPPG
+ * Auth: requireAuth + requirePermission('mitra-pemeriksaan', ...)
  */
 const express = require('express');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
 const { launchPuppeteer } = require('../lib/launchPuppeteer');
 const { getPemeriksaanBahanData } = require('../lib/pemeriksaanBahanHelper');
 const { renderPemeriksaanBahanHtml } = require('../templates/dokumen/pemeriksaanBahan');
@@ -37,7 +37,7 @@ function validatePoId(poId) {
 router.get(
   '/',
   requireAuth,
-  requireRole('ASLAP', 'AKUNTAN', 'KEPALA_SPPG', 'MITRA'),
+  requirePermission('mitra-pemeriksaan', 'READ'),
   async (req, res) => {
     try {
       const { poId, nomorUrut } = req.query;
@@ -79,7 +79,7 @@ router.get(
 router.get(
   '/pdf',
   requireAuth,
-  requireRole('ASLAP', 'AKUNTAN', 'KEPALA_SPPG', 'MITRA'),
+  requirePermission('mitra-pemeriksaan', 'READ'),
   async (req, res) => {
     let browser;
     try {

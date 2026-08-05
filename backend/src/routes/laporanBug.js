@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth, requirePermission } = require("../middleware/auth");
 const { logger } = require("../lib/logger");
 
 const router = express.Router();
@@ -8,8 +8,7 @@ const router = express.Router();
 const VALID_STATUS = ["BARU", "DIPROSES", "SELESAI"];
 
 // POST /api/laporan-bug/submit
-// Guard: requireAuth saja — semua role login boleh submit
-router.post("/submit", requireAuth, async (req, res) => {
+router.post("/submit", requireAuth, requirePermission("laporan-bug", "CREATE"), async (req, res) => {
   try {
     const { judul, deskripsi } = req.body || {};
 
@@ -57,8 +56,7 @@ router.post("/submit", requireAuth, async (req, res) => {
 });
 
 // GET /api/laporan-bug
-// Guard: requireAuth + requireRole("ADMIN") — admin only
-router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-bug", "READ"), async (req, res) => {
   try {
     const laporan = await prisma.laporanBug.findMany({
       select: {
@@ -82,8 +80,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
 });
 
 // PATCH /api/laporan-bug/:id/status
-// Guard: requireAuth + requireRole("ADMIN") — admin only
-router.patch("/:id/status", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.patch("/:id/status", requireAuth, requirePermission("laporan-bug", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body || {};

@@ -97,11 +97,11 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
       expect(res.status).toBe(404);
     });
 
-    test('403 role tidak diizinkan', async () => {
+    test('200 superuser bypass admin', async () => {
       const res = await request(app)
         .get(`/api/mitra/kendaraan/${testKendaraanId}`)
         .set('Authorization', `Bearer ${tokenAdmin}`);
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
     });
   });
 
@@ -122,11 +122,11 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
       expect(res.status).toBe(400);
     });
 
-    test('403 role tidak diizinkan', async () => {
+    test('200 superuser bypass admin', async () => {
       const res = await request(app)
         .get(`/api/mitra/harga-bahan?periodeId=${testPeriodeId}`)
         .set('Authorization', `Bearer ${tokenAdmin}`);
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
     });
   });
 
@@ -147,11 +147,11 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
       expect(res.status).toBe(404);
     });
 
-    test('403 role tidak diizinkan', async () => {
+    test('200 superuser bypass admin', async () => {
       const res = await request(app)
         .get(`/api/mitra/harga-bahan/${testHargaBahanId}`)
         .set('Authorization', `Bearer ${tokenAdmin}`);
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
     });
   });
 
@@ -174,7 +174,7 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
     test('403 role tidak diizinkan', async () => {
       const res = await request(app)
         .get(`/api/mitra/po/kebutuhan?tanggal=2036-01-10&periodeId=${testPeriodeId}`)
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAhliGizi}`);
       expect(res.status).toBe(403);
     });
   });
@@ -261,7 +261,7 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
     test('403 role tidak diizinkan', async () => {
       const res = await request(app)
         .get(`/api/mitra/laporan/realisasi-po?periodeId=${testPeriodeId}`)
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAhliGizi}`);
       expect(res.status).toBe(403);
     });
   });
@@ -286,7 +286,7 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
     test('403 role tidak diizinkan', async () => {
       const res = await request(app)
         .get(`/api/mitra/laporan/realisasi-po/pdf?periodeId=${testPeriodeId}`)
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAhliGizi}`);
       expect(res.status).toBe(403);
     });
   });

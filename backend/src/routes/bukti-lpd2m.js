@@ -3,7 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const prisma = require("../lib/prisma");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth, requirePermission } = require("../middleware/auth");
 const { logger } = require("../lib/logger");
 const { logAudit } = require("../lib/auditHelper");
 
@@ -34,7 +34,7 @@ const upload = multer({
 });
 
 // POST /api/laporan/lpd2m/bukti — multipart/form-data (periodeId, namaBukti, jenis, file)
-router.post("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), upload.single("file"), async (req, res) => {
+router.post("/", requireAuth, requirePermission("laporan-resmi", "CREATE"), upload.single("file"), async (req, res) => {
   try {
     const { periodeId, namaBukti, jenis } = req.body;
 
@@ -106,7 +106,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), upload.sing
 });
 
 // GET /api/laporan/lpd2m/bukti?periodeId= — list bukti
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     if (!periodeId) {
@@ -131,7 +131,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
 });
 
 // DELETE /api/laporan/lpd2m/bukti/:id — hapus record + file dari storage
-router.delete("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.delete("/:id", requireAuth, requirePermission("laporan-resmi", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth, requirePermission } = require("../middleware/auth");
 const { logger } = require("../lib/logger");
 const { logAudit } = require("../lib/auditHelper");
 
@@ -294,7 +294,7 @@ async function handleGetApprovals(req, res) {
 }
 
 // Mounting Route dengan autentikasi & otorisasi KEPALA_SPPG
-router.post("/approval", requireAuth, requireRole("KEPALA_SPPG"), handlePostApproval);
-router.get("/approval", requireAuth, requireRole("KEPALA_SPPG"), handleGetApprovals);
+router.post("/approval", requireAuth, requirePermission("kepala-approval", "APPROVE"), handlePostApproval);
+router.get("/approval", requireAuth, requirePermission("kepala-approval", "READ"), handleGetApprovals);
 
 module.exports = router;

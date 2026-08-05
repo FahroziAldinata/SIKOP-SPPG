@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
-const { requireAuth, requireRole } = require("../middleware/auth");
+const { requireAuth, requirePermission } = require("../middleware/auth");
 const { normalizeDateUTC, HARI_MAP, getTotalPorsiBlok } = require("../lib/accountingHelper");
 const { validate } = require("../middleware/validate");
 const schemas = require("../validators/mitra");
@@ -18,7 +18,7 @@ const router = express.Router();
 // ==========================================
 
 // GET /api/mitra/bahan-pokok - List all master food ingredients
-router.get("/bahan-pokok", requireAuth, requireRole("MITRA", "ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/bahan-pokok", requireAuth, requirePermission("mitra-master", "READ"), async (req, res) => {
   try {
     const data = await prisma.bahanPokok.findMany({
       where: { aktif: true },
@@ -32,7 +32,7 @@ router.get("/bahan-pokok", requireAuth, requireRole("MITRA", "ASLAP", "KEPALA_SP
 });
 
 // PUT /api/mitra/bahan-pokok/:id - Update master food ingredient conversion config
-router.put("/bahan-pokok/:id", requireAuth, requireRole("MITRA"), validate(schemas.bahanPokokSchema), async (req, res) => {
+router.put("/bahan-pokok/:id", requireAuth, requirePermission("mitra-master", "UPDATE"), validate(schemas.bahanPokokSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { konversiPerKg, satuanHitungan } = req.body;
@@ -74,7 +74,7 @@ router.put("/bahan-pokok/:id", requireAuth, requireRole("MITRA"), validate(schem
 // ==========================================
 
 // GET /api/mitra/kendaraan - List Kendaraan
-router.get("/kendaraan", requireAuth, requireRole("MITRA", "AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/kendaraan", requireAuth, requirePermission("mitra-master", "READ"), async (req, res) => {
   try {
     const list = await prisma.kendaraan.findMany({
       orderBy: [
@@ -90,7 +90,7 @@ router.get("/kendaraan", requireAuth, requireRole("MITRA", "AHLI_GIZI", "ASLAP",
 });
 
 // GET /api/mitra/kendaraan/:id - Detail Kendaraan
-router.get("/kendaraan/:id", requireAuth, requireRole("MITRA", "AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/kendaraan/:id", requireAuth, requirePermission("mitra-master", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.kendaraan.findUnique({ where: { id } });
@@ -103,7 +103,7 @@ router.get("/kendaraan/:id", requireAuth, requireRole("MITRA", "AHLI_GIZI", "ASL
 });
 
 // POST /api/mitra/kendaraan - Create Kendaraan
-router.post("/kendaraan", requireAuth, requireRole("MITRA"), validate(schemas.kendaraanSchema), async (req, res) => {
+router.post("/kendaraan", requireAuth, requirePermission("mitra-master", "CREATE"), validate(schemas.kendaraanSchema), async (req, res) => {
   try {
     const { namaKendaraan, platNomor, aktif } = req.body || {};
 
@@ -133,7 +133,7 @@ router.post("/kendaraan", requireAuth, requireRole("MITRA"), validate(schemas.ke
 });
 
 // PUT /api/mitra/kendaraan/:id - Update Kendaraan
-router.put("/kendaraan/:id", requireAuth, requireRole("MITRA"), validate(schemas.updateKendaraanSchema), async (req, res) => {
+router.put("/kendaraan/:id", requireAuth, requirePermission("mitra-master", "UPDATE"), validate(schemas.updateKendaraanSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { namaKendaraan, platNomor, aktif } = req.body || {};
@@ -173,7 +173,7 @@ router.put("/kendaraan/:id", requireAuth, requireRole("MITRA"), validate(schemas
 });
 
 // DELETE /api/mitra/kendaraan/:id - Delete Kendaraan
-router.delete("/kendaraan/:id", requireAuth, requireRole("MITRA"), async (req, res) => {
+router.delete("/kendaraan/:id", requireAuth, requirePermission("mitra-master", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.$transaction(async (tx) => {
@@ -212,7 +212,7 @@ router.delete("/kendaraan/:id", requireAuth, requireRole("MITRA"), async (req, r
 // GET /api/mitra/harga-bahan - Get list of ingredient prices per period
 // Catatan keputusan desain: periodeId wajib di query param karena data harga bahan
 // per periode bisa sangat banyak, membatasi load DB untuk skala performa.
-router.get("/harga-bahan", requireAuth, requireRole("MITRA", "ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/harga-bahan", requireAuth, requirePermission("mitra-master", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     if (!periodeId) {
@@ -239,7 +239,7 @@ router.get("/harga-bahan", requireAuth, requireRole("MITRA", "ASLAP", "KEPALA_SP
 });
 
 // GET /api/mitra/harga-bahan/:id - Get single ingredient price entry
-router.get("/harga-bahan/:id", requireAuth, requireRole("MITRA", "ASLAP", "KEPALA_SPPG", "AHLI_GIZI", "AKUNTAN"), async (req, res) => {
+router.get("/harga-bahan/:id", requireAuth, requirePermission("mitra-master", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.hargaBahanPeriode.findUnique({
@@ -264,7 +264,7 @@ router.get("/harga-bahan/:id", requireAuth, requireRole("MITRA", "ASLAP", "KEPAL
 });
 
 // POST /api/mitra/harga-bahan - Create new ingredient price for a period
-router.post("/harga-bahan", requireAuth, requireRole("MITRA"), validate(schemas.hargaBahanSchema), async (req, res) => {
+router.post("/harga-bahan", requireAuth, requirePermission("mitra-master", "CREATE"), validate(schemas.hargaBahanSchema), async (req, res) => {
   try {
     const { periodeId, bahanPokokId, harga, isFallback } = req.body || {};
     const numHarga = parseFloat(harga);
@@ -343,7 +343,7 @@ router.post("/harga-bahan", requireAuth, requireRole("MITRA"), validate(schemas.
 });
 
 // PUT /api/mitra/harga-bahan/:id - Update existing ingredient price for a period
-router.put("/harga-bahan/:id", requireAuth, requireRole("MITRA"), validate(schemas.updateHargaBahanSchema), async (req, res) => {
+router.put("/harga-bahan/:id", requireAuth, requirePermission("mitra-master", "UPDATE"), validate(schemas.updateHargaBahanSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { periodeId, bahanPokokId, harga, isFallback } = req.body || {};
@@ -443,7 +443,7 @@ router.put("/harga-bahan/:id", requireAuth, requireRole("MITRA"), validate(schem
 });
 
 // DELETE /api/mitra/harga-bahan/:id - Delete existing ingredient price entry
-router.delete("/harga-bahan/:id", requireAuth, requireRole("MITRA"), async (req, res) => {
+router.delete("/harga-bahan/:id", requireAuth, requirePermission("mitra-master", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -485,7 +485,7 @@ router.delete("/harga-bahan/:id", requireAuth, requireRole("MITRA"), async (req,
 
 
 // GET /api/mitra/po/kebutuhan - Get ingredient requirements for a specific date
-router.get("/po/kebutuhan", requireAuth, requireRole("MITRA", "AKUNTAN"), async (req, res) => {
+router.get("/po/kebutuhan", requireAuth, requirePermission("mitra-po", "READ"), async (req, res) => {
   try {
     const { tanggal, periodeId } = req.query;
     if (!tanggal || !periodeId) {
@@ -671,14 +671,14 @@ router.get("/po/kebutuhan", requireAuth, requireRole("MITRA", "AKUNTAN"), async 
 });
 
 // POST /api/mitra/po - DEPRECATED: PO sekarang dibuat oleh Akuntan
-router.post("/po", requireAuth, requireRole("MITRA"), (req, res) => {
+router.post("/po", requireAuth, requirePermission("mitra-po", "CREATE"), (req, res) => {
   res.status(410).json({
     error: "PO sekarang dibuat oleh Akuntan. Gunakan endpoint POST /api/akuntan/po."
   });
 });
 
 // PUT /api/mitra/po/:id/realisasi - Mitra menginput realisasi belanja
-router.put("/po/:id/realisasi", requireAuth, requireRole("MITRA"), validate(schemas.realisasiPoSchema), async (req, res) => {
+router.put("/po/:id/realisasi", requireAuth, requirePermission("mitra-po", "UPDATE"), validate(schemas.realisasiPoSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { items } = req.body || {};
@@ -764,7 +764,7 @@ router.put("/po/:id/realisasi", requireAuth, requireRole("MITRA"), validate(sche
 });
 
 // GET /api/mitra/po/list - List all TransaksiPembelian (POs) for a period
-router.get("/po/list", requireAuth, requireRole("MITRA", "AKUNTAN", "ASLAP"), async (req, res) => {
+router.get("/po/list", requireAuth, requirePermission("mitra-po", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     if (!periodeId) {
@@ -803,7 +803,7 @@ router.get("/po/list", requireAuth, requireRole("MITRA", "AKUNTAN", "ASLAP"), as
 });
 
 // GET /api/mitra/po/:id/pdf - Download PDF Nota Pesanan PO
-router.get("/po/:id/pdf", requireAuth, requireRole("MITRA", "AKUNTAN", "ASLAP"), validate(schemas.idParamSchema, "params"), async (req, res) => {
+router.get("/po/:id/pdf", requireAuth, requirePermission("mitra-po", "READ"), validate(schemas.idParamSchema, "params"), async (req, res) => {
   let browser;
   try {
     const { id } = req.params;
@@ -985,7 +985,7 @@ router.getRealisasiPoData = getRealisasiPoData;
 // ==========================================
 
 // GET /api/mitra/laporan/realisasi-po - JSON Laporan Realisasi PO vs Pesanan
-router.get("/laporan/realisasi-po", requireAuth, requireRole("MITRA", "AKUNTAN", "KEPALA_SPPG"), validate(schemas.realisasiPoQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/realisasi-po", requireAuth, requirePermission("mitra-po", "READ"), validate(schemas.realisasiPoQuerySchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const { periode, poList, grandTotal } = await getRealisasiPoData(periodeId);
@@ -1004,7 +1004,7 @@ router.get("/laporan/realisasi-po", requireAuth, requireRole("MITRA", "AKUNTAN",
 });
 
 // GET /api/mitra/laporan/realisasi-po/pdf - PDF Laporan Realisasi PO vs Pesanan
-router.get("/laporan/realisasi-po/pdf", requireAuth, requireRole("MITRA", "AKUNTAN", "KEPALA_SPPG"), validate(schemas.realisasiPoQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/realisasi-po/pdf", requireAuth, requirePermission("mitra-po", "READ"), validate(schemas.realisasiPoQuerySchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId } = req.query;

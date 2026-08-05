@@ -1,6 +1,6 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
 const { logger } = require('../lib/logger');
 
 const router = express.Router();
@@ -9,7 +9,7 @@ const AKSI_VALID = ['CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'KOREKSI'
 
 // GET /api/audit-log — daftar AuditLog (filter + pagination, pola endpoint lain)
 // Filter: tanggalMulai, tanggalSelesai, userId, aksi, resource (entityType), page, limit
-router.get('/', requireAuth, requireRole('AKUNTAN', 'MITRA', 'ADMIN'), async (req, res) => {
+router.get('/', requireAuth, requirePermission('audit-log', 'READ'), async (req, res) => {
   try {
     const { tanggalMulai, tanggalSelesai, userId, aksi, resource, page, limit } = req.query;
 
