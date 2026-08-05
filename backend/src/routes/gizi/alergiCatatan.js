@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { getPenerimaBlok } = require("./_helpers");
@@ -9,7 +9,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/gizi/alergi-catatan - List AlergiCatatan by block
-router.get("/alergi-catatan", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/alergi-catatan", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { blokId } = req.query;
     if (!blokId) return res.status(400).json({ error: "blokId query parameter wajib dikirimkan" });
@@ -25,7 +25,7 @@ router.get("/alergi-catatan", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KE
 });
 
 // GET /api/gizi/alergi-catatan/:id - Detail AlergiCatatan
-router.get("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/alergi-catatan/:id", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.alergiCatatan.findUnique({ where: { id } });
@@ -38,7 +38,7 @@ router.get("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP",
 });
 
 // POST /api/gizi/alergi-catatan - Create AlergiCatatan
-router.post("/alergi-catatan", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.alergiSchema), async (req, res) => {
+router.post("/alergi-catatan", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.alergiSchema), async (req, res) => {
   try {
     const { blokId, jenisAlergi, jumlahSiswa, bahanPengganti } = req.body;
 
@@ -91,7 +91,7 @@ router.post("/alergi-catatan", requireAuth, requireRole("AHLI_GIZI"), validate(s
 });
 
 // PUT /api/gizi/alergi-catatan/:id - Update AlergiCatatan
-router.put("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.alergiUpdateSchema), async (req, res) => {
+router.put("/alergi-catatan/:id", requireAuth, requirePermission("gizi-menu", "UPDATE"), validate(schemas.alergiUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { jenisAlergi, jumlahSiswa, bahanPengganti } = req.body;
@@ -157,7 +157,7 @@ router.put("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI"), validat
 });
 
 // DELETE /api/gizi/alergi-catatan/:id - Delete AlergiCatatan
-router.delete("/alergi-catatan/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/alergi-catatan/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const exists = await prisma.alergiCatatan.findUnique({ where: { id } });

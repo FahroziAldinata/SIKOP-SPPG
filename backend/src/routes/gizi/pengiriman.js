@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { logger } = require("../../lib/logger");
@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/gizi/pengiriman - List PengirimanHarian
-router.get("/pengiriman", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/pengiriman", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { menuHarianId } = req.query;
     const list = await prisma.pengirimanHarian.findMany({
@@ -26,7 +26,7 @@ router.get("/pengiriman", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA
 });
 
 // GET /api/gizi/pengiriman/:id - Detail PengirimanHarian
-router.get("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/pengiriman/:id", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.pengirimanHarian.findUnique({
@@ -45,7 +45,7 @@ router.get("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KE
 });
 
 // POST /api/gizi/pengiriman - Create PengirimanHarian
-router.post("/pengiriman", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.pengirimanSchema), async (req, res) => {
+router.post("/pengiriman", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.pengirimanSchema), async (req, res) => {
   try {
     const { menuHarianId, kategoriIds, kendaraanId, catatan } = req.body;
 
@@ -103,7 +103,7 @@ router.post("/pengiriman", requireAuth, requireRole("AHLI_GIZI"), validate(schem
 });
 
 // PUT /api/gizi/pengiriman/:id - Update PengirimanHarian
-router.put("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.pengirimanUpdateSchema), async (req, res) => {
+router.put("/pengiriman/:id", requireAuth, requirePermission("gizi-menu", "UPDATE"), validate(schemas.pengirimanUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { menuHarianId, kategoriIds, kendaraanId, catatan } = req.body;
@@ -177,7 +177,7 @@ router.put("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI"), validate(sc
 });
 
 // DELETE /api/gizi/pengiriman/:id - Delete PengirimanHarian
-router.delete("/pengiriman/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/pengiriman/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const exists = await prisma.pengirimanHarian.findUnique({ where: { id } });

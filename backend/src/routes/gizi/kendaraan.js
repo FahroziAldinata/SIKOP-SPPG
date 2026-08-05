@@ -1,12 +1,12 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requireRole, requirePermission } = require("../../middleware/auth");
 const { logger } = require("../../lib/logger");
 
 const router = express.Router();
 
 // GET /api/gizi/kendaraan - List Kendaraan
-router.get("/kendaraan", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/kendaraan", requireAuth, requirePermission("gizi-master", "READ"), async (req, res) => {
   try {
     const list = await prisma.kendaraan.findMany();
     res.json(list);
@@ -17,7 +17,7 @@ router.get("/kendaraan", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_
 });
 
 // GET /api/gizi/kendaraan/:id - Detail Kendaraan
-router.get("/kendaraan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/kendaraan/:id", requireAuth, requirePermission("gizi-master", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.kendaraan.findUnique({ where: { id } });

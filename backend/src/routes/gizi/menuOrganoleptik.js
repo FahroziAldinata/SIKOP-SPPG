@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { logger } = require("../../lib/logger");
@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/gizi/menu-organoleptik/:id - Detail MenuOrganoleptik
-router.get("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/menu-organoleptik/:id", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.menuOrganoleptik.findUnique({ where: { id } });
@@ -21,7 +21,7 @@ router.get("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI", "ASLA
 });
 
 // POST /api/gizi/menu-organoleptik - Create MenuOrganoleptik
-router.post("/menu-organoleptik", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.organoleptikSchema), async (req, res) => {
+router.post("/menu-organoleptik", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.organoleptikSchema), async (req, res) => {
   try {
     const { blokId, rasa, aroma, tekstur, suhuSaji, catatan, ujiPadaTanggal, jumlahOmpreng } = req.body;
 
@@ -63,7 +63,7 @@ router.post("/menu-organoleptik", requireAuth, requireRole("AHLI_GIZI"), validat
 });
 
 // PUT /api/gizi/menu-organoleptik/:id - Update MenuOrganoleptik
-router.put("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.organoleptikUpdateSchema), async (req, res) => {
+router.put("/menu-organoleptik/:id", requireAuth, requirePermission("gizi-menu", "UPDATE"), validate(schemas.organoleptikUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { rasa, aroma, tekstur, suhuSaji, catatan, ujiPadaTanggal, jumlahOmpreng } = req.body;
@@ -117,7 +117,7 @@ router.put("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI"), vali
 });
 
 // DELETE /api/gizi/menu-organoleptik/:id - Delete MenuOrganoleptik
-router.delete("/menu-organoleptik/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/menu-organoleptik/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const exists = await prisma.menuOrganoleptik.findUnique({ where: { id } });

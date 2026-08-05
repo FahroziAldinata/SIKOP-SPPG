@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { logger } = require("../../lib/logger");
@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // POST /api/gizi/menu-harian-blok - Add block to existing MenuHarian
-router.post("/menu-harian-blok", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuHarianBlokSchema), async (req, res) => {
+router.post("/menu-harian-blok", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.menuHarianBlokSchema), async (req, res) => {
   try {
     const { menuHarianId, kelompokUmurMenuId } = req.body;
 
@@ -93,7 +93,7 @@ router.post("/menu-harian-blok", requireAuth, requireRole("AHLI_GIZI"), validate
 });
 
 // DELETE /api/gizi/menu-harian-blok/:id - Delete block
-router.delete("/menu-harian-blok/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/menu-harian-blok/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

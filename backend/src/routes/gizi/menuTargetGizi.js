@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { logger } = require("../../lib/logger");
@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/gizi/menu-target-gizi/:id - Detail MenuTargetGizi
-router.get("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/menu-target-gizi/:id", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.menuTargetGizi.findUnique({ where: { id } });
@@ -21,7 +21,7 @@ router.get("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP
 });
 
 // POST /api/gizi/menu-target-gizi - Create MenuTargetGizi
-router.post("/menu-target-gizi", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.targetGiziSchema), async (req, res) => {
+router.post("/menu-target-gizi", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.targetGiziSchema), async (req, res) => {
   try {
     const { blokId, targetEnergi, targetProtein, targetLemak, targetKarbohidrat, targetSerat } = req.body;
 
@@ -63,7 +63,7 @@ router.post("/menu-target-gizi", requireAuth, requireRole("AHLI_GIZI"), validate
 });
 
 // PUT /api/gizi/menu-target-gizi/:id - Update MenuTargetGizi
-router.put("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.targetGiziUpdateSchema), async (req, res) => {
+router.put("/menu-target-gizi/:id", requireAuth, requirePermission("gizi-menu", "UPDATE"), validate(schemas.targetGiziUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { targetEnergi, targetProtein, targetLemak, targetKarbohidrat, targetSerat } = req.body;
@@ -108,7 +108,7 @@ router.put("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI"), valid
 });
 
 // DELETE /api/gizi/menu-target-gizi/:id - Delete MenuTargetGizi
-router.delete("/menu-target-gizi/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/menu-target-gizi/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const exists = await prisma.menuTargetGizi.findUnique({ where: { id } });

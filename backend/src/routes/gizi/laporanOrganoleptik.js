@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -133,7 +133,7 @@ async function getOrganoleptikData(tanggalMulai, tanggalSelesai, blokKode, tangg
 }
 
 // GET /api/gizi/laporan/organoleptik - Laporan Uji Organoleptik & Keamanan Pangan JSON
-router.get("/laporan/organoleptik", requireAuth, requireRole("AHLI_GIZI", "KEPALA_SPPG"), validate(schemas.laporanOrganoleptikQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/organoleptik", requireAuth, requirePermission("gizi-laporan", "READ"), validate(schemas.laporanOrganoleptikQuerySchema, "query"), async (req, res) => {
   try {
     const { tanggalMulai, tanggalSelesai, blokKode } = req.query;
     const rawTanggal = req.query.tanggal;
@@ -154,7 +154,7 @@ router.get("/laporan/organoleptik", requireAuth, requireRole("AHLI_GIZI", "KEPAL
 });
 
 // GET /api/gizi/laporan/organoleptik/pdf - Download PDF Laporan Uji Organoleptik & Keamanan Pangan
-router.get("/laporan/organoleptik/pdf", requireAuth, requireRole("AHLI_GIZI", "KEPALA_SPPG"), validate(schemas.laporanOrganoleptikQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/organoleptik/pdf", requireAuth, requirePermission("gizi-laporan", "EXPORT"), validate(schemas.laporanOrganoleptikQuerySchema, "query"), async (req, res) => {
   let browser;
   try {
     const { tanggalMulai, tanggalSelesai, blokKode } = req.query;

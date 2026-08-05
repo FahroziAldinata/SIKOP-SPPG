@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -157,7 +157,7 @@ async function getPemenuhanGiziData(tanggalMulai, tanggalSelesai, blokKode, tang
 }
 
 // GET /api/gizi/laporan/pemenuhan-gizi - Laporan Pemenuhan Gizi Harian
-router.get("/laporan/pemenuhan-gizi", requireAuth, requireRole("AHLI_GIZI", "KEPALA_SPPG"), validate(schemas.laporanPemenuhanGiziQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/pemenuhan-gizi", requireAuth, requirePermission("gizi-laporan", "READ"), validate(schemas.laporanPemenuhanGiziQuerySchema, "query"), async (req, res) => {
   try {
     const { tanggalMulai, tanggalSelesai, blokKode } = req.query;
     const rawTanggal = req.query.tanggal;
@@ -178,7 +178,7 @@ router.get("/laporan/pemenuhan-gizi", requireAuth, requireRole("AHLI_GIZI", "KEP
 });
 
 // GET /api/gizi/laporan/pemenuhan-gizi/pdf - Download PDF Laporan Pemenuhan Gizi
-router.get("/laporan/pemenuhan-gizi/pdf", requireAuth, requireRole("AHLI_GIZI", "KEPALA_SPPG"), validate(schemas.laporanPemenuhanGiziQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/pemenuhan-gizi/pdf", requireAuth, requirePermission("gizi-laporan", "EXPORT"), validate(schemas.laporanPemenuhanGiziQuerySchema, "query"), async (req, res) => {
   let browser;
   try {
     const { tanggalMulai, tanggalSelesai, blokKode } = req.query;

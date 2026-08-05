@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { logger } = require("../../lib/logger");
@@ -163,7 +163,7 @@ const getApprovedMasterMenuReferences = async ({ periodeId, jalur, hari, blokId 
 };
 
 // GET /api/gizi/master-menu - List referensi historis dari MenuHarian DISETUJUI
-router.get("/master-menu", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/master-menu", requireAuth, requirePermission("gizi-master", "READ"), async (req, res) => {
   try {
     const { periodeId, jalur, hari } = req.query;
     const list = await getApprovedMasterMenuReferences({ periodeId, jalur, hari });
@@ -178,7 +178,7 @@ router.get("/master-menu", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPAL
 });
 
 // GET /api/gizi/master-menu/by-hari - Return 1 row master buat hari+jalur+mingguKe itu
-router.get("/master-menu/by-hari", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/master-menu/by-hari", requireAuth, requirePermission("gizi-master", "READ"), async (req, res) => {
   try {
     const { periodeId, jalur, hari, mingguKe } = req.query;
     if (!periodeId) return res.status(400).json({ error: "periodeId wajib diisi" });
@@ -217,7 +217,7 @@ router.get("/master-menu/by-hari", requireAuth, requireRole("AHLI_GIZI", "ASLAP"
 });
 
 // GET /api/gizi/master-menu-list - List all MasterMenuMingguan per period
-router.get("/master-menu-list", requireAuth, requireRole("AHLI_GIZI", "AKUNTAN", "KEPALA_SPPG", "ASLAP"), async (req, res) => {
+router.get("/master-menu-list", requireAuth, requirePermission("gizi-master", "READ"), async (req, res) => {
   const { periodeId } = req.query;
   if (!periodeId) return res.status(400).json({ error: "periodeId wajib diisi" });
   try {
@@ -232,7 +232,7 @@ router.get("/master-menu-list", requireAuth, requireRole("AHLI_GIZI", "AKUNTAN",
 });
 
 // GET /api/gizi/master-menu/:id - Detail referensi historis per blok MenuHarian
-router.get("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/master-menu/:id", requireAuth, requirePermission("gizi-master", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const rows = await getApprovedMasterMenuReferences({ blokId: id });
@@ -246,7 +246,7 @@ router.get("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "K
 });
 
 // POST /api/gizi/master-menu - Create MasterMenuMingguan
-router.post("/master-menu", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuSchema), async (req, res) => {
+router.post("/master-menu", requireAuth, requirePermission("gizi-master", "CREATE"), validate(schemas.menuSchema), async (req, res) => {
   try {
     const {
       periodeId,
@@ -309,7 +309,7 @@ router.post("/master-menu", requireAuth, requireRole("AHLI_GIZI"), validate(sche
 });
 
 // PUT /api/gizi/master-menu/:id - Update MasterMenuMingguan
-router.put("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.masterMenuUpdateSchema), async (req, res) => {
+router.put("/master-menu/:id", requireAuth, requirePermission("gizi-master", "UPDATE"), validate(schemas.masterMenuUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -353,7 +353,7 @@ router.put("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI"), validate(s
 });
 
 // DELETE /api/gizi/master-menu/:id - Delete MasterMenuMingguan
-router.delete("/master-menu/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/master-menu/:id", requireAuth, requirePermission("gizi-master", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const existing = await prisma.masterMenuMingguan.findUnique({ where: { id } });

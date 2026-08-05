@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { HARI_MAP } = require("../../lib/accountingHelper");
@@ -9,7 +9,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/gizi/menu-harian - List MenuHarian per period
-router.get("/menu-harian", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/menu-harian", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     if (!periodeId) {
@@ -90,7 +90,7 @@ router.get("/menu-harian", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPAL
 });
 
 // GET /api/gizi/menu-harian/:id - Get single MenuHarian with blocks
-router.get("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/menu-harian/:id", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.menuHarian.findUnique({
@@ -166,7 +166,7 @@ router.get("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "K
 });
 
 // POST /api/gizi/menu-harian - Create MenuHarian and optional blocks
-router.post("/menu-harian", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuHarianSchema), async (req, res) => {
+router.post("/menu-harian", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.menuHarianSchema), async (req, res) => {
   try {
     const { periodeId, tanggal, blok } = req.body;
     const targetTanggal = new Date(tanggal);
@@ -272,7 +272,7 @@ router.post("/menu-harian", requireAuth, requireRole("AHLI_GIZI"), validate(sche
 });
 
 // PUT /api/gizi/menu-harian/:id - Update MenuHarian (e.g. tanggal atau status)
-router.put("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuHarianUpdateSchema), async (req, res) => {
+router.put("/menu-harian/:id", requireAuth, requirePermission("gizi-menu", "UPDATE"), validate(schemas.menuHarianUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { tanggal, status } = req.body;
@@ -404,7 +404,7 @@ router.put("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI"), validate(s
 });
 
 // DELETE /api/gizi/menu-harian/:id - Delete MenuHarian (and cascade blocks)
-router.delete("/menu-harian/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/menu-harian/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

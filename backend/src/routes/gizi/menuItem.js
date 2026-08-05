@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { logger } = require("../../lib/logger");
@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/gizi/menu-item/:id - Detail MenuItem
-router.get("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/menu-item/:id", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.menuItem.findUnique({
@@ -34,7 +34,7 @@ router.get("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEP
 });
 
 // POST /api/gizi/menu-item - Create MenuItem
-router.post("/menu-item", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuItemSchema), async (req, res) => {
+router.post("/menu-item", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.menuItemSchema), async (req, res) => {
   try {
     const { blokId, namaMenu, komponen } = req.body;
 
@@ -70,7 +70,7 @@ router.post("/menu-item", requireAuth, requireRole("AHLI_GIZI"), validate(schema
 });
 
 // PUT /api/gizi/menu-item/:id - Update MenuItem
-router.put("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuItemUpdateSchema), async (req, res) => {
+router.put("/menu-item/:id", requireAuth, requirePermission("gizi-menu", "UPDATE"), validate(schemas.menuItemUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { namaMenu, komponen } = req.body;
@@ -106,7 +106,7 @@ router.put("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI"), validate(sch
 });
 
 // DELETE /api/gizi/menu-item/:id - Delete MenuItem
-router.delete("/menu-item/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/menu-item/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { getHargaBahan } = require("./_helpers");
@@ -9,7 +9,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/gizi/menu-item-bahan/:id - Detail MenuItemBahan
-router.get("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP", "KEPALA_SPPG", "AKUNTAN"), async (req, res) => {
+router.get("/menu-item-bahan/:id", requireAuth, requirePermission("gizi-menu", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.menuItemBahan.findUnique({
@@ -31,7 +31,7 @@ router.get("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI", "ASLAP"
 });
 
 // POST /api/gizi/menu-item-bahan - Create MenuItemBahan
-router.post("/menu-item-bahan", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuItemBahanSchema), async (req, res) => {
+router.post("/menu-item-bahan", requireAuth, requirePermission("gizi-menu", "CREATE"), validate(schemas.menuItemBahanSchema), async (req, res) => {
   try {
     const {
       menuItemId,
@@ -129,7 +129,7 @@ router.post("/menu-item-bahan", requireAuth, requireRole("AHLI_GIZI"), validate(
 });
 
 // PUT /api/gizi/menu-item-bahan/:id - Update MenuItemBahan
-router.put("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI"), validate(schemas.menuItemBahanUpdateSchema), async (req, res) => {
+router.put("/menu-item-bahan/:id", requireAuth, requirePermission("gizi-menu", "UPDATE"), validate(schemas.menuItemBahanUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -245,7 +245,7 @@ router.put("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI"), valida
 });
 
 // DELETE /api/gizi/menu-item-bahan/:id - Delete MenuItemBahan
-router.delete("/menu-item-bahan/:id", requireAuth, requireRole("AHLI_GIZI"), async (req, res) => {
+router.delete("/menu-item-bahan/:id", requireAuth, requirePermission("gizi-menu", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

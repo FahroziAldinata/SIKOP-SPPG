@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -135,7 +135,7 @@ async function getRekapMenuData(tanggalMulai, tanggalSelesai, blokKode, tanggalL
 }
 
 // GET /api/gizi/laporan/rekap-menu - Laporan Rekap Menu
-router.get("/laporan/rekap-menu", requireAuth, requireRole("AHLI_GIZI", "KEPALA_SPPG"), validate(schemas.laporanRekapMenuQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/rekap-menu", requireAuth, requirePermission("gizi-laporan", "READ"), validate(schemas.laporanRekapMenuQuerySchema, "query"), async (req, res) => {
   try {
     const { tanggalMulai, tanggalSelesai, blokKode } = req.query;
     const rawTanggal = req.query.tanggal;
@@ -156,7 +156,7 @@ router.get("/laporan/rekap-menu", requireAuth, requireRole("AHLI_GIZI", "KEPALA_
 });
 
 // GET /api/gizi/laporan/rekap-menu/pdf - Download PDF Laporan Rekap Menu
-router.get("/laporan/rekap-menu/pdf", requireAuth, requireRole("AHLI_GIZI", "KEPALA_SPPG"), validate(schemas.laporanRekapMenuQuerySchema, "query"), async (req, res) => {
+router.get("/laporan/rekap-menu/pdf", requireAuth, requirePermission("gizi-laporan", "EXPORT"), validate(schemas.laporanRekapMenuQuerySchema, "query"), async (req, res) => {
   let browser;
   try {
     const { tanggalMulai, tanggalSelesai, blokKode } = req.query;
