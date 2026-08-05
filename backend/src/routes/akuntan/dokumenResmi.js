@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { logAudit } = require("../../lib/auditHelper");
 const schemas = require("../../validators/akuntan");
@@ -15,7 +15,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/akuntan/dokumen-resmi/generate - Generate preview data for a document
-router.get("/generate", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/generate", requireAuth, requirePermission("laporan-resmi", "READ"), async (req, res) => {
   try {
     const { periodeId, jenisDokumen, nomorDokumen } = req.query;
 
@@ -51,7 +51,7 @@ router.get("/generate", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), asyn
 });
 
 // GET /api/akuntan/dokumen-resmi - List published DokumenResmi
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await prisma.dokumenResmi.findMany({
@@ -73,7 +73,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
 });
 
 // POST /api/akuntan/dokumen-resmi - Publish a DokumenResmi
-router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.dokumenResmiSchema), async (req, res) => {
+router.post("/", requireAuth, requirePermission("laporan-resmi", "CREATE"), validate(schemas.dokumenResmiSchema), async (req, res) => {
   try {
     const { periodeId, jenisDokumen, nomorDokumen } = req.body;
 
@@ -138,7 +138,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.dokumenRe
 });
 
 // DELETE /api/akuntan/dokumen-resmi/:id - Delete (unpublish) a DokumenResmi
-router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.delete("/:id", requireAuth, requirePermission("laporan-resmi", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.$transaction(async (tx) => {

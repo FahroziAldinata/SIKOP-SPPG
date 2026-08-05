@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
 const { validate } = require("../../middleware/validate");
 const { logAudit } = require("../../lib/auditHelper");
@@ -17,7 +17,7 @@ const validasiStokRouter = express.Router();
 // ==========================================
 
 // POST /api/akuntan/saldo-awal-barang - Create SaldoAwalBarang
-router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.saldoAwalBarangSchema), async (req, res) => {
+router.post("/", requireAuth, requirePermission("akuntan-stok", "CREATE"), validate(schemas.saldoAwalBarangSchema), async (req, res) => {
   try {
     const { periodeId, bahanPokokId, saldoAwalQty, hargaBeliAwal } = req.body;
 
@@ -72,7 +72,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.saldoAwal
 });
 
 // GET /api/akuntan/saldo-awal-barang - List SaldoAwalBarang for a period
-router.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("akuntan-stok", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     if (!periodeId) {
@@ -90,7 +90,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // PUT /api/akuntan/saldo-awal-barang/:id - Update SaldoAwalBarang
-router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.put("/:id", requireAuth, requirePermission("akuntan-stok", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const { saldoAwalQty, hargaBeliAwal } = req.body || {};
@@ -156,7 +156,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // DELETE /api/akuntan/saldo-awal-barang/:id - Delete SaldoAwalBarang
-router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.delete("/:id", requireAuth, requirePermission("akuntan-stok", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.$transaction(async (tx) => {
@@ -188,7 +188,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // POST /api/akuntan/saldo-awal-barang/bulk - Bulk upsert SaldoAwalBarang
-router.post("/bulk", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/bulk", requireAuth, requirePermission("akuntan-stok", "CREATE"), async (req, res) => {
   try {
     const { periodeId, items } = req.body || {};
 
@@ -303,7 +303,7 @@ router.post("/bulk", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
 
 // POST /api/akuntan/mutasi-stok - Create MutasiStok
-mutasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.mutasiStokSchema), async (req, res) => {
+mutasiStokRouter.post("/", requireAuth, requirePermission("akuntan-stok", "CREATE"), validate(schemas.mutasiStokSchema), async (req, res) => {
   try {
     const {
       bahanPokokId,
@@ -421,7 +421,7 @@ mutasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas
 });
 
 // GET /api/akuntan/mutasi-stok - List MutasiStok
-mutasiStokRouter.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+mutasiStokRouter.get("/", requireAuth, requirePermission("akuntan-stok", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     
@@ -458,7 +458,7 @@ mutasiStokRouter.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res) 
 // ==========================================
 
 // POST /api/akuntan/validasi-stok - Simpan validasi fisik baru
-validasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+validasiStokRouter.post("/", requireAuth, requirePermission("akuntan-stok", "CREATE"), async (req, res) => {
   try {
     const { bahanPokokId, tanggal, qtyDibeli, qtyTerpakai, catatan } = req.body || {};
 
@@ -534,7 +534,7 @@ validasiStokRouter.post("/", requireAuth, requireRole("AKUNTAN"), async (req, re
 });
 
 // GET /api/akuntan/validasi-stok - Riwayat validasi stok
-validasiStokRouter.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+validasiStokRouter.get("/", requireAuth, requirePermission("akuntan-stok", "READ"), async (req, res) => {
   try {
     const { bahanPokokId, tanggal, limit, offset } = req.query;
 
@@ -597,7 +597,7 @@ validasiStokRouter.get("/", requireAuth, requireRole("AKUNTAN"), async (req, res
 });
 
 // GET /api/akuntan/validasi-stok/preview - Preview akumulasi MutasiStok s.d. tanggal terpilih
-validasiStokRouter.get("/preview", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+validasiStokRouter.get("/preview", requireAuth, requirePermission("akuntan-stok", "READ"), async (req, res) => {
   try {
     const { bahanPokokId, tanggal } = req.query;
 

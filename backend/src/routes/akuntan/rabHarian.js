@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const {
   normalizeDateUTC,
   HARI_MAP,
@@ -26,7 +26,7 @@ const anggaranHarianRouter = express.Router();
 // ==========================================
 
 // GET /api/akuntan/rab-harian/preview?periodeId=X&tanggal=YYYY-MM-DD
-router.get("/preview", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/preview", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   try {
     const { periodeId, tanggal } = req.query;
     if (!periodeId) return res.status(400).json({ error: "periodeId wajib diisi" });
@@ -168,7 +168,7 @@ router.get("/preview", requireAuth, requireRole("AKUNTAN"), async (req, res) => 
 
 
 // POST /api/akuntan/rab-harian - Create RabHarian with optional TransaksiPembelian nested
-router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabSchema), async (req, res) => {
+router.post("/", requireAuth, requirePermission("akuntan-rab", "CREATE"), validate(schemas.rabSchema), async (req, res) => {
   try {
     const { periodeId, tanggal, items } = req.body;
 
@@ -338,7 +338,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabSchema
 });
 
 // GET /api/akuntan/rab-harian - List RabHarian
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await prisma.rabHarian.findMany({
@@ -376,7 +376,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
 });
 
 // GET /api/akuntan/rab-harian/:id - Detail RabHarian
-router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/:id", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.rabHarian.findUnique({
@@ -424,7 +424,7 @@ router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
 });
 
 // PUT /api/akuntan/rab-harian/:id - Update RabHarian (tanggal & status)
-router.put("/:id", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabHarianUpdateSchema), async (req, res) => {
+router.put("/:id", requireAuth, requirePermission("akuntan-rab", "UPDATE"), validate(schemas.rabHarianUpdateSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { tanggal, status } = req.body;
@@ -553,7 +553,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabHari
 });
 
 // PUT /api/akuntan/rab-harian/:id/items - Update harga items (override sebelum verifikasi)
-router.put("/:id/items", requireAuth, requireRole("AKUNTAN"), validate(schemas.rabHarianItemsSchema), async (req, res) => {
+router.put("/:id/items", requireAuth, requirePermission("akuntan-rab", "UPDATE"), validate(schemas.rabHarianItemsSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { items } = req.body;
@@ -639,7 +639,7 @@ router.put("/:id/items", requireAuth, requireRole("AKUNTAN"), validate(schemas.r
 });
 
 // PUT /api/akuntan/rab-harian/:id/verify - Verifikasi harga (finalisasi review)
-router.put("/:id/verify", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.put("/:id/verify", requireAuth, requirePermission("akuntan-rab", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -742,7 +742,7 @@ router.put("/:id/verify", requireAuth, requireRole("AKUNTAN"), async (req, res) 
 });
 
 // DELETE /api/akuntan/rab-harian/:id - Delete RabHarian with manual cascade deletion of related child records
-router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.delete("/:id", requireAuth, requirePermission("akuntan-rab", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -829,7 +829,7 @@ router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 // ==========================================
 
 // POST /api/akuntan/anggaran-harian - Create AnggaranHarian with optional nested AnggaranBahanMakananDetail
-anggaranHarianRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.anggaranHarianSchema), async (req, res) => {
+anggaranHarianRouter.post("/", requireAuth, requirePermission("akuntan-rab", "CREATE"), validate(schemas.anggaranHarianSchema), async (req, res) => {
   try {
     const { periodeId, tanggal, kategoriDana, totalAnggaran, keterangan } = req.body;
 
@@ -964,7 +964,7 @@ anggaranHarianRouter.post("/", requireAuth, requireRole("AKUNTAN"), validate(sch
 });
 
 // GET /api/akuntan/anggaran-harian - List AnggaranHarian
-anggaranHarianRouter.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+anggaranHarianRouter.get("/", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await prisma.anggaranHarian.findMany({
@@ -988,7 +988,7 @@ anggaranHarianRouter.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG")
 });
 
 // GET /api/akuntan/anggaran-harian/:id - Detail AnggaranHarian
-anggaranHarianRouter.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+anggaranHarianRouter.get("/:id", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.anggaranHarian.findUnique({
@@ -1014,7 +1014,7 @@ anggaranHarianRouter.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPP
 });
 
 // PUT /api/akuntan/anggaran-harian/:id - Update AnggaranHarian
-anggaranHarianRouter.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+anggaranHarianRouter.put("/:id", requireAuth, requirePermission("akuntan-rab", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const { tanggal, kategoriDana, totalAnggaran, keterangan } = req.body || {};
@@ -1210,7 +1210,7 @@ anggaranHarianRouter.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req
 });
 
 // DELETE /api/akuntan/anggaran-harian/:id - Delete AnggaranHarian
-anggaranHarianRouter.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+anggaranHarianRouter.delete("/:id", requireAuth, requirePermission("akuntan-rab", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

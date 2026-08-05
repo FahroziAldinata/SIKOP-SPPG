@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const {
   normalizeDateUTC,
   recalcAktualAnggaran
@@ -14,7 +14,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // POST /api/akuntan/jurnal-transaksi - Create JurnalTransaksi
-router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.jurnalSchema), async (req, res) => {
+router.post("/", requireAuth, requirePermission("akuntan-jurnal", "CREATE"), validate(schemas.jurnalSchema), async (req, res) => {
   try {
     const {
       periodeId,
@@ -174,7 +174,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), validate(schemas.jurnalSch
 });
 
 // GET /api/akuntan/jurnal-transaksi - List JurnalTransaksi with pagination
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("akuntan-jurnal", "READ"), async (req, res) => {
   try {
     const { periodeId, page, limit } = req.query;
 
@@ -221,7 +221,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
 });
 
 // GET /api/akuntan/jurnal-transaksi/prefill/:transaksiPembelianId - Akuntan prefill jurnal data dari PO
-router.get("/prefill/:transaksiPembelianId", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/prefill/:transaksiPembelianId", requireAuth, requirePermission("akuntan-jurnal", "READ"), async (req, res) => {
   try {
     const { transaksiPembelianId } = req.params;
     const po = await prisma.transaksiPembelian.findUnique({
@@ -279,7 +279,7 @@ router.get("/prefill/:transaksiPembelianId", requireAuth, requireRole("AKUNTAN")
 
 // GET /api/akuntan/jurnal-transaksi/bulk-preview?periodeId=X
 // List semua PO DIREALISASI yang BELUM di-jurnal — utk modal bulk generate (desain Rozi)
-router.get("/bulk-preview", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/bulk-preview", requireAuth, requirePermission("akuntan-jurnal", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     if (!periodeId) {
@@ -338,7 +338,7 @@ router.get("/bulk-preview", requireAuth, requireRole("AKUNTAN"), async (req, res
 
 // POST /api/akuntan/jurnal-transaksi/bulk-generate
 // Generate jurnal KELUAR sekaligus untuk banyak PO DIREALISASI (desain Rozi)
-router.post("/bulk-generate", requireAuth, requireRole("AKUNTAN"), validate(schemas.bulkGenerateSchema), async (req, res) => {
+router.post("/bulk-generate", requireAuth, requirePermission("akuntan-jurnal", "CREATE"), validate(schemas.bulkGenerateSchema), async (req, res) => {
   try {
     const { periodeId, rows } = req.body;
 
@@ -505,7 +505,7 @@ router.post("/bulk-generate", requireAuth, requireRole("AKUNTAN"), validate(sche
 });
 
 // GET /api/akuntan/jurnal-transaksi/:id - Detail JurnalTransaksi
-router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/:id", requireAuth, requirePermission("akuntan-jurnal", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const data = await prisma.jurnalTransaksi.findUnique({
@@ -528,7 +528,7 @@ router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
 });
 
 // PUT /api/akuntan/jurnal-transaksi/:id - Update JurnalTransaksi
-router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.put("/:id", requireAuth, requirePermission("akuntan-jurnal", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -701,7 +701,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // DELETE /api/akuntan/jurnal-transaksi/:id - Delete JurnalTransaksi
-router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.delete("/:id", requireAuth, requirePermission("akuntan-jurnal", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
 

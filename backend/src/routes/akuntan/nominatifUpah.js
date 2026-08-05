@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
 const { logger } = require("../../lib/logger");
 const { logAudit } = require("../../lib/auditHelper");
@@ -8,7 +8,7 @@ const { logAudit } = require("../../lib/auditHelper");
 const router = express.Router();
 
 // POST /api/akuntan/daftar-nominatif-upah - Create DaftarNominatifUpah with nested detailHarian
-router.post("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/", requireAuth, requirePermission("akuntan-upah", "CREATE"), async (req, res) => {
   try {
     const {
       periodeId,
@@ -156,7 +156,7 @@ router.post("/", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // GET /api/akuntan/daftar-nominatif-upah - List DaftarNominatifUpah
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("akuntan-upah", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await prisma.daftarNominatifUpah.findMany({
@@ -191,7 +191,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, 
 });
 
 // GET /api/akuntan/daftar-nominatif-upah/:id - Detail of DaftarNominatifUpah
-router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/:id", requireAuth, requirePermission("akuntan-upah", "READ"), async (req, res) => {
   try {
     const { id } = req.params;
     const item = await prisma.daftarNominatifUpah.findUnique({
@@ -225,7 +225,7 @@ router.get("/:id", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (re
 });
 
 // PUT /api/akuntan/daftar-nominatif-upah/:id - Update DaftarNominatifUpah and its nested detailHarian
-router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.put("/:id", requireAuth, requirePermission("akuntan-upah", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const {
@@ -380,7 +380,7 @@ router.put("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // DELETE /api/akuntan/daftar-nominatif-upah/:id - Delete DaftarNominatifUpah (Cascade)
-router.delete("/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.delete("/:id", requireAuth, requirePermission("akuntan-upah", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.$transaction(async (tx) => {

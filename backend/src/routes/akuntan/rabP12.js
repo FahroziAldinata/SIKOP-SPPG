@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { normalizeDateUTC } = require("../../lib/accountingHelper");
 const { renderRabP12Html } = require("../../templates/dokumen/rabP12");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -15,7 +15,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/akuntan/rab-p12/harian - Pagu & Porsi Harian Per Jenis Porsi
-router.get("/harian", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/harian", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   try {
     const { periodeId, tanggal } = req.query;
 
@@ -63,7 +63,7 @@ router.get("/harian", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // GET /api/akuntan/rab-p12/rekap?periodeId=X - Rekap pagu + kebutuhan bahan + pemakaian anggaran per hari
-router.get("/rekap", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/rekap", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   try {
     const { periodeId } = req.query;
 
@@ -148,7 +148,7 @@ router.get("/rekap", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 });
 
 // GET /api/akuntan/rab-p12/pdf?periodeId=X&tanggal=YYYY-MM-DD - PDF RAB P12
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("akuntan-rab", "READ"), async (req, res) => {
   let browser;
   try {
     const { periodeId, tanggal } = req.query;

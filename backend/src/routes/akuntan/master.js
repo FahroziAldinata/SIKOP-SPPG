@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const {
   normalizeDateUTC,
   HARI_MAP,
@@ -14,7 +14,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/akuntan/akun - List all active accounts
-router.get("/akun", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/akun", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
   try {
     const list = await prisma.akun.findMany({
       where: {
@@ -40,7 +40,7 @@ router.get("/akun", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
 
 
 // GET /api/akuntan/supplier - List all active suppliers
-router.get("/supplier", requireAuth, requireRole("AKUNTAN", "MITRA"), async (req, res) => {
+router.get("/supplier", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
   try {
     const list = await prisma.supplier.findMany({
       where: {
@@ -63,7 +63,7 @@ router.get("/supplier", requireAuth, requireRole("AKUNTAN", "MITRA"), async (req
 });
 
 // POST /api/akuntan/supplier - Akuntan membuat supplier baru
-router.post("/supplier", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/supplier", requireAuth, requirePermission("akuntan-master", "CREATE"), async (req, res) => {
   try {
     const { nama, kontak } = req.body || {};
     if (!nama) {
@@ -96,7 +96,7 @@ router.post("/supplier", requireAuth, requireRole("AKUNTAN"), async (req, res) =
 });
 
 // GET /api/akuntan/periode/latest-setup - Mendapatkan SetupLembaga periode terakhir untuk autofill
-router.get("/periode/latest-setup", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/periode/latest-setup", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
   try {
     const latest = await prisma.periode.findFirst({
       orderBy: { tanggalMulai: "desc" },
@@ -126,7 +126,7 @@ router.get("/periode/latest-setup", requireAuth, requireRole("AKUNTAN"), async (
 });
 
 // POST /api/akuntan/periode - Membuat periode baru beserta SetupLembaga
-router.post("/periode", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/periode", requireAuth, requirePermission("akuntan-master", "CREATE"), async (req, res) => {
   try {
     const {
       tanggalMulai,
@@ -231,7 +231,7 @@ router.post("/periode", requireAuth, requireRole("AKUNTAN"), async (req, res) =>
 });
 
 // POST /api/akuntan/periode/:id/tutup-periode - Otomatisasi carry-over saldo awal & tutup periode
-router.post("/periode/:id/tutup-periode", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/periode/:id/tutup-periode", requireAuth, requirePermission("akuntan-master", "APPROVE"), async (req, res) => {
   try {
     const { id } = req.params;
     const { periodeTargetId, overwrite } = req.body || {};
@@ -507,7 +507,7 @@ router.post("/periode/:id/tutup-periode", requireAuth, requireRole("AKUNTAN"), a
 });
 
 // PUT /api/akuntan/periode/:id - Update status / detail periode
-router.put("/periode/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.put("/periode/:id", requireAuth, requirePermission("akuntan-master", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const { status, anggaranAlokasi, totalDanaDiterima } = req.body;
@@ -568,7 +568,7 @@ router.put("/periode/:id", requireAuth, requireRole("AKUNTAN"), async (req, res)
 // ==========================================
 
 // GET /api/akuntan/jenis-pekerjaan - List JenisPekerjaan
-router.get("/jenis-pekerjaan", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
   try {
     const { all } = req.query;
     const where = {};
@@ -587,7 +587,7 @@ router.get("/jenis-pekerjaan", requireAuth, requireRole("AKUNTAN"), async (req, 
 });
 
 // POST /api/akuntan/jenis-pekerjaan - Create JenisPekerjaan
-router.post("/jenis-pekerjaan", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-master", "CREATE"), async (req, res) => {
   try {
     const { nama, tarifHarian, aktif } = req.body || {};
     if (!nama) {
@@ -638,7 +638,7 @@ router.post("/jenis-pekerjaan", requireAuth, requireRole("AKUNTAN"), async (req,
 });
 
 // PUT /api/akuntan/jenis-pekerjaan/:id - Update JenisPekerjaan
-router.put("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.put("/jenis-pekerjaan/:id", requireAuth, requirePermission("akuntan-master", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const { nama, tarifHarian, aktif } = req.body || {};
@@ -698,7 +698,7 @@ router.put("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async (r
 });
 
 // DELETE /api/akuntan/jenis-pekerjaan/:id - Delete JenisPekerjaan
-router.delete("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.delete("/jenis-pekerjaan/:id", requireAuth, requirePermission("akuntan-master", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const existing = await prisma.jenisPekerjaan.findUnique({
@@ -736,7 +736,7 @@ router.delete("/jenis-pekerjaan/:id", requireAuth, requireRole("AKUNTAN"), async
 // ==========================================
 
 // GET /api/akuntan/hari-libur - List HariLibur
-router.get("/hari-libur", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.get("/hari-libur", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
   try {
     const list = await prisma.hariLibur.findMany({
       orderBy: { tanggal: "asc" }
@@ -749,7 +749,7 @@ router.get("/hari-libur", requireAuth, requireRole("AKUNTAN"), async (req, res) 
 });
 
 // POST /api/akuntan/hari-libur - Create HariLibur
-router.post("/hari-libur", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/hari-libur", requireAuth, requirePermission("akuntan-master", "CREATE"), async (req, res) => {
   try {
     const { tanggal, keterangan } = req.body || {};
     if (!tanggal) {
@@ -797,7 +797,7 @@ router.post("/hari-libur", requireAuth, requireRole("AKUNTAN"), async (req, res)
 });
 
 // DELETE /api/akuntan/hari-libur/:id - Delete HariLibur
-router.delete("/hari-libur/:id", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.delete("/hari-libur/:id", requireAuth, requirePermission("akuntan-master", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const existing = await prisma.hariLibur.findUnique({
@@ -835,7 +835,7 @@ router.delete("/hari-libur/:id", requireAuth, requireRole("AKUNTAN"), async (req
 // ==========================================
 
 // POST /api/akuntan/po - Akuntan membuat PO baru
-router.post("/po", requireAuth, requireRole("AKUNTAN"), validate(schemas.poSchema), async (req, res) => {
+router.post("/po", requireAuth, requirePermission("akuntan-master", "CREATE"), validate(schemas.poSchema), async (req, res) => {
   try {
     const { periodeId, tanggal, supplierId, items, catatan } = req.body;
 
@@ -987,7 +987,7 @@ router.post("/po", requireAuth, requireRole("AKUNTAN"), validate(schemas.poSchem
 });
 
 // GET /api/akuntan/kebutuhan-hitungan - Get food requirements calculation for a specific date
-router.get("/kebutuhan-hitungan", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), async (req, res) => {
+router.get("/kebutuhan-hitungan", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
   try {
     const { periodeId, tanggal } = req.query;
     if (!periodeId || !tanggal) {
@@ -1110,7 +1110,7 @@ router.get("/kebutuhan-hitungan", requireAuth, requireRole("AKUNTAN", "KEPALA_SP
 });
 
 // POST /api/akuntan/bahan-pokok - Create new master food ingredient
-router.post("/bahan-pokok", requireAuth, requireRole("AKUNTAN"), async (req, res) => {
+router.post("/bahan-pokok", requireAuth, requirePermission("akuntan-master", "CREATE"), async (req, res) => {
   try {
     const { nama, satuan, tipePenyimpanan, konversiPerKg, satuanHitungan } = req.body;
 
