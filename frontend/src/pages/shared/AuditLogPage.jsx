@@ -100,8 +100,8 @@ export const AuditLogPage = () => {
     {
       key: 'createdAt',
       label: 'Waktu',
-      render: (row) => {
-        const d = new Date(row.createdAt);
+      render: (value, row) => {
+        const d = new Date(value);
         return (
           <div>
             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', whiteSpace: 'nowrap' }}>
@@ -117,11 +117,11 @@ export const AuditLogPage = () => {
     {
       key: 'user',
       label: 'User',
-      render: (row) => (
+      render: (value, row) => (
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{row.user?.nama || '—'}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{value?.nama || '—'}</div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            {row.user?.username} • {row.user?.role}
+            {value?.username} • {value?.role}
           </div>
         </div>
       ),
@@ -129,8 +129,8 @@ export const AuditLogPage = () => {
     {
       key: 'aksi',
       label: 'Aksi',
-      render: (row) => {
-        const s = AKSI_STYLE[row.aksi] || AKSI_STYLE.CREATE;
+      render: (value, row) => {
+        const s = AKSI_STYLE[value] || AKSI_STYLE.CREATE;
         return (
           <span
             style={{
@@ -143,7 +143,7 @@ export const AuditLogPage = () => {
               backgroundColor: s.bg,
             }}
           >
-            {row.aksi}
+            {value.aksi}
           </span>
         );
       },
@@ -153,8 +153,8 @@ export const AuditLogPage = () => {
     {
       key: 'dataBaru',
       label: 'Perubahan',
-      render: (row) => {
-        const txt = row.dataBaru ? ringkas(row.dataBaru) : row.dataLama ? ringkas(row.dataLama) : '—';
+      render: (value, row) => {
+        const txt = value ? ringkas(value) : row.dataLama ? ringkas(row.dataLama) : '—';
         return (
           <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{txt}</span>
         );
