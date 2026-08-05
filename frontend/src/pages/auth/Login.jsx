@@ -34,8 +34,8 @@ export const Login = () => {
 
       if (res.ok) {
         setLoginSuccessUser(data.user);
-        setTimeout(() => {
-          login(data.token, data.user);
+        setTimeout(async () => {
+          await login(data.token, data.user);
           navigate('/');
         }, 1200);
       } else {

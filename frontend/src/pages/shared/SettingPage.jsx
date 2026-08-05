@@ -269,7 +269,7 @@ export const SettingPage = () => {
                 setPassword('');
                 setConfirmPassword('');
                 // Update user details in context
-                login(token, resJson.user);
+                                await login(token, resJson.user);
             } else {
                 const d = await r.json().catch(() => ({ error: 'Gagal memperbarui profil.' }));
                 toast.error(d.error);

@@ -81,7 +81,7 @@ function App() {
             <Route
               path="aslap"
               element={
-                <ProtectedRoute allowedRoles={['ASLAP']}>
+                <ProtectedRoute requiredPerm="aslap-master:READ">
                   <AslapDashboard />
                 </ProtectedRoute>
               }
@@ -122,7 +122,7 @@ function App() {
             <Route
               path="mitra"
               element={
-                <ProtectedRoute allowedRoles={['MITRA']}>
+                <ProtectedRoute requiredPerm="mitra-master:READ">
                   <MitraDashboard />
                 </ProtectedRoute>
               }
@@ -191,7 +191,7 @@ function App() {
             <Route
               path="akuntan"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-master:READ">
                   <AkuntanDashboard />
                 </ProtectedRoute>
               }
