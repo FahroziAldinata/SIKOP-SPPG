@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanBpSchema, laporanRekapSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -12,7 +12,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/laporan/bp - Buku Pembantu per Akun
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanBpSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanBpSchema, "query"), async (req, res) => {
   try {
     const { periodeId, akunId } = req.query;
 
@@ -61,7 +61,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 // Daftarkan 4 data route + 4 PDF route secara dinamis
 for (const cfg of BP_CONFIGS) {
   // Data route: GET /api/laporan/bp/:path
-  router.get(`/${cfg.path}`, requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanRekapSchema, "query"), async (req, res) => {
+  router.get(`/${cfg.path}`, requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanRekapSchema, "query"), async (req, res) => {
     try {
       const { periodeId } = req.query;
 
@@ -76,7 +76,7 @@ for (const cfg of BP_CONFIGS) {
   });
 
   // PDF route: GET /api/laporan/bp/:path/pdf
-  router.get(`/${cfg.path}/pdf`, requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanRekapSchema, "query"), async (req, res) => {
+  router.get(`/${cfg.path}/pdf`, requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanRekapSchema, "query"), async (req, res) => {
     let browser;
     try {
       const { periodeId } = req.query;

@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanKebutuhanBelanjaSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -14,7 +14,7 @@ const router = express.Router();
 const bahanRouter = express.Router();
 
 // GET /api/laporan/kebutuhan-belanja-bahan - Kebutuhan Belanja Bahan
-bahanRouter.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanKebutuhanBelanjaSchema, "query"), async (req, res) => {
+bahanRouter.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanKebutuhanBelanjaSchema, "query"), async (req, res) => {
   try {
     const { periodeId, tanggalMulai, tanggalSelesai } = req.query;
 
@@ -104,7 +104,7 @@ bahanRouter.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validat
 });
 
 // GET /api/laporan/kebutuhan-belanja/pdf — PDF Kebutuhan Belanja
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanKebutuhanBelanjaSchema, "query"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanKebutuhanBelanjaSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId, tanggalMulai, tanggalSelesai } = req.query;

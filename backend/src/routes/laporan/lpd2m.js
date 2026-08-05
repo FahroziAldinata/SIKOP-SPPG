@@ -2,7 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanMultiPeriodeSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -14,7 +14,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/laporan/lpd2m - Laporan Perkembangan Dana Dua Mingguan
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
   try {
     const { periodeIds } = req.query;
     const data = await getLpd2mData(periodeIds);
@@ -29,7 +29,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 });
 
 // GET /api/laporan/lpd2m/pdf - LPD2M sebagai PDF
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeIds } = req.query;

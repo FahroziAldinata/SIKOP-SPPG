@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanAnggaranSchema } = require("../../validators/laporan");
 const { logger } = require("../../lib/logger");
@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/laporan/ringkasan-anggaran?periodeId=X
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanAnggaranSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanAnggaranSchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
 

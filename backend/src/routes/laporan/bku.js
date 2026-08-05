@@ -1,5 +1,5 @@
 const express = require("express");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanBkuSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -14,7 +14,7 @@ const router = express.Router();
 const catatanRouter = express.Router();
 
 // GET /api/laporan/bku - Buku Kas Umum
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanBkuSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanBkuSchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
 
@@ -34,7 +34,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 });
 
 // GET /api/laporan/bku/pdf - Render BKU sebagai PDF
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanBkuSchema, "query"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanBkuSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId } = req.query;
@@ -70,7 +70,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
 });
 
 // GET /api/laporan/bku/export-excel - Export BKU ke Excel (.xlsx)
-router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanBkuSchema, "query"), async (req, res) => {
+router.get("/export-excel", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanBkuSchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await getBkuData(periodeId);
@@ -89,7 +89,7 @@ router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), 
 });
 
 // GET /api/laporan/catatan/pdf - Render Catatan Pengeluaran Bulanan sebagai PDF
-catatanRouter.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanBkuSchema, "query"), async (req, res) => {
+catatanRouter.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanBkuSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId } = req.query;

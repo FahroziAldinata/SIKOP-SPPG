@@ -1,5 +1,5 @@
 const express = require("express");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanHarianSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -11,7 +11,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/laporan/harian - Laporan Harian (ringkasan satu hari)
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanHarianSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanHarianSchema, "query"), async (req, res) => {
   try {
     const { periodeId, tanggal } = req.query;
 
@@ -27,7 +27,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 });
 
 // GET /api/laporan/harian/pdf - PDF Laporan Harian
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanHarianSchema, "query"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanHarianSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId, tanggal } = req.query;

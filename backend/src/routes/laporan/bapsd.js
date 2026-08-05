@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanBapsdSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -11,7 +11,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/laporan/bapsd - Berita Acara Pengalihan Sisa Dana
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanBapsdSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanBapsdSchema, "query"), async (req, res) => {
   try {
     const { periodeId, nomorDokumen } = req.query;
 
@@ -60,7 +60,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 });
 
 // GET /api/laporan/bapsd/pdf - Render BAPSD sebagai PDF
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanBapsdSchema, "query"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanBapsdSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId, nomorDokumen } = req.query;

@@ -1,5 +1,5 @@
 const express = require("express");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanLbbpSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -11,7 +11,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/laporan/lbbp — JSON data
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanLbbpSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanLbbpSchema, "query"), async (req, res) => {
   try {
     const { periodeId } = req.query;
     const data = await getLbbpData(periodeId);
@@ -26,7 +26,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 });
 
 // GET /api/laporan/lbbp/pdf — render LBBP sebagai PDF
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanLbbpSchema, "query"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanLbbpSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeId } = req.query;

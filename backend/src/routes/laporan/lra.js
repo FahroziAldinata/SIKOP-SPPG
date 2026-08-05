@@ -1,6 +1,6 @@
 const express = require("express");
 const prisma = require("../../lib/prisma");
-const { requireAuth, requireRole } = require("../../middleware/auth");
+const { requireAuth, requirePermission } = require("../../middleware/auth");
 const { validate } = require("../../middleware/validate");
 const { laporanMultiPeriodeSchema } = require("../../validators/laporan");
 const { launchPuppeteer } = require("../../lib/launchPuppeteer");
@@ -13,7 +13,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/laporan/lra - Laporan Realisasi Anggaran (multi-periode komparatif)
-router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
+router.get("/", requireAuth, requirePermission("laporan-resmi", "READ"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
   try {
     const { periodeIds } = req.query;
     const data = await getLraData(periodeIds);
@@ -28,7 +28,7 @@ router.get("/", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(lap
 });
 
 // GET /api/laporan/lra/pdf - LRA sebagai PDF
-router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
+router.get("/pdf", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
   let browser;
   try {
     const { periodeIds } = req.query;
@@ -78,7 +78,7 @@ router.get("/pdf", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(
 });
 
 // GET /api/laporan/lra/export-excel - Export LRA ke Excel (.xlsx)
-router.get("/export-excel", requireAuth, requireRole("AKUNTAN", "KEPALA_SPPG"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
+router.get("/export-excel", requireAuth, requirePermission("laporan-resmi", "EXPORT"), validate(laporanMultiPeriodeSchema, "query"), async (req, res) => {
   try {
     const { periodeIds } = req.query;
     const lraData = await getLraData(periodeIds);
