@@ -292,6 +292,16 @@ enum JenjangSekolah {
   SMA_SMK
 }
 
+enum PermissionAksi {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  APPROVE
+  EXPORT
+}
+
+
 // -----------------------------------------------------------------------------
 // USER & AUTH
 // -----------------------------------------------------------------------------
@@ -1250,5 +1260,33 @@ model DokumenBuktiLpd2m {
   uploadedBy   User     @relation(fields: [uploadedById], references: [id])
   @@index([periodeId])
 }
+
+// -----------------------------------------------------------------------------
+// DYNAMIC RBAC (RESOURCE & ROLE PERMISSION)
+// -----------------------------------------------------------------------------
+
+model Resource {
+  id             String           @id @default(cuid())
+  kode           String           @unique
+  nama           String
+  modul          String
+  aktif          Boolean          @default(true)
+  RolePermission RolePermission[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model RolePermission {
+  id         String         @id @default(cuid())
+  role       Role
+  resourceId String
+  resource   Resource       @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  aksi       PermissionAksi
+  createdAt  DateTime       @default(now())
+
+  @@unique([role, resourceId, aksi])
+  @@index([role])
+}
+
 
 
