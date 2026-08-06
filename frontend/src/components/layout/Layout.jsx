@@ -32,7 +32,7 @@ import {
 
 
 export const Layout = () => {
-  const { user, logout, theme, toggleTheme } = useAuth();
+  const { user, logout, theme, toggleTheme, hasPerm } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const api = useApi();
@@ -480,7 +480,7 @@ export const Layout = () => {
         backgroundColor: 'var(--bg-elevated)'
       }}>
         {/* Static Header & Home Link for Akuntan (Outside Scroll Area) */}
-        {user?.role === 'AKUNTAN' && (
+        {hasPerm('akuntan-master:READ') && (
           <div style={{ marginBottom: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
             <div style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Menu Akuntan
@@ -495,100 +495,92 @@ export const Layout = () => {
           <ul style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
 
             {/* ASLAP Navigation */}
-            {user?.role === 'ASLAP' && (
-              <>
-                <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Menu Aslap
-                </li>
-                {renderLink('/aslap', 'Beranda / Dashboard', Home)}
-                {renderLink('/aslap/penerima-manfaat', 'Penerima Manfaat', Users)}
-                {renderLink('/aslap/sekolah', 'Sekolah', BookOpen)}
-                {renderLink('/aslap/po', 'Verifikasi PO', ClipboardCheck)}
-                {renderLink('/aslap/laporan', 'Laporan', FileText)}
-              </>
+            {hasPerm('aslap-master:READ') && (
+              <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Menu Aslap
+              </li>
             )}
+            {hasPerm('aslap-master:READ') && renderLink('/aslap', 'Beranda / Dashboard', Home)}
+            {hasPerm('aslap-master:READ') && renderLink('/aslap/sekolah', 'Sekolah', BookOpen)}
+            {hasPerm('aslap-input:READ') && renderLink('/aslap/penerima-manfaat', 'Penerima Manfaat', Users)}
+            {hasPerm('aslap-po-approval:APPROVE') && renderLink('/aslap/po', 'Verifikasi PO', ClipboardCheck)}
+            {hasPerm('aslap-laporan:READ') && renderLink('/aslap/laporan', 'Laporan', FileText)}
 
             {/* MITRA Navigation */}
-            {user?.role === 'MITRA' && (
-              <>
-                <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Menu Mitra
-                </li>
-                {renderLink('/mitra', 'Beranda / Dashboard', Home)}
-                {renderLink('/mitra/harga-bahan', 'Harga Bahan', BookOpen)}
-                {renderLink('/mitra/po', 'Nota Pesanan (PO)', ClipboardCheck)}
-                {renderLink('/mitra/kendaraan', 'Kendaraan Operasional', Truck)}
-                {renderLink('/mitra/laporan', 'Laporan', FileText)}
-                {renderLink('/audit-log', 'Audit Log', History)}
-              </>
+            {hasPerm('mitra-master:READ') && (
+              <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Menu Mitra
+              </li>
             )}
+            {hasPerm('mitra-master:READ') && renderLink('/mitra', 'Beranda / Dashboard', Home)}
+            {hasPerm('mitra-master:READ') && renderLink('/mitra/harga-bahan', 'Harga Bahan', BookOpen)}
+            {hasPerm('mitra-po:READ') && renderLink('/mitra/po', 'Nota Pesanan (PO)', ClipboardCheck)}
+            {hasPerm('mitra-master:READ') && renderLink('/mitra/kendaraan', 'Kendaraan Operasional', Truck)}
+            {hasPerm('mitra-po:READ') && renderLink('/mitra/laporan', 'Laporan', FileText)}
+            {hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
             {/* AHLI_GIZI Navigation */}
-            {user?.role === 'AHLI_GIZI' && (
-              <>
-                <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Menu Gizi
-                </li>
-                {renderLink('/gizi', 'Beranda / Dashboard', Home)}
-                {renderLink('/gizi/menu-harian', 'Menu Harian', FileSpreadsheet)}
-                {renderLink('/gizi/target-gizi', 'Setup Gizi', Settings)}
-                {renderLink('/gizi/laporan-gizi', 'Laporan Gizi', FileText)}
-              </>
+            {hasPerm('gizi-master:READ') && (
+              <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Menu Gizi
+              </li>
             )}
+            {hasPerm('gizi-master:READ') && renderLink('/gizi', 'Beranda / Dashboard', Home)}
+            {hasPerm('gizi-menu:READ') && renderLink('/gizi/menu-harian', 'Menu Harian', FileSpreadsheet)}
+            {hasPerm('gizi-target:READ') && renderLink('/gizi/target-gizi', 'Setup Gizi', Settings)}
+            {hasPerm('gizi-laporan:READ') && renderLink('/gizi/laporan-gizi', 'Laporan Gizi', FileText)}
 
             {/* AKUNTAN Navigation (Beranda dipindah ke atas nav scroll area) */}
-            {user?.role === 'AKUNTAN' && (
-              <>
-                <li style={{ padding: '0 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  Operasional
-                </li>
-                {renderLink('/akuntan/laporan/periode-setup', 'Setup Periode', Calendar)}
-                {renderLink('/akuntan/jurnal', 'Jurnal Transaksi', BookOpen)}
-                {renderLink('/akuntan/po', 'Nota Pesanan (PO)', ShoppingCart)}
-                {renderLink('/akuntan/anggaran-harian', 'Anggaran Harian', TrendingUp)}
-                {renderLink('/akuntan/dokumen-resmi', 'Dokumen Resmi', Award)}
-                {renderLink('/akuntan/nominatif-upah', 'Nominatif Upah', Users)}
-
-                <li style={{ padding: '8px 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
-                  Stok &amp; Gudang
-                </li>
-                {renderLink('/akuntan/saldo-awal-barang', 'Input Saldo Awal', PlusCircle)}
-                {renderLink('/akuntan/mutasi-stok', 'Mutasi Stok', RefreshCw)}
-                {renderLink('/akuntan/validasi-stok', 'Validasi Stok', ClipboardCheck)}
-
-                <li style={{ padding: '8px 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
-                  Laporan
-                </li>
-                {renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
-                {renderLink('/audit-log', 'Audit Log', History)}
-              </>
+            {hasPerm('akuntan-master:READ') && (
+              <li style={{ padding: '0 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                Operasional
+              </li>
             )}
+            {hasPerm('akuntan-master:READ') && renderLink('/akuntan/laporan/periode-setup', 'Setup Periode', Calendar)}
+            {hasPerm('akuntan-jurnal:READ') && renderLink('/akuntan/jurnal', 'Jurnal Transaksi', BookOpen)}
+            {hasPerm('mitra-po:READ') && renderLink('/akuntan/po', 'Nota Pesanan (PO)', ShoppingCart)}
+            {hasPerm('akuntan-rab:READ') && renderLink('/akuntan/anggaran-harian', 'Anggaran Harian', TrendingUp)}
+            {hasPerm('laporan-resmi:READ') && renderLink('/akuntan/dokumen-resmi', 'Dokumen Resmi', Award)}
+            {hasPerm('akuntan-upah:READ') && renderLink('/akuntan/nominatif-upah', 'Nominatif Upah', Users)}
+
+            {hasPerm('akuntan-stok:READ') && (
+              <li style={{ padding: '8px 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
+                Stok &amp; Gudang
+              </li>
+            )}
+            {hasPerm('akuntan-stok:READ') && renderLink('/akuntan/saldo-awal-barang', 'Input Saldo Awal', PlusCircle)}
+            {hasPerm('akuntan-stok:READ') && renderLink('/akuntan/mutasi-stok', 'Mutasi Stok', RefreshCw)}
+            {hasPerm('akuntan-stok:READ') && renderLink('/akuntan/validasi-stok', 'Validasi Stok', ClipboardCheck)}
+
+            {hasPerm('laporan-resmi:READ') && (
+              <li style={{ padding: '8px 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
+                Laporan
+              </li>
+            )}
+            {hasPerm('laporan-resmi:READ') && renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
+            {hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
             {/* KEPALA_SPPG Navigation */}
-            {user?.role === 'KEPALA_SPPG' && (
-              <>
-                <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Menu Kepala
-                </li>
-                {renderLink('/kepala', 'Beranda / Dashboard', Home)}
-                {renderLink('/kepala/approval', 'Approval / Persetujuan', CheckSquare)}
-                {renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
-              </>
+            {hasPerm('kepala-approval:READ') && (
+              <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Menu Kepala
+              </li>
             )}
+            {hasPerm('kepala-approval:READ') && renderLink('/kepala', 'Beranda / Dashboard', Home)}
+            {hasPerm('kepala-approval:APPROVE') && renderLink('/kepala/approval', 'Approval / Persetujuan', CheckSquare)}
+            {hasPerm('laporan-resmi:READ') && renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
 
             {/* ADMIN Navigation */}
-            {user?.role === 'ADMIN' && (
-              <>
-                <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Menu Admin
-                </li>
-                {renderLink('/admin', 'Beranda / Dashboard', Home)}
-                {renderLink('/admin/users', 'Kelola User', Users)}
-                {renderLink('/admin/permissions', 'Kelola Akses & Permission', ShieldCheck)}
-                {renderLink('/admin/laporan-bug', 'Laporan Bug', Bug)}
-                {renderLink('/audit-log', 'Audit Log', History)}
-              </>
+            {hasPerm('admin-user:READ') && (
+              <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Menu Admin
+              </li>
             )}
+            {hasPerm('admin-user:READ') && renderLink('/admin', 'Beranda / Dashboard', Home)}
+            {hasPerm('admin-user:READ') && renderLink('/admin/users', 'Kelola User', Users)}
+            {hasPerm('admin-permission:READ') && renderLink('/admin/permissions', 'Kelola Akses & Permission', ShieldCheck)}
+            {hasPerm('laporan-bug:READ') && renderLink('/admin/laporan-bug', 'Laporan Bug', Bug)}
+            {hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
           </ul>
         </nav>
