@@ -1,28 +1,24 @@
-# Handoff — 2026-08-06 (sesi 42) — FASE 3 DYNAMIC RBAC TUNTAS + MERGED + PUSHED
+# Handoff — 2026-08-06 (sesi 43) — SIDEBAR FE DINAMIS TUNTAS + MERGED + PUSHED
 
 ## Status Terakhir
-- **Fase 3 RBAC SELESAI + MERGED KE MAIN + PUSHED**: 11 commit RBAC, HEAD main == origin/main == `c20a864`.
-- **Fix review `c68aee4`**: BUG 1 cache lockout (`requirePermission` reload saat `!permissionCache.has(role)` — bukan `size===0`), BUG 2 resource `aslap-po-approval` (pisah dari kepala-approval, ASLAP tak bisa akses POST /kepala/approval), regresi MITRA `aslap-periode`.
-- **Penyempitan akses final `c20a864`** (keputusan Rozi): `akuntan-akun`/`akuntan-jenis-pekerjaan` (MITRA dilarang), `gizi-target` (AKUNTAN/ASLAP dilarang, hanya AHLI_GIZI+KEPALA).
-- **Verifikasi**: 590/590 PASS (39 files), lint 0/0, prisma validate OK, migrate up-to-date (resource baru = data seed).
-- **Arsip**: DOCUMENTATION.md entry Fase 3 dibuat; plans/ + prompts/ dibersihkan (isi dihapus, .gitkeep tetap).
+- **Sidebar FE Dinamis SELESAI + MERGED KE MAIN + PUSHED**: HEAD main == origin/main == `533946b` (rev-parse identik).
+- **Branch** `feat/sidebar-dynamic-permissions` (dari main `938a816`), 2 commit: `44a19a0` (wip migrasi hasPerm-only) + `533946b` (koreksi role-check) — merge ff-only ke main sebagai `533946b`. Branch remote (`git push origin --delete`) + lokal dihapus, diverifikasi `git fetch --prune && git branch -r | grep sidebar` → kosong.
+- **Pola final WAJIB**: `user?.role === 'ROLE' && hasPerm('resource:AKSI')` — role check tetap wajib walau hasPerm() lolos (grant READ lintas modul KEPALA_SPPG bocor saat migrasi hasPerm-only).
+- **Verifikasi**: simulasi rbacSeeder KEPALA_SPPG=4 PASS (hanya Menu Kepala), lint 0 error (152 warning lama), build exit 0, backend 0 file, ff-only aman (origin/main ancestor).
 
-## Next Step (sesi berikutnya, butuh TASK_SELECTION Rozi)
-1. TASK 5: UI matrix role-resource admin (kelola resource & izin per role) — endpoint BE siap
-2. Sidebar FE dinamis — Layout.jsx 10+ branch `user?.role`, butuh audit menu→permission mapping
-3. Anomali b `/api-docs` guard — keputusan Rozi (3 opsi: biarkan / selalu guard / migrasi requirePermission)
-4. V3 Fase 4-8 — backlog (docs end-user, deployment, legal, AI chatbot, notifikasi)
-5. Branch `rbac-fase3-review` dipertahankan (belum dihapus)
+## Next Step (butuh TASK_SELECTION)
+1. Migrasi route FE non-pilot ke `requiredPerm` (hanya 3 pilot: aslap/mitra/akuntan; sisanya `allowedRoles` lama)
+2. Anomali b `/api-docs` guard — keputusan Rozi (3 opsi)
+3. OpenAPI cover endpoint `my-permissions` + admin resources/permissions
+4. Seeder RBAC `upsert` ≠ hapus — row lama perlu deleteMany manual
+5. V3 Fase 4-8 (docs end-user, deployment, legal, AI chatbot, email+WhatsApp) — 100% backlog
+6. ⚠️ `git fetch` ulang WAJIB awal sesi berikutnya (HEAD main = 533946b — verifikasi ke remote sebelum percaya state files)
 
-## Pola yang Terbukti (sesi 42)
-- **Test anti-bug**: revert fix sementara → test fail (buktikan bug), restore → PASS. Terbukti efektif utk cache lockout.
-- **Resource granular RBAC**: resource coarse (akuntan-master, gizi-master, aslap-master) melebarkan akses ke role yang dulu 403. Fix = resource baru per domain endpoint sensitif (akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, aslap-periode, aslap-po-approval).
-- **Seeder upsert ≠ hapus**: resource/grant yang dihapus dari definisi tetap di DB — perlu `deleteMany` manual (dipakai 3x sesi ini: ASLAP kepala-approval, MITRA aslap-master).
-- **`git push HEAD:branch` TIDAK switch branch lokal** — commit berikutnya jatuh ke branch lama (fix c68aee4 sempat ter-commit di main). Fix: `git branch -f main <old>` + checkout, tanpa reset --hard.
-- **Checkout branch bisa "hilangkan" file**: file test baru yang hanya ada di commit branch review tak muncul di working tree main — cek `git branch --show-current` sebelum edit.
+## Pola yang Terbukti (sesi 43)
+- **Role = batas section, hasPerm = kontrol granular**: migrasi permission-based sidebar HARUS pertahankan role gate di luar hasPerm — grant READ lintas modul bikin menu bocor ke role lain.
+- **Simulasi RBAC**: evaluasi kondisi sidebar terhadap grant rbacSeeder per role → deteksi leak lebih awal dari browser test.
 
 ## Risiko / Pitfall
-- DB test (`postgres` localhost:5432) berisi row seed RBAC lama — koreksi matriks butuh deleteMany + seed ulang, bukan hanya edit seeder.
-- Full suite ±3-4 menit (PDF tests) — background + notify, jangan foreground timeout 180s.
-- Jangan commit dump backup (`backend/backups/` — .gitignore aktif).
-- GF-011: agent bisa revert uncommitted — cek git status sebelum/sesudah tiap session agent.
+- Layout.jsx sisa `user?.role` = blok notifikasi (L77/106/125/317) + badge role (L291) — by design, JANGAN migrasi.
+- DB test postgres lok: row seed RBAC lama — koreksi matriks butuh deleteMany + seed ulang, bukan edit seeder.
+- GF-011: agent bisa revert uncommitted — cek git status sebelum tiap session agent.

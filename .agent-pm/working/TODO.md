@@ -108,7 +108,7 @@
 - ✅ Penyempitan akses final `c20a864`: `akuntan-akun`/`akuntan-jenis-pekerjaan` (MITRA dilarang), `gizi-target` (AKUNTAN/ASLAP dilarang)
 - ✅ Full suite **590/590 PASS** + lint 0/0 + prisma valid — MERGED + PUSHED ke main
 - ⏳ UI matrix role-resource (tabel role × resource) — TASK 5 BACKLOG (butuh TASK_SELECTION)
-- ⏳ Sidebar dinamis (menu muncul sesuai izin) — BACKLOG (Layout.jsx 10+ branch `user?.role`)
+- ✅ Sidebar dinamis (menu muncul sesuai izin) — **SELESAI sesi 43 (2026-08-06)**: `533946b` merged ke main. Pola `user?.role === 'ROLE' && hasPerm('resource:AKSI')` — role gate + hasPerm granular (role tetap batas section; hasPerm-only bocor utk KEPALA_SPPG). Notifikasi tetap hardcode role (backend requireAuth saja). Branch dihapus.
 - ✅ Admin sebagai superuser (bypass di requirePermission)
 
 ### FASE 4 — Dokumentasi End-User

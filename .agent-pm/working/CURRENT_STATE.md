@@ -1,6 +1,16 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: Fase 3 Dynamic RBAC — TUNTAS + MERGED + PUSHED ke main (2026-08-06, sesi 42). HEAD main == origin/main == `c20a864`.**
+**Scope Aktif: Sidebar FE Dinamis — TUNTAS + MERGED + PUSHED ke main (2026-08-06, sesi 43). HEAD main == origin/main == `533946b`.**
+
+## Sesi 43 (2026-08-06) — SIDEBAR FE DINAMIS (Task: migrasi role-hardcode → role + hasPerm) ✅ TUNTAS + MERGED + PUSHED
+- **Branch** `feat/sidebar-dynamic-permissions` (dari main `938a816`), 2 commit: `44a19a0` (wip migrasi hasPerm-only) + `533946b` (koreksi role-check) — merge fast-forward ke main sebagai `533946b`, branch remote + lokal dihapus.
+- **STEP 0 audit** (OpenCode): Layout.jsx 43 menu/elemen di-gate, SEMUA pakai `user?.role ===` hardcode; 25 resource RBAC (seeder) menutupi ~80% menu; GAP = notifikasi (bell L317-437 + polling L125-130), kendaraan, laporan mitra, pengaturan `/setting`, 3 inkonsistensi menu invisible.
+- **Keputusan final Rozi**: (1) Notifikasi TETAP hardcode role (backend `/api/notifikasi` cuma requireAuth); (2) Kendaraan → `hasPerm('mitra-master:READ')`; (3) Laporan Mitra → `hasPerm('mitra-po:READ')`; (4) Pengaturan universal; (5) mitra-pemeriksaan bukan menu.
+- **Koreksi review Claude**: hasPerm()-only BOCOR — KEPALA_SPPG punya banyak grant READ lintas modul → lihat hampir semua section. Fix: ROLE = batas section, hasPerm = granular di dalam. Pola WAJIB: `user?.role === 'ROLE' && hasPerm('resource:AKSI') && ...` di 38+ kondisi.
+- **Verifikasi**: simulasi grant rbacSeeder: KEPALA_SPPG=4 PASS (hanya Menu Kepala: header, /kepala, /kepala/approval, /akuntan/laporan) — 39 FAIL role-check; lint 0 error (152 warning lama); build exit 0; backend 0 file berubah; ff-only aman (origin/main ancestor).
+- **Setelah merge**: `938a816..533946b main -> main`. HEAD main == origin/main == `533946b` (rev-parse identik).
+- Model: [Hermes oc/deepseek-v4-flash-free] + [AGY claude-sonnet-4-6 utk build] + [OpenCode deepseek-v4-flash-free utk audit/verifikasi].
+
 
 ## Sesi 42 (2026-08-06) — FASE 3 RBAC FINAL: fix review + penyempitan akses + MERGE KE MAIN ✅ (11 commit RBAC, semua pushed)
 - **Progress report** (perintah Rozi): plan `2026-08-05-fase3-rbac-progress-report.md` — 74 file RBAC, 9 commit belum push, 575/575 test, lint 0/0, prisma valid. Angka 207/265 ≠ fakta (210 literal requireRole, 233 total guard, 218 requirePermission sekarang).

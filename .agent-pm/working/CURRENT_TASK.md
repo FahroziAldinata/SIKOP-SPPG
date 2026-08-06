@@ -1,21 +1,20 @@
-# CURRENT TASK — 2026-08-06 (sesi 42) — FASE 3 RBAC MERGED KE MAIN ✅
+# CURRENT TASK — 2026-08-06 (sesi 43) — SIDEBAR FE DINAMIS MERGED KE MAIN ✅
 
-## Status: ✅ FASE 3 DYNAMIC RBAC — TUNTAS + MERGED + PUSHED (11 commit, HEAD `c20a864`)
+## Status: ✅ SIDEBAR FE DINAMIS — TUNTAS + MERGED + PUSHED (HEAD `533946b`)
 
-- **Merge ke main**: `git reset --hard origin/main` (5b87197) → `git merge --ff-only origin/rbac-fase3-review` → `c20a864` → push. main == origin/main == `c20a864`.
-- **11 commit RBAC di main**: `7ab97cf`(1) `7dd128a`(2) `e75f630`(3a) `c0945ff`(3b) `95af7a2`(3c) `8f88d63`(3d) `658c77b`(3e) `c380eba`(4) `a413f2f`(fix) + fix review `c68aee4` + `c20a864`.
-- **Fix review (c68aee4)**: cache lockout (requirePermission reload saat `!permissionCache.has(role)`, bukan `size===0`) + resource `aslap-po-approval` terpisah dari `kepala-approval` + regresi MITRA `aslap-periode`.
-- **Penyempitan akses final (c20a864)**: resource `akuntan-akun`, `akuntan-jenis-pekerjaan` (MITRA dilarang), `gizi-target` (hanya AHLI_GIZI READ/UPDATE + KEPALA READ; AKUNTAN/ASLAP dilarang).
-- **Resource RBAC total: 23** (20 asli + aslap-periode + aslap-po-approval + akuntan-akun + akuntan-jenis-pekerjaan + gizi-target).
-- Backend **590/590 PASS** (39 files, ±190s), lint 0/0, prisma validate OK, migrate status up-to-date (21 migrations).
+- **Branch**: `feat/sidebar-dynamic-permissions` (dari main 938a816) — 2 commit: `44a19a0` (wip migrasi hasPerm-only) + `533946b` (koreksi role-check di 38+ kondisi). Merge ff-only → main `533946b` → push. Branch remote + lokal dihapus.
+- **Pola final** (WAJIB utk semua render menu): `user?.role === 'ROLE' && hasPerm('resource:AKSI')` — role-check tetap wajib walau hasPerm() lolos (KEPALA_SPPG punya grant READ lintas modul).
+- **Keputusan**: Notifikasi tetap hardcode role; Kendaraan `mitra-master:READ`; Laporan Mitra `mitra-po:READ`; Pengaturan universal.
+- **Verifikasi**: simulasi rbacSeeder KEPALA_SPPG=4 PASS (hanya Menu Kepala), lint 0 error, build exit 0, backend 0 file, ff aman.
 
-## Next Step (prioritas)
-1. TASK 5: UI matrix role-resource admin (kelola permission via tabel role × resource) — backlog, butuh TASK_SELECTION
-2. Sidebar FE dinamis (Layout.jsx role→permission, butuh audit menu→permission mapping) — backlog
-3. Anomali b /api-docs guard — butuh keputusan Rozi (3 opsi tercatat di TODO)
-4. V3 Fase 4-8 (docs end-user, deployment, legal, AI chatbot, notifikasi) — backlog
-5. Branch `rbac-fase3-review` masih ada di remote — belum dihapus (keputusan Rozi: biarkan)
+## Next Step (prioritas — dari audit sesi 43)
+1. **Migrasi route FE non-pilot**: masih pakai `allowedRoles` lama, belum migrasi ke `requiredPerm` (3 pilot: aslap/mitra/akuntan sudah) — butuh TASK_SELECTION
+2. **Anomali b /api-docs guard** (`app.js`) — keputusan Rozi (3 opsi: biarkan / selalu guard / migrasi requirePermission)
+3. **OpenAPI belum cover** endpoint `my-permissions` + admin resources/permissions — registrasi swagger kurang
+4. **Seeder RBAC `upsert` ≠ hapus** — row lama (resource/grant yang dihapus) tetap di DB, perlu deleteMany manual
+5. **V3 Fase 4-8** (docs end-user, deployment, legal, AI chatbot, notifikasi eksternal) — 100% backlog
+6. `git fetch` ulang WAJIB di awal sesi berikutnya (HEAD main = 533946b, verifikasi ulang ke remote)
 
 ## Catatan sesi
-- **Pelajaran (catat ke GOVERNANCE_FINDINGS)**: push `HEAD:branch` TIDAK switch branch lokal → commit berikutnya bisa jatuh ke branch lama (fix c68aee4 sempat ter-commit di main). Recovery: `git branch -f` + checkout, tanpa reset --hard.
-- Seeder upsert ≠ hapus: resource/grant yang dihapus dari definisi tetap di DB — perlu deleteMany manual (dipakai 3x sesi ini).
+- **Pelajaran (CLAUDE sandbox)**: Claude bisa jalankan `npm install`, `npm run lint`, `npm run build` sendiri di sandbox (exit 0) — verifikasi lint/build tidak lagi sepenuhnya bergantung laporan agent.
+- Layout.jsx: 43 hasPerm semuanya ber-role-check, 0 bare; sisa `user?.role` = blok notifikasi (77/106/125/317) + badge role (291) — by design.
