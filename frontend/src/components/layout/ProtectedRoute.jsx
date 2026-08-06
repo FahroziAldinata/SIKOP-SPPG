@@ -13,16 +13,25 @@ export const ProtectedRoute = ({ children, allowedRoles, requiredPerm }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredPerm) {
+  if (allowedRoles && requiredPerm) {
+    // AND logic: user harus lolos SEMUA — role ada di allowedRoles DAN punya semua requiredPerm
+    const roleOk = allowedRoles.includes(user.role);
+    const permList = Array.isArray(requiredPerm) ? requiredPerm : [requiredPerm];
+    const permOk = permList.every((perm) => hasPerm(perm));
+    if (!roleOk || !permOk) {
+      return <div>Akses ditolak: Anda tidak memiliki izin untuk halaman ini.</div>;
+    }
+  } else if (requiredPerm) {
+    // Hanya requiredPerm — cek perm saja (perilaku pilot lama)
     const permList = Array.isArray(requiredPerm) ? requiredPerm : [requiredPerm];
     const hasAll = permList.every((perm) => hasPerm(perm));
     if (!hasAll) {
       return <div>Akses ditolak: Anda tidak memiliki izin untuk halaman ini.</div>;
     }
   } else if (allowedRoles && !allowedRoles.includes(user.role)) {
+    // Hanya allowedRoles — cek role saja (perilaku lama)
     return <div>Akses ditolak: Anda tidak memiliki izin untuk halaman ini.</div>;
   }
 
   return children;
 };
-
