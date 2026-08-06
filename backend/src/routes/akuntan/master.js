@@ -14,7 +14,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/akuntan/akun - List all active accounts
-router.get("/akun", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
+router.get("/akun", requireAuth, requirePermission("akuntan-akun", "READ"), async (req, res) => {
   try {
     const list = await prisma.akun.findMany({
       where: {
@@ -568,7 +568,7 @@ router.put("/periode/:id", requireAuth, requirePermission("akuntan-master", "UPD
 // ==========================================
 
 // GET /api/akuntan/jenis-pekerjaan - List JenisPekerjaan
-router.get("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-master", "READ"), async (req, res) => {
+router.get("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-jenis-pekerjaan", "READ"), async (req, res) => {
   try {
     const { all } = req.query;
     const where = {};
@@ -587,7 +587,7 @@ router.get("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-master", 
 });
 
 // POST /api/akuntan/jenis-pekerjaan - Create JenisPekerjaan
-router.post("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-master", "CREATE"), async (req, res) => {
+router.post("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-jenis-pekerjaan", "CREATE"), async (req, res) => {
   try {
     const { nama, tarifHarian, aktif } = req.body || {};
     if (!nama) {
@@ -638,7 +638,7 @@ router.post("/jenis-pekerjaan", requireAuth, requirePermission("akuntan-master",
 });
 
 // PUT /api/akuntan/jenis-pekerjaan/:id - Update JenisPekerjaan
-router.put("/jenis-pekerjaan/:id", requireAuth, requirePermission("akuntan-master", "UPDATE"), async (req, res) => {
+router.put("/jenis-pekerjaan/:id", requireAuth, requirePermission("akuntan-jenis-pekerjaan", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
     const { nama, tarifHarian, aktif } = req.body || {};
@@ -698,7 +698,7 @@ router.put("/jenis-pekerjaan/:id", requireAuth, requirePermission("akuntan-maste
 });
 
 // DELETE /api/akuntan/jenis-pekerjaan/:id - Delete JenisPekerjaan
-router.delete("/jenis-pekerjaan/:id", requireAuth, requirePermission("akuntan-master", "DELETE"), async (req, res) => {
+router.delete("/jenis-pekerjaan/:id", requireAuth, requirePermission("akuntan-jenis-pekerjaan", "DELETE"), async (req, res) => {
   try {
     const { id } = req.params;
     const existing = await prisma.jenisPekerjaan.findUnique({

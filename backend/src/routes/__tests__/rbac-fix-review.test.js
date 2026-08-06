@@ -14,6 +14,7 @@ describe('RBAC Fix Review — cache lockout, approval resource split, MITRA asla
   let aslapToken;
   let mitraToken;
   let kepalaToken;
+  let ahligiziToken;
   let adminToken;
   let createdPermissionId;
 
@@ -32,6 +33,7 @@ describe('RBAC Fix Review — cache lockout, approval resource split, MITRA asla
     aslapToken = await login('aslap');
     mitraToken = await login('mitra');
     kepalaToken = await login('kepalasppg');
+    ahligiziToken = await login('ahligizi');
     adminToken = await login('admin');
   });
 
@@ -152,6 +154,64 @@ describe('RBAC Fix Review — cache lockout, approval resource split, MITRA asla
         .set('Authorization', `Bearer ${mitraToken}`);
 
       expect(res.status).toBe(403);
+    });
+  });
+
+  describe('PENYEMPITAN AKSES FINAL — resource granular akuntan-akun/akuntan-jenis-pekerjaan & gizi-target', () => {
+    test('MITRA mendapat 403 di GET /api/akuntan/akun (tanpa grant akuntan-akun)', async () => {
+      const res = await request(app)
+        .get('/api/akuntan/akun')
+        .set('Authorization', `Bearer ${mitraToken}`);
+
+      expect(res.status).toBe(403);
+    });
+
+    test('MITRA mendapat 403 di GET /api/akuntan/jenis-pekerjaan (tanpa grant akuntan-jenis-pekerjaan)', async () => {
+      const res = await request(app)
+        .get('/api/akuntan/jenis-pekerjaan')
+        .set('Authorization', `Bearer ${mitraToken}`);
+
+      expect(res.status).toBe(403);
+    });
+
+    test('MITRA tetap 200 di GET /api/akuntan/periode/latest-setup (masih akuntan-master READ)', async () => {
+      const res = await request(app)
+        .get('/api/akuntan/periode/latest-setup')
+        .set('Authorization', `Bearer ${mitraToken}`);
+
+      expect(res.status).toBe(200);
+    });
+
+    test('AKUNTAN mendapat 403 di GET /api/gizi/master-target (tanpa grant gizi-target)', async () => {
+      const res = await request(app)
+        .get('/api/gizi/master-target')
+        .set('Authorization', `Bearer ${akuntanToken}`);
+
+      expect(res.status).toBe(403);
+    });
+
+    test('ASLAP mendapat 403 di GET /api/gizi/master-target (tanpa grant gizi-target)', async () => {
+      const res = await request(app)
+        .get('/api/gizi/master-target')
+        .set('Authorization', `Bearer ${aslapToken}`);
+
+      expect(res.status).toBe(403);
+    });
+
+    test('AHLI_GIZI tetap 200 di GET /api/gizi/master-target (grant gizi-target READ)', async () => {
+      const res = await request(app)
+        .get('/api/gizi/master-target')
+        .set('Authorization', `Bearer ${ahligiziToken}`);
+
+      expect(res.status).toBe(200);
+    });
+
+    test('KEPALA_SPPG tetap 200 di GET /api/gizi/master-target (grant gizi-target READ)', async () => {
+      const res = await request(app)
+        .get('/api/gizi/master-target')
+        .set('Authorization', `Bearer ${kepalaToken}`);
+
+      expect(res.status).toBe(200);
     });
   });
 });

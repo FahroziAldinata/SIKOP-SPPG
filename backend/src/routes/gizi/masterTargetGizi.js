@@ -8,7 +8,7 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // --- MasterTargetGizi ---
-router.get('/master-target', requireAuth, requirePermission('gizi-master', 'READ'), async (req, res) => {
+router.get('/master-target', requireAuth, requirePermission('gizi-target', 'READ'), async (req, res) => {
   try {
     const data = await prisma.masterTargetGizi.findMany({
       include: { kelompokUmurMenu: { select: { id: true, kode: true, nama: true, jalur: true } } },
@@ -21,7 +21,7 @@ router.get('/master-target', requireAuth, requirePermission('gizi-master', 'READ
   }
 });
 
-router.put('/master-target/:id', requireAuth, requirePermission('gizi-master', 'UPDATE'), validate(schemas.masterTargetGiziSchema), async (req, res) => {
+router.put('/master-target/:id', requireAuth, requirePermission('gizi-target', 'UPDATE'), validate(schemas.masterTargetGiziSchema), async (req, res) => {
   try {
     const { energiKkal, proteinGr, lemakGr, karbohidratGr, seratGr } = req.body;
     const updated = await prisma.masterTargetGizi.update({
