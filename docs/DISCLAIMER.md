@@ -1,0 +1,3 @@
+Disclaimer
+
+SIKOP-SPPG adalah proyek pembelajaran (learning/design exercise), bukan sistem produksi yang digunakan oleh instansi manapun. Alur kerja, struktur data, dan terminologi mengacu pada pola kerja program Makan Bergizi Gratis (MBG) di lapangan agar desain sistem realistis. Seluruh data dalam sistem — termasuk data seed, contoh transaksi, dan akun pengguna — adalah data dummy/fiktif untuk keperluan pengembangan dan pengujian. Tidak ada data pribadi, data instansi, maupun record asli yang digunakan atau disimpan dalam proyek ini.

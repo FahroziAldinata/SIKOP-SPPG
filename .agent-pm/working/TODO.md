@@ -122,9 +122,9 @@
 - Setup domain bila perlu
 - Uptime monitoring (healthcheck berkala, alert)
 
-### FASE 6 — Legal/Administratif
-- Klarifikasi status hukum aplikasi (izin/persetujuan pihak SPPG/BGN bila diperlukan)
-- Rencana data ownership & handover (siapa pemilik data, prosedur serah terima)
+### FASE 6 — Legal/Administratif ✅ SELESAI (2026-08-07, sesi 44) — scope disederhanakan jadi disclaimer saja (keputusan Rozi, bukan proses legal formal)
+- ✅ `docs/DISCLAIMER.md` ADA: project pembelajaran (learning/design exercise), alur mengacu pola MBG, seluruh data dummy/fiktif, tanpa data asli/pribadi/instansi. Verifikasi OpenCode verbatim.
+- Catatan: FASE 6 ditutup sebagai item disclaimer saja; pertanyaan data ownership/handover tetap terbuka bila sistem naik produksi (non-blocker).
 
 ### FASE 7 — Fitur AI Chatbot
 - BYOK (bring-your-own-key) — user pakai API key sendiri
