@@ -113,9 +113,9 @@
 - ✅ Admin sebagai superuser (bypass di requirePermission)
 
 ### FASE 4 — Dokumentasi End-User
-- Panduan penggunaan per role (Aslap, Ahli Gizi, Akuntan, Kepala SPPG, Mitra, Admin)
-- Screenshot alur tiap modul
-- Prosedur support (troubleshooting umum, kontak, eskalasi)
+- ✅ **Inventaris/audit fitur per role** (2026-08-07, sesi 44) — draft v2 `2026-08-07-fase4-audit-dokumentasi-enduser-v2.md` di branch `docs/fase4-audit-revisi` (commit `48f9843`), APPROVED Rozi. Data: grant per role (rbacSeeder.js), menu+requiredPerm (App.jsx/Layout.jsx), fitur, alur kerja, gap. Tunggu keputusan final Rozi — branch tetap terbuka, belum merge.
+- ⏳ Screenshot alur tiap modul — OPEN (butuh verifikasi UI/browser)
+- ⏳ Prosedur support (troubleshooting umum, kontak, eskalasi) — OPEN
 
 ### FASE 5 — Deployment & Environment Production
 - Pisahkan environment production (env file terpisah, build terpisah, proteksi /api-docs production sudah ada — lengkapi sisanya)
