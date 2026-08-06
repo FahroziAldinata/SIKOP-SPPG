@@ -107,8 +107,9 @@
 - ✅ Fix review `c68aee4`: cache lockout (`!permissionCache.has(role)`), resource `asap-po-approval` (approval PO ASLAP pisah dari kepala-approval), regresi MITRA `asap-periode`
 - ✅ Penyempitan akses final `c20a864`: `akuntan-akun`/`akuntan-jenis-pekerjaan` (MITRA dilarang), `gizi-target` (AKUNTAN/ASLAP dilarang)
 - ✅ Full suite **590/590 PASS** + lint 0/0 + prisma valid — MERGED + PUSHED ke main
-- ⏳ UI matrix role-resource (tabel role × resource) — TASK 5 BACKLOG (butuh TASK_SELECTION)
-- ✅ Sidebar dinamis (menu muncul sesuai izin) — **SELESAI sesi 43 (2026-08-06)**: `533946b` merged ke main. Pola `user?.role === 'ROLE' && hasPerm('resource:AKSI')` — role gate + hasPerm granular (role tetap batas section; hasPerm-only bocor utk KEPALA_SPPG). Notifikasi tetap hardcode role (backend requireAuth saja). Branch dihapus.
+- ✅ Sidebar dinamis (menu muncul sesuai izin) — **SELESAI sesi 43 (2026-08-06)**: `533946b` merged ke main. Pola `user?.role === 'ROLE' && hasPerm('resource:AKSI')` — role gate + hasPerm granular (role tetap batas section; hasPerm-only bocor utk KEPALA_SPPG). Notifikasi tetap role (backend requireAuth saja). Branch dihapus.
+- ✅ Seeder RBAC `upsert ≠ hapus` (perlu deleteMany) — **CLOSED (False Alarm) sesi 44 (2026-08-07)**: dry-run audit menunjukkan 0 resource stale, 0 grant stale, seluruh 138 grant sesuai `rbacSeeder.js` — kemungkinan sudah bersih sejak commit `c20a864`. TIDAK perlu deleteMany.
+- ✅ UI matrix role-resource (TASK 5) — **CLOSED (Verified & Approved) sesi 44 (2026-08-07)**: verifikasi manual dilakukan & disetujui Rozi — tidak perlu diverifikasi ulang. Commit `dc4dbe5`.
 - ✅ Admin sebagai superuser (bypass di requirePermission)
 
 ### FASE 4 — Dokumentasi End-User

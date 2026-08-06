@@ -1,6 +1,15 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: Sidebar FE Dinamis — TUNTAS + MERGED + PUSHED ke main (2026-08-06, sesi 43). HEAD main == origin/main == `533946b`.**
+**Scope Aktif: RBAC Fase 3 CLOSED (2026-08-07, sesi 44). HEAD main == origin/main == `5ce2116`.**
+
+## Sesi 44 (2026-08-07) — RBAC Fase 3 TUTUP: migrasi route FE + /api-docs guard + OpenAPI RBAC + audit seeder ✅
+- **Commit `3135fef`**: migrasi seluruh route `App.jsx` dari `allowedRoles` → `requiredPerm` (RBAC dinamis) — 41 route non-pilot + 3 pilot, `/setting` auth-only. 6/6 smoke role-route PASS, build/lint 0 error, browser manual PASS (Rozi).
+- **Commit `a160f92`**: guard `/api-docs` (`requireRole('ADMIN')` → `requirePermission('admin-permission','READ')`) — production 401/403/200, dev tetap 200, 590/590 test.
+- **Commit `5ce2116`**: OpenAPI registrasi 6 endpoint RBAC (`my-permissions` + admin resources/permissions) — 0 entri existing diubah, 590/590 test.
+- **Dry-run audit seeder (OpenCode, read-only)**: DB RBAC sinkron penuh dgn `rbacSeeder.js` — 25 Resource, 138 grant, **0 stale** (0 seeder-origin, 0 admin-created). AuditLog memadai (74 row RolePermission, 34 CREATE). → backlog "seeder deleteMany" = **False Alarm**, CLOSED.
+- **TASK 5 matrix role-resource** (`dc4dbe5`) — **CLOSED (Verified & Approved)** oleh Rozi.
+- **Backlog RBAC Fase 3 habis.** Sisa backlog aktif: V3 FASE 4-8.
+- Model: [Hermes oc/deepseek-v4-flash-free] + [AGY claude-sonnet-4-6 utk build] + [OpenCode deepseek-v4-flash-free utk verify/audit].
 
 ## Sesi 43 (2026-08-06) — SIDEBAR FE DINAMIS (Task: migrasi role-hardcode → role + hasPerm) ✅ TUNTAS + MERGED + PUSHED
 - **Branch** `feat/sidebar-dynamic-permissions` (dari main `938a816`), 2 commit: `44a19a0` (wip migrasi hasPerm-only) + `533946b` (koreksi role-check) — merge fast-forward ke main sebagai `533946b`, branch remote + lokal dihapus.
