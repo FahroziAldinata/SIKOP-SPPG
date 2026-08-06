@@ -23,7 +23,7 @@ const { httpLogger } = require('./lib/logger');
 const errorHandler = require('./middleware/errorHandler');
 const swaggerUi = require('swagger-ui-express');
 const { swaggerSpec } = require('./docs/openapi');
-const { requireAuth, requireRole } = require('./middleware/auth');
+const { requireAuth, requirePermission } = require('./middleware/auth');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -60,7 +60,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 const docsEnabled = process.env.NODE_ENV !== 'production' || process.env.ENABLE_DOCS === 'true';
 if (docsEnabled) {
   const docsAuth = process.env.NODE_ENV === 'production'
-    ? [requireAuth, requireRole('ADMIN')]
+    ? [requireAuth, requirePermission('admin-permission', 'READ')]
     : [];
   app.get('/api-docs.json', ...docsAuth, (req, res) => {
     res.json(JSON.parse(swaggerSpec));
