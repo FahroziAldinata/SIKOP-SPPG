@@ -117,7 +117,10 @@ function requirePermission(resource, aksi) {
     }
 
     try {
-      if (permissionCache.size === 0) {
+      // Reload bila role user TIDAK ada di cache (bukan hanya saat cache kosong total).
+      // invalidatePermissionCache(role) menghapus key role dari Map — tanpa cek ini,
+      // role yang di-invalidate admin akan terkunci 403 sampai server restart.
+      if (!permissionCache.has(role)) {
         await loadPermissionCache();
       }
 

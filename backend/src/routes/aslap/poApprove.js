@@ -9,7 +9,9 @@ const { logAudit } = require("../../lib/auditHelper");
 const router = express.Router();
 
 // PUT /api/aslap/po/:id/approve - Aslap konfirmasi penerimaan fisik
-router.put("/po/:id/approve", requireAuth, requirePermission("kepala-approval", "APPROVE"), validate(schemas.poApproveSchema), async (req, res) => {
+// Resource terpisah dari kepala-approval: approval PO oleh ASLAP tidak boleh
+// memberi akses ke POST /api/kepala/approval (dan sebaliknya).
+router.put("/po/:id/approve", requireAuth, requirePermission("aslap-po-approval", "APPROVE"), validate(schemas.poApproveSchema), async (req, res) => {
   try {
     const { id } = req.params;
     const { items } = req.body;

@@ -2,8 +2,10 @@ const { logger } = require('./logger');
 
 const RBAC_RESOURCES = [
   { kode: 'aslap-master', nama: 'Master Data Aslap', modul: 'aslap' },
+  { kode: 'aslap-periode', nama: 'Periode Aslap', modul: 'aslap' },
   { kode: 'aslap-input', nama: 'Input Penerima Manfaat', modul: 'aslap' },
   { kode: 'aslap-laporan', nama: 'Laporan Aslap', modul: 'aslap' },
+  { kode: 'aslap-po-approval', nama: 'Approval PO Aslap', modul: 'aslap' },
   { kode: 'gizi-master', nama: 'Master Menu & Gizi', modul: 'gizi' },
   { kode: 'gizi-menu', nama: 'Rencana & Menu Harian', modul: 'gizi' },
   { kode: 'gizi-laporan', nama: 'Laporan Gizi', modul: 'gizi' },
@@ -47,6 +49,7 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'AKUNTAN', resource: 'akuntan-upah', aksi: 'UPDATE' },
   { role: 'AKUNTAN', resource: 'akuntan-upah', aksi: 'DELETE' },
   { role: 'AKUNTAN', resource: 'aslap-master', aksi: 'READ' },
+  { role: 'AKUNTAN', resource: 'aslap-periode', aksi: 'READ' },
   { role: 'AKUNTAN', resource: 'aslap-input', aksi: 'READ' },
   { role: 'AKUNTAN', resource: 'aslap-laporan', aksi: 'READ' },
   { role: 'AKUNTAN', resource: 'aslap-laporan', aksi: 'EXPORT' },
@@ -69,6 +72,7 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'KEPALA_SPPG', resource: 'kepala-approval', aksi: 'CREATE' },
   { role: 'KEPALA_SPPG', resource: 'kepala-approval', aksi: 'APPROVE' },
   { role: 'KEPALA_SPPG', resource: 'aslap-master', aksi: 'READ' },
+  { role: 'KEPALA_SPPG', resource: 'aslap-periode', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'aslap-input', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'aslap-laporan', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'aslap-laporan', aksi: 'EXPORT' },
@@ -102,6 +106,7 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'AHLI_GIZI', resource: 'gizi-laporan', aksi: 'READ' },
   { role: 'AHLI_GIZI', resource: 'gizi-laporan', aksi: 'EXPORT' },
   { role: 'AHLI_GIZI', resource: 'aslap-master', aksi: 'READ' },
+  { role: 'AHLI_GIZI', resource: 'aslap-periode', aksi: 'READ' },
   { role: 'AHLI_GIZI', resource: 'aslap-input', aksi: 'READ' },
   { role: 'AHLI_GIZI', resource: 'aslap-laporan', aksi: 'READ' },
   { role: 'AHLI_GIZI', resource: 'aslap-laporan', aksi: 'EXPORT' },
@@ -114,6 +119,7 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'ASLAP', resource: 'aslap-input', aksi: 'UPDATE' },
   { role: 'ASLAP', resource: 'aslap-input', aksi: 'DELETE' },
   { role: 'ASLAP', resource: 'aslap-master', aksi: 'READ' },
+  { role: 'ASLAP', resource: 'aslap-periode', aksi: 'READ' },
   { role: 'ASLAP', resource: 'aslap-master', aksi: 'CREATE' },
   { role: 'ASLAP', resource: 'aslap-master', aksi: 'UPDATE' },
   { role: 'ASLAP', resource: 'aslap-master', aksi: 'DELETE' },
@@ -125,7 +131,7 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'ASLAP', resource: 'mitra-po', aksi: 'READ' },
   { role: 'ASLAP', resource: 'mitra-pemeriksaan', aksi: 'READ' },
   { role: 'ASLAP', resource: 'mitra-pemeriksaan', aksi: 'CREATE' },
-  { role: 'ASLAP', resource: 'kepala-approval', aksi: 'APPROVE' },
+  { role: 'ASLAP', resource: 'aslap-po-approval', aksi: 'APPROVE' },
   { role: 'ASLAP', resource: 'laporan-bug', aksi: 'CREATE' },
 
   // MITRA
@@ -138,6 +144,9 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'MITRA', resource: 'mitra-po', aksi: 'UPDATE' },
   { role: 'MITRA', resource: 'mitra-pemeriksaan', aksi: 'READ' },
   { role: 'MITRA', resource: 'mitra-pemeriksaan', aksi: 'CREATE' },
+  // Regresi fix: MITRA dulu boleh GET /api/aslap/periode (requireRole ASLAP,MITRA,...) —
+  // via resource granular aslap-periode, TANPA membuka kategori/sekolah/posyandu (dulu 403 utk MITRA)
+  { role: 'MITRA', resource: 'aslap-periode', aksi: 'READ' },
   { role: 'MITRA', resource: 'akuntan-master', aksi: 'READ' },
   { role: 'MITRA', resource: 'audit-log', aksi: 'READ' },
   { role: 'MITRA', resource: 'laporan-bug', aksi: 'CREATE' },

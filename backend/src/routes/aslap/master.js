@@ -8,7 +8,9 @@ const { logger } = require("../../lib/logger");
 const router = express.Router();
 
 // GET /api/aslap/periode - List all periods
-router.get("/periode", requireAuth, requirePermission("aslap-master", "READ"), async (req, res) => {
+// Resource granular aslap-periode (bukan aslap-master): MITRA dulu boleh endpoint ini
+// (requireRole ASLAP,MITRA,KEPALA_SPPG,AHLI_GIZI,AKUNTAN) tapi tidak kategori/sekolah/posyandu
+router.get("/periode", requireAuth, requirePermission("aslap-periode", "READ"), async (req, res) => {
   try {
     const data = await prisma.periode.findMany({
       orderBy: { tanggalMulai: "desc" },

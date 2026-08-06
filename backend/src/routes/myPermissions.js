@@ -7,7 +7,9 @@ const router = express.Router();
 // GET /api/my-permissions — FE source of truth for user role & permissions
 router.get('/', requireAuth, async (req, res) => {
   try {
-    if (permissionCache.size === 0) {
+    // Reload bila role user tidak ada di cache (konsisten dengan requirePermission) —
+    // cegah my-permissions kosong setelah invalidatePermissionCache(role).
+    if (!permissionCache.has(req.user.role)) {
       await loadPermissionCache();
     }
 
