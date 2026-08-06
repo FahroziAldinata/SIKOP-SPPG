@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -45,7 +45,7 @@ export const RolePermissionMatrixPage = () => {
   const [groupedResources, setGroupedResources] = useState({});
 
   // ── FETCH DATA ────────────────────────────────────────────────────────────
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     setLoading(true);
     setLoadError(false);
     try {
@@ -80,11 +80,11 @@ export const RolePermissionMatrixPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [request, toast]);
+  };
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── HELPERS ───────────────────────────────────────────────────────────────
   const findPerm = (role, resourceKode, aksi) =>
