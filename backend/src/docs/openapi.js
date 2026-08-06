@@ -154,6 +154,7 @@ const routeDefinitions = [
   },
   { method: 'get', path: '/api/auth/ttd', module: 'auth', summary: 'Get path TTD user' },
   { method: 'delete', path: '/api/auth/ttd', module: 'auth', summary: 'Hapus TTD user' },
+  { method: 'get', path: '/api/my-permissions', module: 'my-permissions', summary: 'Get role dan daftar permission user yang sedang login' },
 
   // ================= ADMIN (MANUAL INLINE SCHEMAS) =================
   { method: 'get', path: '/api/admin/users', module: 'admin', summary: 'Get daftar seluruh user' },
@@ -184,6 +185,46 @@ const routeDefinitions = [
     summary: 'Update data user'
   },
   { method: 'delete', path: '/api/admin/users/{id}', module: 'admin', summary: 'Nonaktifkan user (soft delete)' },
+  { method: 'get', path: '/api/admin/resources', module: 'admin', summary: 'Get daftar seluruh resource (akses admin-permission READ)' },
+  {
+    method: 'get',
+    path: '/api/admin/permissions',
+    module: 'admin',
+    target: 'query',
+    schema: z.object({
+      role: z.enum(['ASLAP', 'MITRA', 'AHLI_GIZI', 'AKUNTAN', 'KEPALA_SPPG', 'ADMIN']).optional().openapi({ description: 'Filter by role' }),
+      resourceId: z.string().optional().openapi({ description: 'Filter by resource id' }),
+      resource: z.string().optional().openapi({ description: 'Filter by resource kode' })
+    }),
+    summary: 'Get daftar role permission (filter by role/resource)'
+  },
+  {
+    method: 'post',
+    path: '/api/admin/permissions',
+    module: 'admin',
+    target: 'body',
+    schema: z.object({
+      role: z.enum(['ASLAP', 'MITRA', 'AHLI_GIZI', 'AKUNTAN', 'KEPALA_SPPG', 'ADMIN']),
+      resourceId: z.string().optional().openapi({ description: 'UUID resource (salah satu dari resourceId atau resourceKode wajib diisi)' }),
+      resourceKode: z.string().optional().openapi({ description: 'Kode resource (alternatif resourceId)' }),
+      aksi: z.enum(['CREATE', 'READ', 'UPDATE', 'DELETE', 'APPROVE', 'EXPORT'])
+    }),
+    summary: 'Buat role permission baru'
+  },
+  {
+    method: 'put',
+    path: '/api/admin/permissions/{id}',
+    module: 'admin',
+    target: 'body',
+    schema: z.object({
+      role: z.enum(['ASLAP', 'MITRA', 'AHLI_GIZI', 'AKUNTAN', 'KEPALA_SPPG', 'ADMIN']).optional(),
+      resourceId: z.string().optional().openapi({ description: 'UUID resource' }),
+      resourceKode: z.string().optional().openapi({ description: 'Kode resource (alternatif resourceId)' }),
+      aksi: z.enum(['CREATE', 'READ', 'UPDATE', 'DELETE', 'APPROVE', 'EXPORT']).optional()
+    }),
+    summary: 'Update role permission'
+  },
+  { method: 'delete', path: '/api/admin/permissions/{id}', module: 'admin', summary: 'Hapus role permission' },
 
   // ================= KEPALA (MANUAL INLINE SCHEMAS) =================
   {
