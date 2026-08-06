@@ -26,7 +26,8 @@ import {
   CheckSquare,
   Bell,
   Bug,
-  History
+  History,
+  ShieldCheck
 } from 'lucide-react';
 
 
@@ -185,6 +186,7 @@ export const Layout = () => {
     '/kepala/approval': 'Approval',
     '/admin': 'Beranda Admin',
     '/admin/users': 'Kelola User',
+    '/admin/permissions': 'Kelola Akses & Permission',
     '/admin/laporan-bug': 'Laporan Bug',
     '/setting': 'Pengaturan Profil',
   };
@@ -582,6 +584,7 @@ export const Layout = () => {
                 </li>
                 {renderLink('/admin', 'Beranda / Dashboard', Home)}
                 {renderLink('/admin/users', 'Kelola User', Users)}
+                {renderLink('/admin/permissions', 'Kelola Akses & Permission', ShieldCheck)}
                 {renderLink('/admin/laporan-bug', 'Laporan Bug', Bug)}
                 {renderLink('/audit-log', 'Audit Log', History)}
               </>

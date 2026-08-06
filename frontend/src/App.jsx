@@ -15,6 +15,7 @@ import { KepalaDashboard } from './pages/kepala/KepalaDashboard';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { UserManagementPage } from './pages/admin/UserManagementPage';
 import { LaporanBugPage } from './pages/admin/LaporanBugPage';
+import { RolePermissionMatrixPage } from './pages/admin/RolePermissionMatrixPage';
 
 // Sub-pages / CRUD Pages
 import { PenerimaManfaatPage } from './pages/aslap/PenerimaManfaatPage';
@@ -397,6 +398,14 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
                   <UserManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/permissions"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <RolePermissionMatrixPage />
                 </ProtectedRoute>
               }
             />
