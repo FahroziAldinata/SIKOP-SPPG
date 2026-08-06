@@ -1,6 +1,19 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: Fase 3 Dynamic RBAC — MODE INVESTIGASI (2026-08-05, arahan Rozi — tanpa perubahan file, tunggu keputusan desain). Fase 2 Data Safety SELESAI TOTAL + coverage cycle 1-3 committed + pushed.**
+**Scope Aktif: Fase 3 Dynamic RBAC — TUNTAS + MERGED + PUSHED ke main (2026-08-06, sesi 42). HEAD main == origin/main == `c20a864`.**
+
+## Sesi 42 (2026-08-06) — FASE 3 RBAC FINAL: fix review + penyempitan akses + MERGE KE MAIN ✅ (11 commit RBAC, semua pushed)
+- **Progress report** (perintah Rozi): plan `2026-08-05-fase3-rbac-progress-report.md` — 74 file RBAC, 9 commit belum push, 575/575 test, lint 0/0, prisma valid. Angka 207/265 ≠ fakta (210 literal requireRole, 233 total guard, 218 requirePermission sekarang).
+- **Push branch review**: `git push origin HEAD:rbac-fase3-review` (9 commit). ⚠️ Pelajaran: push HEAD:branch TIDAK switch branch lokal.
+- **Fix review commit `c68aee4`** (ditemukan oleh test/audit):
+  - **BUG 1 cache lockout**: `requirePermission` cek `permissionCache.size === 0` → ganti `!permissionCache.has(role)`. `invalidatePermissionCache(role)` hapus key role dari Map; tanpa fix, role yang di-invalidate admin terkunci 403 sampai restart. Fix juga di `myPermissions.js`. Test anti-bug: revert fix → test fail (403 lockout), restore → PASS.
+  - **BUG 2 resource approval campur**: ASLAP punya `kepala-approval APPROVE` (dipakai poApprove) → bisa akses POST /api/kepala/approval. Fix: resource baru `aslap-po-approval APPROVE` khusus ASLAP; poApprove.js pindah. Keputusan: KEPALA_SPPG TIDAK boleh PUT /po/:id/approve (perilaku lama requireRole("ASLAP")) — di-test.
+  - **Regresi MITRA**: dulu boleh GET /api/aslap/periode (requireRole ASLAP,MITRA,...), hilang di migrasi. Fix via resource granular `aslap-periode` READ utk 5 role (ASLAP/MITRA/KEPALA/AHLI_GIZI/AKUNTAN) — TIDAK buka sekolah/posyandu (tetap 403 utk MITRA, sesuai origin).
+- **Penyempitan akses final commit `c20a864`** (keputusan Rozi, business workflow): resource `akuntan-akun` + `akuntan-jenis-pekerjaan` (AKUNTAN penuh, KEPALA READ, **MITRA dilarang** → 403), resource `gizi-target` (AHLI_GIZI READ/UPDATE + KEPALA READ, **AKUNTAN/ASLAP dilarang** → 403). 5 endpoint akuntan/master.js + 2 endpoint masterTargetGizi.js pindah resource; endpoint lain tetap akuntan-master.
+- **Test**: 7 test verifikasi baru di `rbac-fix-review.test.js` (total 15 test file itu): MITRA 403 /akun + /jenis-pekerjaan, MITRA 200 /periode/latest-setup, AKUNTAN+ASLAP 403 /gizi/master-target, AHLI_GIZI+KEPALA 200. **Full suite 590/590 PASS** (39 files), lint 0/0, prisma validate OK + migrate status up-to-date (resource baru = data seed, TIDAK perlu migration).
+- **Merge ke main** (proses pengaman Rozi 10 langkah): reset --hard origin/main (5b87197) → merge --ff-only rbac-fase3-review → `c20a864` → `git push origin main`. main == origin/main == `c20a864`. Branch rbac-fase3-review DIPERTAHANKAN (belum dihapus).
+- **Resource RBAC total: 23**. Seeder upsert ≠ hapus — row lama (mis. ASLAP kepala-approval, MITRA aslap-master) perlu deleteMany manual (3x sesi ini).
+- Model: [Hermes oc/deepseek-v4-flash-free] + [AGY gemini-3.6-flash-medium/claude-sonnet-4-6 utk build task sebelumnya].
 
 ## Sesi 40 (2026-08-05) — Sinkronisasi state files dengan git remote aktual (GF-012) ✅ COMMITTED + PUSHED
 - **Verifikasi independen** `git log origin/main -10 --oneline`: `682da6c` (cycle 2) + `cb2803b` (cycle 3) **SUDAH di origin/main** — state files lama (klaim "BELUM push") TERTINGGAL dari kondisi remote. HEAD == origin/main `cb2803b`.

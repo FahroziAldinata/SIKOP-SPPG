@@ -236,6 +236,27 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-05 s.d. 2026-08-06
+
+### Fase 3 — Dynamic RBAC ✅ TUNTAS + MERGED KE MAIN (sesi 41-42, HEAD `c20a864`)
+- **Desain approved Rozi (2026-08-05)**: A1/A2 (role enum TETAP 6 + tabel `RolePermission` dinamis DB) + B1/B3 (cache Map boot + invalidasi write-through) + C2 (migrasi bertahap per modul) + D4 (FE hybrid config + `/api/my-permissions`).
+- **TASK 1** `7ab97cf`: model `Resource`+`RolePermission`+enum `PermissionAksi` (migration `20260805131002_add_role_permission`), middleware `requirePermission` + `permissionCache` Map + `loadPermissionCache` boot + `invalidatePermissionCache`, ADMIN superuser bypass.
+- **TASK 2** `7dd128a`: `GET /api/my-permissions` + CRUD admin `/api/admin/permissions` (POST/PUT/DELETE → invalidate write-through + logAudit) + seeder `src/lib/rbacSeeder.js`.
+- **TASK 3a-3e** `e75f630` `c0945ff` `95af7a2` `8f88d63` `658c77b`: migrasi 61 file route `requireRole` → `requirePermission` (akuntan 7, gizi 15, aslap 11, laporan 17, mitra/kepala/admin/auditLog/bukti-lpd2m/laporanBug/pemeriksaan-bahan). Sisa requireRole disengaja: app.js docs guard (anomali b, keputusan tertunda) + gizi/kendaraan stub 410. Anomali a fixed (laporanAggregate AUTH-ONLY → requirePermission).
+- **TASK 4** `c380eba`: FE D4 — AuthContext `permissions`+`hasPerm`+ADMIN bypass+`permissionsReady` anti-race, ProtectedRoute `requiredPerm` fallback allowedRoles, 3 route pilot. Fix `a413f2f`: AuditLogPage crash (render signature `(value,row)`).
+- **Fix review** `c68aee4` (sesi 42, temuan test/audit):
+  - **BUG 1 cache lockout**: `requirePermission` cek `!permissionCache.has(role)` (bukan `size===0`) — role yang di-invalidate admin terkunci 403 sampai restart tanpa ini. Konsisten di `myPermissions.js`. Test anti-bug: revert → 403 lockout, restore → PASS.
+  - **BUG 2 approval campur**: ASLAP punya `kepala-approval APPROVE` (dipakai poApprove) → bisa akses POST /api/kepala/approval. Fix: resource baru `aslap-po-approval APPROVE` khusus ASLAP; poApprove.js pindah. Keputusan: KEPALA_SPPG TIDAK boleh PUT /po/:id/approve (perilaku lama).
+  - **Regresi MITRA**: `GET /api/aslap/periode` dulu boleh MITRA, hilang di migrasi. Fix resource granular `aslap-periode` READ utk 5 role — TIDAK buka sekolah/posyandu (tetap 403 utk MITRA, sesuai origin/main).
+- **Penyempitan akses final** `c20a864` (keputusan Rozi business workflow): resource `akuntan-akun` + `akuntan-jenis-pekerjaan` (AKUNTAN penuh, KEPALA READ, MITRA dilarang → 403) + `gizi-target` (AHLI_GIZI READ/UPDATE + KEPALA READ, AKUNTAN/ASLAP dilarang → 403). 5 endpoint akuntan/master.js + 2 endpoint masterTargetGizi.js pindah resource.
+- **Resource RBAC total: 23** (20 asli + aslap-periode + aslap-po-approval + akuntan-akun + akuntan-jenis-pekerjaan + gizi-target).
+- **Verifikasi**: full suite **590/590 PASS** (39 files), lint 0/0, prisma validate OK, migrate status up-to-date (resource baru = data seed, tanpa migration).
+- **Merge**: reset --hard origin/main → `git merge --ff-only origin/rbac-fase3-review` → push. main == origin/main == `c20a864`. Branch `rbac-fase3-review` dipertahankan.
+- **Backlog tersisa**: TASK 5 UI matrix role-resource (admin) + Sidebar FE dinamis (Layout.jsx role→permission) + anomali b /api-docs guard (3 opsi, tunggu keputusan Rozi).
+- **Pelajaran**: (1) `git push HEAD:branch` TIDAK switch branch lokal — commit berikutnya bisa jatuh ke branch lama; (2) seeder upsert ≠ hapus — row yang dihapus dari definisi tetap di DB, perlu `deleteMany` manual.
+
+---
+
 ## Catatan Umum
 
 - **AGY**: Mode `-p` = text-only. Butuh `-i` + PTY untuk eksekusi tool. Settings di `C:\Users\Administrator\.gemini\antigravity-cli\settings.json`

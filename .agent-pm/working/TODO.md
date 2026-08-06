@@ -98,14 +98,18 @@
 - ✅ Backup PostgreSQL OTOMATIS — **keputusan Rozi 2026-08-05: scope LOCAL saja, tanpa scheduler nyata** — panduan jadwal (Windows Task Scheduler schtasks + alternatif cron/bash + retensi forfiles 7 hari) ditambahkan ke `docs/DISASTER_RECOVERY.md` section "Panduan Otomatisasi (Local Windows)". Script `backend/scripts/backup-db.js` siap diintegrasikan (exit 0/1).
 - ✅ Audit kebocoran data: TASK A errorHandler NODE_ENV guard (`92fcba5`) + leak fix `.message` 3 titik (`9dc3c7f`). Temuan audit: 95 titik, 92 AMAN, 3 BERISIKO — SEMUA di-fix.
 
-### FASE 3 — Dynamic RBAC
-- Model Prisma: `Resource` & `RolePermission` (permission matrix di DB, bukan hardcode)
-- Middleware `requirePermission()` (ganti/pelengkap `requireRole()` per-endpoint)
-- CRUD resource + permission matrix (halaman admin kelola resource & izin per role)
-- Endpoint `/api/my-permissions` (FE ambil izin user login)
-- UI matrix role-resource (tabel role × resource)
-- Sidebar dinamis (menu muncul sesuai izin)
-- Admin sebagai superuser (akses semua permission)
+### FASE 3 — Dynamic RBAC ✅ TUNTAS + MERGED KE MAIN (2026-08-06, sesi 42, HEAD `c20a864`)
+- ✅ Model Prisma: `Resource` & `RolePermission` (migration `20260805131002_add_role_permission`) + middleware `requirePermission()` + cache Map boot + invalidasi write-through — TASK 1 (`7ab97cf`)
+- ✅ CRUD permission admin (GET/POST/PUT/DELETE `/api/admin/permissions` + audit trail) + endpoint `/api/my-permissions` — TASK 2 (`7dd128a`)
+- ✅ Migrasi per modul requireRole → requirePermission (C2): akuntan, gizi, asap, mitra/kepala/admin/auditLog/bukti-lpd2m/laporanBug/pemeriksaan-bahan, laporan/* (17 file) — TASK 3a-3e
+- ✅ Anomali a (laporanAggregate AUTH-ONLY) — FIXED. Anomali b (/api-docs guard kondisional) — tercatat, keputusan Rozi tertunda
+- ✅ Seeder RBAC: 23 resource + matriks permission per role, upsert idempotent + invalidate cache
+- ✅ Fix review `c68aee4`: cache lockout (`!permissionCache.has(role)`), resource `asap-po-approval` (approval PO ASLAP pisah dari kepala-approval), regresi MITRA `asap-periode`
+- ✅ Penyempitan akses final `c20a864`: `akuntan-akun`/`akuntan-jenis-pekerjaan` (MITRA dilarang), `gizi-target` (AKUNTAN/ASLAP dilarang)
+- ✅ Full suite **590/590 PASS** + lint 0/0 + prisma valid — MERGED + PUSHED ke main
+- ⏳ UI matrix role-resource (tabel role × resource) — TASK 5 BACKLOG (butuh TASK_SELECTION)
+- ⏳ Sidebar dinamis (menu muncul sesuai izin) — BACKLOG (Layout.jsx 10+ branch `user?.role`)
+- ✅ Admin sebagai superuser (bypass di requirePermission)
 
 ### FASE 4 — Dokumentasi End-User
 - Panduan penggunaan per role (Aslap, Ahli Gizi, Akuntan, Kepala SPPG, Mitra, Admin)

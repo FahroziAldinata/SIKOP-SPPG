@@ -1,28 +1,28 @@
-# Handoff — 2026-08-05 — Sinkronisasi state files (GF-012) + Fase 2 Data Safety SELESAI TOTAL + Fase 3 RBAC INVESTIGASI
+# Handoff — 2026-08-06 (sesi 42) — FASE 3 DYNAMIC RBAC TUNTAS + MERGED + PUSHED
 
 ## Status Terakhir
-- **✅ State files DISINKRONKAN dengan git remote (2026-08-05)**: verifikasi `git log origin/main -10` membuktikan coverage cycle 2 (`682da6c`) + cycle 3 (`cb2803b`) SUDAH pushed — state files lama klaim "BELUM push" (GF-012). HEAD == origin/main `cb2803b`.
-- **Fase 2 Data Safety SELESAI TOTAL + pushed**: `9dc3c7f` (leak fix) | `343b2b0` (backup script + DISASTER_RECOVERY.md) | `92fcba5` (errorHandler NODE_ENV guard) | `cff9bab` (panduan otomatisasi local — keputusan Rozi: scope LOCAL, tanpa scheduler nyata).
-- **Coverage cycle 1-3 SELESAI + pushed**: `69d10e5` (30 endpoint) | `682da6c` (45 endpoint) | `cb2803b` (216 test) — total 558 PASS. Sisa endpoint minor = backlog non-blocker.
-- **Insiden GF-011 (RESOLVED)**: TASK A sempat hilang dari working copy → re-apply diff verbatim, commit `92fcba5`.
+- **Fase 3 RBAC SELESAI + MERGED KE MAIN + PUSHED**: 11 commit RBAC, HEAD main == origin/main == `c20a864`.
+- **Fix review `c68aee4`**: BUG 1 cache lockout (`requirePermission` reload saat `!permissionCache.has(role)` — bukan `size===0`), BUG 2 resource `aslap-po-approval` (pisah dari kepala-approval, ASLAP tak bisa akses POST /kepala/approval), regresi MITRA `aslap-periode`.
+- **Penyempitan akses final `c20a864`** (keputusan Rozi): `akuntan-akun`/`akuntan-jenis-pekerjaan` (MITRA dilarang), `gizi-target` (AKUNTAN/ASLAP dilarang, hanya AHLI_GIZI+KEPALA).
+- **Verifikasi**: 590/590 PASS (39 files), lint 0/0, prisma validate OK, migrate up-to-date (resource baru = data seed).
+- **Arsip**: DOCUMENTATION.md entry Fase 3 dibuat; plans/ + prompts/ dibersihkan (isi dihapus, .gitkeep tetap).
 
-## Next Step — FASE 3 DYNAMIC RBAC (MODE INVESTIGASI, arahan Rozi 2026-08-05)
-- **HANYA investigasi, TANPA mengubah file**: inventaris seluruh pemakaian `requireRole(...)` + `requireAuth` tanpa requireRole (tabel file/method+path/roles), analisis pola kombinasi role per modul, audit FE logic role-based (menu, route guard), lapor data mentah (jumlah endpoint, distribusi per role, variasi kombinasi).
-- Susun 23 opsi desain RBAC dinamis + trade-off (skema Prisma, middleware + caching tanpa query DB tiap request, strategi migrasi ~265 pemanggilan existing, dampak FE) — minimal Opsi A (role tetap 6 enum, permission dinamis) + Opsi B (role & permission sepenuhnya dinamis).
-- **BERHENTI setelah opsi tersusun — tunggu keputusan Rozi sebelum implementasi.**
-- Opsi lain (non-aktif): backup otomatis terjadwal (keputusan Rozi 2026-08-05: scope LOCAL, panduan di DISASTER_RECOVERY.md — SELESAI), sisa endpoint minor coverage (non-blocker), V3 Fase 4-8.
+## Next Step (sesi berikutnya, butuh TASK_SELECTION Rozi)
+1. TASK 5: UI matrix role-resource admin (kelola resource & izin per role) — endpoint BE siap
+2. Sidebar FE dinamis — Layout.jsx 10+ branch `user?.role`, butuh audit menu→permission mapping
+3. Anomali b `/api-docs` guard — keputusan Rozi (3 opsi: biarkan / selalu guard / migrasi requirePermission)
+4. V3 Fase 4-8 — backlog (docs end-user, deployment, legal, AI chatbot, notifikasi)
+5. Branch `rbac-fase3-review` dipertahankan (belum dihapus)
 
-## Pola yang Terbukti (sesi 40)
-- **AGY timeout ≠ gagal**: cek git status/diff. Model: `claude-sonnet-4-6` (dash), `gemini-3.6-flash-medium`.
-- **OpenCode CLI**: prompt via file (`.agent-pm/prompts/*.txt`) + `"$(cat file)" --auto --pure`.
-- **⚠️ GF-011 — OpenCode bisa me-revert uncommitted changes secara tak sengaja** (reset/restore) → WAJIB: cek `git status`/diff SEBELUM dan SESUDAH tiap session agent; jangan asumsikan file modified masih ada.
-- **PostgreSQL lokal**: bin di `D:\Tools_Project\PostgreSQL\18\bin` (pg_dump/pg_restore/psql/initdb/pg_ctl — TIDAK di PATH). Koneksi 5432 pakai kredensial Rozi. Test DB terpisah (bukan `sppg`) + drop setelah selesai.
-- **Test backup E2E**: initdb --auth=trust port baru (bebas kredensial) ATAU DB test di instance existing + PGPASSWORD env (jangan di argv).
-- **git apply patch**: verifikasi isi patch dulu (read_file), `git apply --check`, lalu `git apply`.
-- **Review Rozi suka bukti fisik**: output command verbatim, ukuran file, exit code, TOC dump.
+## Pola yang Terbukti (sesi 42)
+- **Test anti-bug**: revert fix sementara → test fail (buktikan bug), restore → PASS. Terbukti efektif utk cache lockout.
+- **Resource granular RBAC**: resource coarse (akuntan-master, gizi-master, aslap-master) melebarkan akses ke role yang dulu 403. Fix = resource baru per domain endpoint sensitif (akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, aslap-periode, aslap-po-approval).
+- **Seeder upsert ≠ hapus**: resource/grant yang dihapus dari definisi tetap di DB — perlu `deleteMany` manual (dipakai 3x sesi ini: ASLAP kepala-approval, MITRA aslap-master).
+- **`git push HEAD:branch` TIDAK switch branch lokal** — commit berikutnya jatuh ke branch lama (fix c68aee4 sempat ter-commit di main). Fix: `git branch -f main <old>` + checkout, tanpa reset --hard.
+- **Checkout branch bisa "hilangkan" file**: file test baru yang hanya ada di commit branch review tak muncul di working tree main — cek `git branch --show-current` sebelum edit.
 
 ## Risiko / Pitfall
+- DB test (`postgres` localhost:5432) berisi row seed RBAC lama — koreksi matriks butuh deleteMany + seed ulang, bukan hanya edit seeder.
+- Full suite ±3-4 menit (PDF tests) — background + notify, jangan foreground timeout 180s.
 - Jangan commit dump backup (`backend/backups/` — .gitignore aktif).
-- Kredensial DB: jangan print ke laporan/chat.
-- Test butuh DB seeded + JWT_SECRET + Chrome; `fileParallelism: false`.
-- Fase 2 otomatisasi backup TERBLOKIR keputusan platform — jangan mulai tanpa arahan.
+- GF-011: agent bisa revert uncommitted — cek git status sebelum/sesudah tiap session agent.
