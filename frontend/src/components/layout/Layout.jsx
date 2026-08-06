@@ -480,7 +480,7 @@ export const Layout = () => {
         backgroundColor: 'var(--bg-elevated)'
       }}>
         {/* Static Header & Home Link for Akuntan (Outside Scroll Area) */}
-        {hasPerm('akuntan-master:READ') && (
+        {user?.role === 'AKUNTAN' && hasPerm('akuntan-master:READ') && (
           <div style={{ marginBottom: '8px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
             <div style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Menu Akuntan
@@ -495,92 +495,92 @@ export const Layout = () => {
           <ul style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '6px', width: '100%' }}>
 
             {/* ASLAP Navigation */}
-            {hasPerm('aslap-master:READ') && (
+            {user?.role === 'ASLAP' && hasPerm('aslap-master:READ') && (
               <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Menu Aslap
               </li>
             )}
-            {hasPerm('aslap-master:READ') && renderLink('/aslap', 'Beranda / Dashboard', Home)}
-            {hasPerm('aslap-master:READ') && renderLink('/aslap/sekolah', 'Sekolah', BookOpen)}
-            {hasPerm('aslap-input:READ') && renderLink('/aslap/penerima-manfaat', 'Penerima Manfaat', Users)}
-            {hasPerm('aslap-po-approval:APPROVE') && renderLink('/aslap/po', 'Verifikasi PO', ClipboardCheck)}
-            {hasPerm('aslap-laporan:READ') && renderLink('/aslap/laporan', 'Laporan', FileText)}
+            {user?.role === 'ASLAP' && hasPerm('aslap-master:READ') && renderLink('/aslap', 'Beranda / Dashboard', Home)}
+            {user?.role === 'ASLAP' && hasPerm('aslap-master:READ') && renderLink('/aslap/sekolah', 'Sekolah', BookOpen)}
+            {user?.role === 'ASLAP' && hasPerm('aslap-input:READ') && renderLink('/aslap/penerima-manfaat', 'Penerima Manfaat', Users)}
+            {user?.role === 'ASLAP' && hasPerm('aslap-po-approval:APPROVE') && renderLink('/aslap/po', 'Verifikasi PO', ClipboardCheck)}
+            {user?.role === 'ASLAP' && hasPerm('aslap-laporan:READ') && renderLink('/aslap/laporan', 'Laporan', FileText)}
 
             {/* MITRA Navigation */}
-            {hasPerm('mitra-master:READ') && (
+            {user?.role === 'MITRA' && hasPerm('mitra-master:READ') && (
               <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Menu Mitra
               </li>
             )}
-            {hasPerm('mitra-master:READ') && renderLink('/mitra', 'Beranda / Dashboard', Home)}
-            {hasPerm('mitra-master:READ') && renderLink('/mitra/harga-bahan', 'Harga Bahan', BookOpen)}
-            {hasPerm('mitra-po:READ') && renderLink('/mitra/po', 'Nota Pesanan (PO)', ClipboardCheck)}
-            {hasPerm('mitra-master:READ') && renderLink('/mitra/kendaraan', 'Kendaraan Operasional', Truck)}
-            {hasPerm('mitra-po:READ') && renderLink('/mitra/laporan', 'Laporan', FileText)}
-            {hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
+            {user?.role === 'MITRA' && hasPerm('mitra-master:READ') && renderLink('/mitra', 'Beranda / Dashboard', Home)}
+            {user?.role === 'MITRA' && hasPerm('mitra-master:READ') && renderLink('/mitra/harga-bahan', 'Harga Bahan', BookOpen)}
+            {user?.role === 'MITRA' && hasPerm('mitra-po:READ') && renderLink('/mitra/po', 'Nota Pesanan (PO)', ClipboardCheck)}
+            {user?.role === 'MITRA' && hasPerm('mitra-master:READ') && renderLink('/mitra/kendaraan', 'Kendaraan Operasional', Truck)}
+            {user?.role === 'MITRA' && hasPerm('mitra-po:READ') && renderLink('/mitra/laporan', 'Laporan', FileText)}
+            {user?.role === 'MITRA' && hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
             {/* AHLI_GIZI Navigation */}
-            {hasPerm('gizi-master:READ') && (
+            {user?.role === 'AHLI_GIZI' && hasPerm('gizi-master:READ') && (
               <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Menu Gizi
               </li>
             )}
-            {hasPerm('gizi-master:READ') && renderLink('/gizi', 'Beranda / Dashboard', Home)}
-            {hasPerm('gizi-menu:READ') && renderLink('/gizi/menu-harian', 'Menu Harian', FileSpreadsheet)}
-            {hasPerm('gizi-target:READ') && renderLink('/gizi/target-gizi', 'Setup Gizi', Settings)}
-            {hasPerm('gizi-laporan:READ') && renderLink('/gizi/laporan-gizi', 'Laporan Gizi', FileText)}
+            {user?.role === 'AHLI_GIZI' && hasPerm('gizi-master:READ') && renderLink('/gizi', 'Beranda / Dashboard', Home)}
+            {user?.role === 'AHLI_GIZI' && hasPerm('gizi-menu:READ') && renderLink('/gizi/menu-harian', 'Menu Harian', FileSpreadsheet)}
+            {user?.role === 'AHLI_GIZI' && hasPerm('gizi-target:READ') && renderLink('/gizi/target-gizi', 'Setup Gizi', Settings)}
+            {user?.role === 'AHLI_GIZI' && hasPerm('gizi-laporan:READ') && renderLink('/gizi/laporan-gizi', 'Laporan Gizi', FileText)}
 
             {/* AKUNTAN Navigation (Beranda dipindah ke atas nav scroll area) */}
-            {hasPerm('akuntan-master:READ') && (
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-master:READ') && (
               <li style={{ padding: '0 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
                 Operasional
               </li>
             )}
-            {hasPerm('akuntan-master:READ') && renderLink('/akuntan/laporan/periode-setup', 'Setup Periode', Calendar)}
-            {hasPerm('akuntan-jurnal:READ') && renderLink('/akuntan/jurnal', 'Jurnal Transaksi', BookOpen)}
-            {hasPerm('mitra-po:READ') && renderLink('/akuntan/po', 'Nota Pesanan (PO)', ShoppingCart)}
-            {hasPerm('akuntan-rab:READ') && renderLink('/akuntan/anggaran-harian', 'Anggaran Harian', TrendingUp)}
-            {hasPerm('laporan-resmi:READ') && renderLink('/akuntan/dokumen-resmi', 'Dokumen Resmi', Award)}
-            {hasPerm('akuntan-upah:READ') && renderLink('/akuntan/nominatif-upah', 'Nominatif Upah', Users)}
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-master:READ') && renderLink('/akuntan/laporan/periode-setup', 'Setup Periode', Calendar)}
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-jurnal:READ') && renderLink('/akuntan/jurnal', 'Jurnal Transaksi', BookOpen)}
+            {user?.role === 'AKUNTAN' && hasPerm('mitra-po:READ') && renderLink('/akuntan/po', 'Nota Pesanan (PO)', ShoppingCart)}
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-rab:READ') && renderLink('/akuntan/anggaran-harian', 'Anggaran Harian', TrendingUp)}
+            {user?.role === 'AKUNTAN' && hasPerm('laporan-resmi:READ') && renderLink('/akuntan/dokumen-resmi', 'Dokumen Resmi', Award)}
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-upah:READ') && renderLink('/akuntan/nominatif-upah', 'Nominatif Upah', Users)}
 
-            {hasPerm('akuntan-stok:READ') && (
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-stok:READ') && (
               <li style={{ padding: '8px 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
                 Stok &amp; Gudang
               </li>
             )}
-            {hasPerm('akuntan-stok:READ') && renderLink('/akuntan/saldo-awal-barang', 'Input Saldo Awal', PlusCircle)}
-            {hasPerm('akuntan-stok:READ') && renderLink('/akuntan/mutasi-stok', 'Mutasi Stok', RefreshCw)}
-            {hasPerm('akuntan-stok:READ') && renderLink('/akuntan/validasi-stok', 'Validasi Stok', ClipboardCheck)}
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-stok:READ') && renderLink('/akuntan/saldo-awal-barang', 'Input Saldo Awal', PlusCircle)}
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-stok:READ') && renderLink('/akuntan/mutasi-stok', 'Mutasi Stok', RefreshCw)}
+            {user?.role === 'AKUNTAN' && hasPerm('akuntan-stok:READ') && renderLink('/akuntan/validasi-stok', 'Validasi Stok', ClipboardCheck)}
 
-            {hasPerm('laporan-resmi:READ') && (
+            {user?.role === 'AKUNTAN' && hasPerm('laporan-resmi:READ') && (
               <li style={{ padding: '8px 14px 4px 14px', fontSize: '9px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', borderTop: '1px solid var(--border)', marginTop: '8px' }}>
                 Laporan
               </li>
             )}
-            {hasPerm('laporan-resmi:READ') && renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
-            {hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
+            {user?.role === 'AKUNTAN' && hasPerm('laporan-resmi:READ') && renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
+            {user?.role === 'AKUNTAN' && hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
             {/* KEPALA_SPPG Navigation */}
-            {hasPerm('kepala-approval:READ') && (
+            {user?.role === 'KEPALA_SPPG' && hasPerm('kepala-approval:READ') && (
               <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Menu Kepala
               </li>
             )}
-            {hasPerm('kepala-approval:READ') && renderLink('/kepala', 'Beranda / Dashboard', Home)}
-            {hasPerm('kepala-approval:APPROVE') && renderLink('/kepala/approval', 'Approval / Persetujuan', CheckSquare)}
-            {hasPerm('laporan-resmi:READ') && renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
+            {user?.role === 'KEPALA_SPPG' && hasPerm('kepala-approval:READ') && renderLink('/kepala', 'Beranda / Dashboard', Home)}
+            {user?.role === 'KEPALA_SPPG' && hasPerm('kepala-approval:APPROVE') && renderLink('/kepala/approval', 'Approval / Persetujuan', CheckSquare)}
+            {user?.role === 'KEPALA_SPPG' && hasPerm('laporan-resmi:READ') && renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
 
             {/* ADMIN Navigation */}
-            {hasPerm('admin-user:READ') && (
+            {user?.role === 'ADMIN' && hasPerm('admin-user:READ') && (
               <li style={{ padding: '0 14px', marginBottom: '8px', fontSize: '10px', fontWeight: '800', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Menu Admin
               </li>
             )}
-            {hasPerm('admin-user:READ') && renderLink('/admin', 'Beranda / Dashboard', Home)}
-            {hasPerm('admin-user:READ') && renderLink('/admin/users', 'Kelola User', Users)}
-            {hasPerm('admin-permission:READ') && renderLink('/admin/permissions', 'Kelola Akses & Permission', ShieldCheck)}
-            {hasPerm('laporan-bug:READ') && renderLink('/admin/laporan-bug', 'Laporan Bug', Bug)}
-            {hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
+            {user?.role === 'ADMIN' && hasPerm('admin-user:READ') && renderLink('/admin', 'Beranda / Dashboard', Home)}
+            {user?.role === 'ADMIN' && hasPerm('admin-user:READ') && renderLink('/admin/users', 'Kelola User', Users)}
+            {user?.role === 'ADMIN' && hasPerm('admin-permission:READ') && renderLink('/admin/permissions', 'Kelola Akses & Permission', ShieldCheck)}
+            {user?.role === 'ADMIN' && hasPerm('laporan-bug:READ') && renderLink('/admin/laporan-bug', 'Laporan Bug', Bug)}
+            {user?.role === 'ADMIN' && hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
           </ul>
         </nav>
