@@ -82,7 +82,7 @@ function App() {
             <Route
               path="aslap"
               element={
-                <ProtectedRoute allowedRoles={['ASLAP']} requiredPerm="aslap-master:READ">
+                <ProtectedRoute requiredPerm="aslap-master:READ">
                   <AslapDashboard />
                 </ProtectedRoute>
               }
@@ -90,7 +90,7 @@ function App() {
             <Route
               path="aslap/penerima-manfaat"
               element={
-                <ProtectedRoute allowedRoles={['ASLAP']}>
+                <ProtectedRoute requiredPerm="aslap-input:READ">
                   <PenerimaManfaatPage />
                 </ProtectedRoute>
               }
@@ -98,7 +98,7 @@ function App() {
             <Route
               path="aslap/sekolah"
               element={
-                <ProtectedRoute allowedRoles={['ASLAP']}>
+                <ProtectedRoute requiredPerm="aslap-master:READ">
                   <SekolahPage />
                 </ProtectedRoute>
               }
@@ -106,7 +106,7 @@ function App() {
             <Route
               path="aslap/po"
               element={
-                <ProtectedRoute allowedRoles={['ASLAP']}>
+                <ProtectedRoute requiredPerm="aslap-po-approval:APPROVE">
                   <AslapPoPage />
                 </ProtectedRoute>
               }
@@ -114,7 +114,7 @@ function App() {
             <Route
               path="aslap/laporan"
               element={
-                <ProtectedRoute allowedRoles={['ASLAP', 'KEPALA_SPPG', 'AKUNTAN']}>
+                <ProtectedRoute requiredPerm="aslap-laporan:READ">
                   <AslapLaporanPage />
                 </ProtectedRoute>
               }
@@ -123,7 +123,7 @@ function App() {
             <Route
               path="mitra"
               element={
-                <ProtectedRoute allowedRoles={['MITRA']} requiredPerm="mitra-master:READ">
+                <ProtectedRoute requiredPerm="mitra-master:READ">
                   <MitraDashboard />
                 </ProtectedRoute>
               }
@@ -131,7 +131,7 @@ function App() {
             <Route
               path="mitra/harga-bahan"
               element={
-                <ProtectedRoute allowedRoles={['MITRA']}>
+                <ProtectedRoute requiredPerm="mitra-master:READ">
                   <HargaBahanPage />
                 </ProtectedRoute>
               }
@@ -139,7 +139,7 @@ function App() {
             <Route
               path="mitra/po"
               element={
-                <ProtectedRoute allowedRoles={['MITRA']}>
+                <ProtectedRoute requiredPerm="mitra-po:READ">
                   <MitraPoPage />
                 </ProtectedRoute>
               }
@@ -147,7 +147,7 @@ function App() {
             <Route
               path="mitra/kendaraan"
               element={
-                <ProtectedRoute allowedRoles={['MITRA']}>
+                <ProtectedRoute requiredPerm="mitra-master:READ">
                   <KendaraanPage />
                 </ProtectedRoute>
               }
@@ -155,7 +155,7 @@ function App() {
             <Route
               path="mitra/laporan"
               element={
-                <ProtectedRoute allowedRoles={['MITRA', 'AKUNTAN', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="mitra-po:READ">
                   <MitraLaporanPage />
                 </ProtectedRoute>
               }
@@ -165,7 +165,7 @@ function App() {
             <Route
               path="gizi"
               element={
-                <ProtectedRoute allowedRoles={['AHLI_GIZI']}>
+                <ProtectedRoute requiredPerm="gizi-master:READ">
                   <GiziDashboard />
                 </ProtectedRoute>
               }
@@ -173,16 +173,16 @@ function App() {
             <Route
               path="gizi/menu-harian"
               element={
-                <ProtectedRoute allowedRoles={['AHLI_GIZI']}>
+                <ProtectedRoute requiredPerm="gizi-menu:READ">
                   <MenuHarianPage />
                 </ProtectedRoute>
               }
             />
-            <Route path="gizi/target-gizi" element={<ProtectedRoute allowedRoles={['AHLI_GIZI']}><MasterTargetGiziPage /></ProtectedRoute>} />
+            <Route path="gizi/target-gizi" element={<ProtectedRoute requiredPerm="gizi-target:READ"><MasterTargetGiziPage /></ProtectedRoute>} />
             <Route
               path="gizi/laporan-gizi"
               element={
-                <ProtectedRoute allowedRoles={['AHLI_GIZI', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="gizi-laporan:READ">
                   <LaporanGiziPage />
                 </ProtectedRoute>
               }
@@ -192,7 +192,7 @@ function App() {
             <Route
               path="akuntan"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']} requiredPerm="akuntan-master:READ">
+                <ProtectedRoute requiredPerm="akuntan-master:READ">
                   <AkuntanDashboard />
                 </ProtectedRoute>
               }
@@ -200,7 +200,7 @@ function App() {
             <Route
               path="akuntan/laporan/periode-setup"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="akuntan-master:READ">
                   <PeriodeSetupPage />
                 </ProtectedRoute>
               }
@@ -208,7 +208,7 @@ function App() {
             <Route
               path="akuntan/jurnal"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-jurnal:READ">
                   <JurnalTransaksiPage />
                 </ProtectedRoute>
               }
@@ -216,7 +216,7 @@ function App() {
             <Route
               path="akuntan/po"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="mitra-po:READ">
                   <AkuntanPoPage />
                 </ProtectedRoute>
               }
@@ -224,7 +224,7 @@ function App() {
             <Route
               path="akuntan/laporan"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -232,7 +232,7 @@ function App() {
             <Route
               path="akuntan/laporan/stock-barang"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -240,7 +240,7 @@ function App() {
             <Route
               path="akuntan/laporan/kebutuhan-belanja-bahan"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -248,7 +248,7 @@ function App() {
             <Route
               path="akuntan/validasi-stok"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-stok:READ">
                   <ValidasiStokPage />
                 </ProtectedRoute>
               }
@@ -256,7 +256,7 @@ function App() {
             <Route
               path="akuntan/rab-harian"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-rab:READ">
                   <RabHarianPage />
                 </ProtectedRoute>
               }
@@ -264,7 +264,7 @@ function App() {
             <Route
               path="akuntan/anggaran-harian"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-rab:READ">
                   <RabHarianPage />
                 </ProtectedRoute>
               }
@@ -272,7 +272,7 @@ function App() {
             <Route
               path="akuntan/saldo-awal-barang"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-stok:READ">
                   <SaldoAwalBarangPage />
                 </ProtectedRoute>
               }
@@ -280,7 +280,7 @@ function App() {
             <Route
               path="akuntan/mutasi-stok"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-stok:READ">
                   <MutasiStokPage />
                 </ProtectedRoute>
               }
@@ -288,7 +288,7 @@ function App() {
             <Route
               path="akuntan/dokumen-resmi"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <DokumenResmiPage />
                 </ProtectedRoute>
               }
@@ -296,7 +296,7 @@ function App() {
             <Route
               path="akuntan/laporan/per-periode"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -304,7 +304,7 @@ function App() {
             <Route
               path="akuntan/laporan/per-bulan"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -312,7 +312,7 @@ function App() {
             <Route
               path="akuntan/laporan/harian"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -320,7 +320,7 @@ function App() {
             <Route
               path="akuntan/laporan/lra"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -328,7 +328,7 @@ function App() {
             <Route
               path="akuntan/laporan/lpd2m"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -336,7 +336,7 @@ function App() {
             <Route
               path="akuntan/laporan/bapsd"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN', 'KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -344,7 +344,7 @@ function App() {
             <Route
               path="akuntan/laporan/sptj"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -352,7 +352,7 @@ function App() {
             <Route
               path="akuntan/laporan/btt"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="laporan-resmi:READ">
                   <LaporanPage />
                 </ProtectedRoute>
               }
@@ -360,7 +360,7 @@ function App() {
             <Route
               path="akuntan/nominatif-upah"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN']}>
+                <ProtectedRoute requiredPerm="akuntan-upah:READ">
                   <NominatifUpahPage />
                 </ProtectedRoute>
               }
@@ -370,7 +370,7 @@ function App() {
             <Route
               path="kepala"
               element={
-                <ProtectedRoute allowedRoles={['KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="kepala-approval:READ">
                   <KepalaDashboard />
                 </ProtectedRoute>
               }
@@ -378,7 +378,7 @@ function App() {
             <Route
               path="kepala/approval"
               element={
-                <ProtectedRoute allowedRoles={['KEPALA_SPPG']}>
+                <ProtectedRoute requiredPerm="kepala-approval:APPROVE">
                   <ApprovalPage />
                 </ProtectedRoute>
               }
@@ -388,7 +388,7 @@ function App() {
             <Route
               path="admin"
               element={
-                <ProtectedRoute allowedRoles={['ADMIN']}>
+                <ProtectedRoute requiredPerm="admin-user:READ">
                   <AdminDashboard />
                 </ProtectedRoute>
               }
@@ -396,7 +396,7 @@ function App() {
             <Route
               path="admin/users"
               element={
-                <ProtectedRoute allowedRoles={['ADMIN']}>
+                <ProtectedRoute requiredPerm="admin-user:READ">
                   <UserManagementPage />
                 </ProtectedRoute>
               }
@@ -404,7 +404,7 @@ function App() {
             <Route
               path="admin/permissions"
               element={
-                <ProtectedRoute allowedRoles={['ADMIN']}>
+                <ProtectedRoute requiredPerm="admin-permission:READ">
                   <RolePermissionMatrixPage />
                 </ProtectedRoute>
               }
@@ -412,7 +412,7 @@ function App() {
             <Route
               path="admin/laporan-bug"
               element={
-                <ProtectedRoute allowedRoles={['ADMIN']}>
+                <ProtectedRoute requiredPerm="laporan-bug:READ">
                   <LaporanBugPage />
                 </ProtectedRoute>
               }
@@ -422,7 +422,7 @@ function App() {
             <Route
               path="audit-log"
               element={
-                <ProtectedRoute allowedRoles={['AKUNTAN', 'MITRA', 'ADMIN']}>
+                <ProtectedRoute requiredPerm="audit-log:READ">
                   <AuditLogPage />
                 </ProtectedRoute>
               }
