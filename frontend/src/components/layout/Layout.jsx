@@ -517,7 +517,6 @@ export const Layout = () => {
             {user?.role === 'MITRA' && hasPerm('mitra-po:READ') && renderLink('/mitra/po', 'Nota Pesanan (PO)', ClipboardCheck)}
             {user?.role === 'MITRA' && hasPerm('mitra-master:READ') && renderLink('/mitra/kendaraan', 'Kendaraan Operasional', Truck)}
             {user?.role === 'MITRA' && hasPerm('mitra-po:READ') && renderLink('/mitra/laporan', 'Laporan', FileText)}
-            {user?.role === 'MITRA' && hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
             {/* AHLI_GIZI Navigation */}
             {user?.role === 'AHLI_GIZI' && hasPerm('gizi-master:READ') && (
@@ -558,7 +557,6 @@ export const Layout = () => {
               </li>
             )}
             {user?.role === 'AKUNTAN' && hasPerm('laporan-resmi:READ') && renderLink('/akuntan/laporan', 'Laporan Keuangan', FileText)}
-            {user?.role === 'AKUNTAN' && hasPerm('audit-log:READ') && renderLink('/audit-log', 'Audit Log', History)}
 
             {/* KEPALA_SPPG Navigation */}
             {user?.role === 'KEPALA_SPPG' && hasPerm('kepala-approval:READ') && (

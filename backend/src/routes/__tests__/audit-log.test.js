@@ -35,21 +35,18 @@ describe('GET /api/audit-log — akses role + filter + pagination', () => {
     await prismaDb.$disconnect();
   });
 
-  test('AKUNTAN dapat mengakses -> 200 + data + pagination', async () => {
+  test('AKUNTAN tidak bisa mengakses -> 403', async () => {
     const res = await request(app)
       .get('/api/audit-log')
       .set('Authorization', `Bearer ${await login('akuntan')}`);
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body.data)).toBe(true);
-    expect(res.body.pagination).toMatchObject({ page: 1, limit: 20 });
-    expect(res.body.pagination.total).toBeGreaterThanOrEqual(2);
+    expect(res.status).toBe(403);
   });
 
-  test('MITRA dapat mengakses -> 200', async () => {
+  test('MITRA tidak bisa mengakses -> 403', async () => {
     const res = await request(app)
       .get('/api/audit-log')
       .set('Authorization', `Bearer ${await login('mitra')}`);
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(403);
   });
 
   test('ADMIN dapat mengakses -> 200', async () => {
@@ -74,7 +71,7 @@ describe('GET /api/audit-log — akses role + filter + pagination', () => {
   });
 
   test('Filter aksi + userId + resource mengembalikan baris yang sesuai', async () => {
-    const token = await login('akuntan');
+    const token = await login('admin');
     const res = await request(app)
       .get('/api/audit-log')
       .set('Authorization', `Bearer ${token}`)
@@ -88,7 +85,7 @@ describe('GET /api/audit-log — akses role + filter + pagination', () => {
   });
 
   test('Filter tanggal rentang bekerja', async () => {
-    const token = await login('akuntan');
+    const token = await login('admin');
     const res = await request(app)
       .get('/api/audit-log')
       .set('Authorization', `Bearer ${token}`)
@@ -98,7 +95,7 @@ describe('GET /api/audit-log — akses role + filter + pagination', () => {
   });
 
   test('Pagination limit=1 -> 1 baris + totalPages sesuai', async () => {
-    const token = await login('akuntan');
+    const token = await login('admin');
     const res = await request(app)
       .get('/api/audit-log')
       .set('Authorization', `Bearer ${token}`)
@@ -112,7 +109,7 @@ describe('GET /api/audit-log — akses role + filter + pagination', () => {
   test('aksi tidak valid -> 400', async () => {
     const res = await request(app)
       .get('/api/audit-log')
-      .set('Authorization', `Bearer ${await login('akuntan')}`)
+      .set('Authorization', `Bearer ${await login('admin')}`)
       .query({ aksi: 'HACK' });
     expect(res.status).toBe(400);
   });

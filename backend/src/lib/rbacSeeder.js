@@ -76,7 +76,6 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'AKUNTAN', resource: 'laporan-resmi', aksi: 'CREATE' },
   { role: 'AKUNTAN', resource: 'laporan-resmi', aksi: 'DELETE' },
   { role: 'AKUNTAN', resource: 'laporan-resmi', aksi: 'EXPORT' },
-  { role: 'AKUNTAN', resource: 'audit-log', aksi: 'READ' },
   { role: 'AKUNTAN', resource: 'laporan-bug', aksi: 'CREATE' },
 
   // KEPALA_SPPG
@@ -166,7 +165,6 @@ const RBAC_ROLE_PERMISSIONS = [
   // via resource granular aslap-periode, TANPA membuka kategori/sekolah/posyandu (dulu 403 utk MITRA)
   { role: 'MITRA', resource: 'aslap-periode', aksi: 'READ' },
   { role: 'MITRA', resource: 'akuntan-master', aksi: 'READ' },
-  { role: 'MITRA', resource: 'audit-log', aksi: 'READ' },
   { role: 'MITRA', resource: 'laporan-bug', aksi: 'CREATE' },
 
   // ADMIN

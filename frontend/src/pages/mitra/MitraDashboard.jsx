@@ -324,7 +324,7 @@ export const MitraDashboard = () => {
         ) : notifikasi.length === 0 ? (
           <p style={{ color: 'var(--color-success, #16a34a)', fontSize: 14, margin: 0 }}>✓ Tidak ada notifikasi saat ini</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: '240px', overflowY: 'auto' }}>
             {notifikasi.map(n => (
               <div
                 key={n.id}

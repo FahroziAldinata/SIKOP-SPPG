@@ -17,7 +17,7 @@ export const PeriodeListCard = ({ periodeList = [], user, onRequestClose }) => {
             {periodeList.length === 0 ? (
                 <p style={{ color: 'var(--text-muted)', fontSize: '14px', margin: 0 }}>Belum ada periode yang terdaftar.</p>
             ) : (
-                <div style={{ overflowX: 'auto' }}>
+                <div style={{ overflowX: 'auto', maxHeight: '265px', overflowY: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                         <thead>
                             <tr style={{ borderBottom: '2px solid var(--border)', textAlign: 'left' }}>
