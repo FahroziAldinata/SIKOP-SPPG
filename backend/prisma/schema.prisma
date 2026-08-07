@@ -337,6 +337,8 @@ model User {
   poDiterima            TransaksiPembelian[]         @relation("AslapTerimaPO")
   poItemUpdated         TransaksiPembelianItem[]     @relation("MitraUpdatePOItem")
   buktiLpd2m            DokumenBuktiLpd2m[]
+  chatApiKey            ChatApiKey?
+  chatLogs              ChatLog[]
 
   @@index([role])
 }
@@ -1288,5 +1290,36 @@ model RolePermission {
   @@index([role])
 }
 
+// -----------------------------------------------------------------------------
+// CHATBOT — API Key & Log (Fase 7 Step 1)
+// -----------------------------------------------------------------------------
 
+// Menyimpan API key enkripsi per user (1 user = 1 key aktif per provider).
+// apiKeyEncrypted disimpan dalam format "iv:tag:ciphertext" via AES-256-GCM.
+model ChatApiKey {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider        String   // 'gemini' | 'groq' | 'openai'
+  apiKeyEncrypted String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
 
+// Menyimpan histori percakapan chatbot per user.
+model ChatLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pertanyaan   String
+  jawaban      String
+  roleSnapshot String   // snapshot req.user.role saat chat terjadi
+  provider     String
+  model        String
+  toolCalls    Json?
+  status       String   // 'success' | 'error'
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
