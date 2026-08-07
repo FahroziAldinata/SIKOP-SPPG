@@ -2,6 +2,11 @@
 
 ## Log Keputusan Arsitektur & Desain
 
+### [2026-08-07] - Cleanup Wajib plans/ + prompts/ setelah Approval + Archive
+- **Keputusan**: Setelah Rozi approve task dan task masuk DOCUMENTATION_ARCHIVE, isi folder `.agent-pm/plans/` DAN `.agent-pm/prompts/` WAJIB dikosongkan (sisakan `.gitkeep` saja) — tanpa pengecualian.
+- **Alasan**: File kerja sementara menumpuk lintas sesi; kontennya sudah terwakili di DOCUMENTATION.md + state files. Instruksi eksplisit Rozi 2026-08-07.
+- **Status**: DITERAPKAN 2026-08-07 — tercatat di SOUL.md Workflow Baku 0; file Fase 4 + Fase 5 dibersihkan.
+
 ### [2026-07-03] - Flat Router Pattern (Monolith)
 - **Keputusan**: Menggunakan Flat Router Pattern di Express.js tanpa Service Layer, Repository Pattern, atau Controller terpisah. Logika bisnis langsung berada di dalam route handlers (`src/routes/*.js`).
 - **Alasan**: Menjaga kesederhanaan codebase dan kecepatan eksekusi, serta mempermudah navigasi code tanpa abstraction layer yang tidak diperlukan pada monolith SPPG.

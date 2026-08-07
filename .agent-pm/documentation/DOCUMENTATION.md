@@ -257,6 +257,24 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-07 (sesi 44-45) — Fase 4 (dokumentasi end-user) + Fase 5 (runbook deployment) ✅
+
+### Fase 4 — Dokumentasi End-User ✅ TUNTAS + MERGED (sesi 44, HEAD `660dde4`)
+- **Inventaris/audit fitur per role** — draft v2 `2026-08-07-fase4-audit-dokumentasi-enduser-v2.md`, APPROVED Rozi. Data: grant per role (rbacSeeder.js), menu+requiredPerm (App.jsx/Layout.jsx), fitur, alur kerja, gap.
+- **Screenshot alur tiap modul** — 35 screenshot per role (termasuk versi scroll-fix `66320ea` utk periode-setup & mitra).
+- **Prosedur support** — `docs/user-guide/PROSEDUR-SUPPORT.md` (troubleshooting umum, kontak, eskalasi).
+- **RBAC audit-log fix** `ac472bf`: akses GET /api/audit-log dicabut dari MITRA/AKUNTAN (khusus ADMIN) + scroll fix PeriodeListCard & MitraDashboard.
+- **Merge `d5531a5`** `--no-ff`: branch `docs/fase4-audit-revisi` → main. Test **590/590 PASS** (dokumentasi murni, 0 regresi). Branch dihapus (lokal+remote).
+
+### Fase 5 — Runbook Deployment Production ✅ (sesi 45, commit `324e94f`) — DOKUMENTASI SAJA
+- **Keputusan Rozi**: Fase 5 skip implementasi produksi — cukup dokumen langkah "kalau project dipakai production".
+- **Deliverable**: `docs/DEPLOYMENT.md` 159 → 347 baris (+215/-27), 1 file tanpa file baru: Platform Database (Supabase PgBouncer 6543 runtime / direct 5432 migrasi), Setup Env Production Terpisah (contoh `.env.production`, `openssl rand -hex 64`, HTTPS wajib), Setup Domain & HTTPS (CNAME/apex Vercel+Railway, redirect 301 + headers), Healthcheck & Uptime Monitoring (`GET /api/health` + UptimeRobot/BetterStack — **langkah saat produksi, belum diimplementasikan**), Matrix Env Dev vs Prod (8 KEY), Deploy Checklist, Ops & Pemulihan (link DISASTER_RECOVERY, rotasi JWT, rollback).
+- **Fix drift factual**: klaim `trust proxy` "belum di-set" → SUDAH di-set (`backend/src/app.js:29`).
+- **Verifikasi OpenCode 5/5 PASS** (scope bersih, 0 duplikasi, konsisten fakta repo). 0 perubahan kode produksi.
+- **Aturan baru Rozi (2026-08-07)**: setelah APPROVE + DOCUMENTATION_ARCHIVE → WAJIB kosongkan isi `plans/` + `prompts/` (tercatat di SOUL.md Workflow Baku 0).
+
+---
+
 ## Catatan Umum
 
 - **AGY**: Mode `-p` = text-only. Butuh `-i` + PTY untuk eksekusi tool. Settings di `C:\Users\Administrator\.gemini\antigravity-cli\settings.json`

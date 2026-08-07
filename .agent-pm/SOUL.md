@@ -204,11 +204,11 @@ Hermes hanya:
 
 ## Workflow Baku (WAJIB)
 
-### 0. CLEANUP — Dokumentasi 1 file + hapus prompts/ tiap task selesai
+### 0. CLEANUP — Arsip DOCUMENTATION.md + BERSIHKAN plans/ & prompts/ tiap task selesai (aturan Rozi 2026-08-07)
 - Dokumentasi final cukup di `documentation/DOCUMENTATION.md` — SATU file mencakup semua task
 - Jangan bikin file summary per-task — nanti numpuk
-- Folder `.agent-pm/prompts/` adalah prompt sementara — WAJIB dikosongkan setelah task masuk DOCUMENTATION_ARCHIVE
-- Jangan commit file kerja sementara
+- Setelah Rozi APPROVE + task masuk DOCUMENTATION_ARCHIVE: **WAJIB kosongkan isi folder `.agent-pm/plans/` DAN `.agent-pm/prompts/`** (file kerja sementara), sisakan `.gitkeep` — tanpa pengecualian, termasuk file yang terlihat "penting" (kontennya sudah terwakili di DOCUMENTATION.md / state files)
+- Jangan commit file kerja sementara (plans/ + prompts/ sudah di-gitignore)
 
 ### A. Siklus AUTOMATION_CYCLE (1 task = 1 cycle)
 ```

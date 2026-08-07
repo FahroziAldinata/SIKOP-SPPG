@@ -113,7 +113,7 @@
 - ✅ Admin sebagai superuser (bypass di requirePermission)
 
 ### FASE 4 — Dokumentasi End-User ✅ TUNTAS + MERGED KE MAIN (2026-08-07, sesi 44, HEAD `d5531a5`)
-- ✅ **Inventaris/audit fitur per role** — draft v2 `2026-08-07-fase4-audit-dokumentasi-enduser-v2.md`, APPROVED Rozi. Data: grant per role (rbacSeeder.js), menu+requiredPerm (App.jsx/Layout.jsx), fitur, alur kerja, gap.
+- ✅ **Inventaris/audit fitur per role** — draft v2 `2026-08-07-fase4-audit-dokumentasi-enduser-v2.md` APPROVED Rozi (file plan dibersihkan 2026-08-07 sesuai aturan cleanup — konten terarsip di DOCUMENTATION.md). Data: grant per role (rbacSeeder.js), menu+requiredPerm (App.jsx/Layout.jsx), fitur, alur kerja, gap.
 - ✅ **Screenshot alur tiap modul** — 35 screenshot per role (termasuk versi scroll-fix 66320ea utk periode-setup & mitra).
 - ✅ **Prosedur support** — `docs/user-guide/PROSEDUR-SUPPORT.md` (troubleshooting umum, kontak, eskalasi).
 - ✅ **Merge `d5531a5`** `--no-ff`: branch `docs/fase4-audit-revisi` → main + RBAC audit-log fix `ac472bf` (audit-log HANYA ADMIN) — keduanya TERPUSH + branch dihapus. Test **590/590 PASS**.
