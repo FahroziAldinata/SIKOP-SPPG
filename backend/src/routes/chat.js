@@ -14,7 +14,7 @@ const express = require('express');
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
 const prisma = require('../lib/prisma');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
 const { logger } = require('../lib/logger');
 const { encrypt, decrypt } = require('../lib/chat/encryption');
 const { chatCompletion } = require('../lib/chat/providers/openaiCompatible');
@@ -121,7 +121,7 @@ function buildSystemPrompt(role) {
 // POST /api/chat/api-key — simpan/upsert API key (terenkripsi)
 // ---------------------------------------------------------------------------
 
-router.post('/api-key', requireAuth, async (req, res) => {
+router.post('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async (req, res) => {
   const parsed = apiKeyBodySchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
@@ -151,7 +151,7 @@ router.post('/api-key', requireAuth, async (req, res) => {
 // GET /api/chat/api-key — ambil info key (masked)
 // ---------------------------------------------------------------------------
 
-router.get('/api-key', requireAuth, async (req, res) => {
+router.get('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async (req, res) => {
   const userId = req.user.sub;
 
   try {
@@ -184,7 +184,7 @@ router.get('/api-key', requireAuth, async (req, res) => {
 // DELETE /api/chat/api-key — hapus key user
 // ---------------------------------------------------------------------------
 
-router.delete('/api-key', requireAuth, async (req, res) => {
+router.delete('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async (req, res) => {
   const userId = req.user.sub;
 
   try {
@@ -200,7 +200,7 @@ router.delete('/api-key', requireAuth, async (req, res) => {
 // POST /api/chat — kirim pesan ke AI, simpan ChatLog
 // ---------------------------------------------------------------------------
 
-router.post('/', requireAuth, chatLimiter, async (req, res) => {
+router.post('/', requireAuth, requirePermission('chatbot', 'READ'), chatLimiter, async (req, res) => {
   const parsed = chatBodySchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });

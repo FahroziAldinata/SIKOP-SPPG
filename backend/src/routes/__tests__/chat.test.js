@@ -229,6 +229,16 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(401);
     });
 
+    test('200 — role dengan grant chatbot:READ tetap mendapat respons normal (requirePermission tidak memblokir)', async () => {
+      const res = await request(app)
+        .get('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAslap}`);
+
+      // ASLAP punya grant chatbot:READ — harus lolos requirePermission, bukan 403
+      expect(res.status).not.toBe(403);
+      expect([200, 404]).toContain(res.status);
+    });
+
     test('200 — mengembalikan provider, baseUrl, model, dan apiKeyMasked (4 karakter + ****)', async () => {
       const RAW_KEY = 'sk-openai-test-key-12345678';
       const BASE_URL = 'https://api.openai.com/v1';
