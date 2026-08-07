@@ -41,8 +41,11 @@ async function chatCompletion({ baseUrl, apiKey, model, messages }) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      // JANGAN log body yang mengandung apiKey atau pesan user
-      body: JSON.stringify({ model, messages }),
+      // JANGAN log body yang mengandung apiKey atau pesan user.
+      // stream:false eksplisit — OpenAI-compatible spec default non-streaming,
+      // tapi sebagian proxy (mis. 9router lokal) default streaming (SSE) yang
+      // membuat response.json() di bawah gagal.
+      body: JSON.stringify({ model, messages, stream: false }),
       signal: controller.signal
     });
 
