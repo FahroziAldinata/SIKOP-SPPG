@@ -1,6 +1,6 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: Fase 4 dokumentasi end-user TUNTAS + RBAC audit-log fix (2026-08-07, sesi 44). HEAD main == origin/main == `d5531a5`.**
+**Scope Aktif: Fase 4 dokumentasi end-user TUNTAS + RBAC audit-log fix (2026-08-07, sesi 44). HEAD main == origin/main == `660dde4`.**
 
 ## Sesi 44 (2026-08-07) — MERGE docs/fase4 + RBAC audit-log fix; keduanya di main ✅
 - **RBAC audit-log HANYA ADMIN** (`ac472bf`, fix/periode-notifikasi-scroll-mitra-auditlog): cabut akses GET /api/audit-log dari MITRA/AKUNTAN (khusus ADMIN), + scroll fix PeriodeListCard & MitraDashboard (maxHeight + overflowY).

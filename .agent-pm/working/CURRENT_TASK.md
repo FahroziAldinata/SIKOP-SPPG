@@ -1,6 +1,6 @@
 # CURRENT TASK — 2026-08-07 (sesi 44) — FASE 4 DOKUMENTASI END-USER TUNTAS
 
-## Status: ✅ FASE 4 SELESAI + MERGED KE MAIN (HEAD `d5531a5`)
+## Status: ✅ FASE 4 SELESAI + MERGED KE MAIN (HEAD `660dde4`)
 
 - **RBAC audit-log HANYA ADMIN** (`ac472bf`): akses GET /api/audit-log dicabut dari MITRA/AKUNTAN (khusus ADMIN) + scroll fix PeriodeListCard & MitraDashboard (maxHeight + overflowY).
 - **Fase 4 dokumentasi end-user SELESAI + APPROVED**: inventaris fitur per role + 35 screenshot + prosedur support. Draft v2 `.agent-pm/plans/2026-08-07-fase4-audit-dokumentasi-enduser-v2.md`.
