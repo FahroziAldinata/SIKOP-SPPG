@@ -47,24 +47,6 @@
 				"runOptions": {
 					"runOn": "folderOpen"
 				}
-			},
-			{
-				"label": "Hermes",
-				"type": "shell",
-				"command": "",
-				"options": {
-					"cwd": "${workspaceFolder}"
-				},
-				"presentation": {
-					"reveal": "always",
-					"panel": "dedicated",
-					"group": "hermes",
-					"clear": false
-				},
-				"problemMatcher": [],
-				"runOptions": {
-					"runOn": "folderOpen"
-				}
 			}
 		]
 	}
