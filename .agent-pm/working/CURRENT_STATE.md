@@ -1,6 +1,15 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: RBAC Fase 3 CLOSED (2026-08-07, sesi 44). HEAD main == origin/main == `5ce2116`.**
+**Scope Aktif: Fase 4 dokumentasi end-user TUNTAS + RBAC audit-log fix (2026-08-07, sesi 44). HEAD main == origin/main == `d5531a5`.**
+
+## Sesi 44 (2026-08-07) — MERGE docs/fase4 + RBAC audit-log fix; keduanya di main ✅
+- **RBAC audit-log HANYA ADMIN** (`ac472bf`, fix/periode-notifikasi-scroll-mitra-auditlog): cabut akses GET /api/audit-log dari MITRA/AKUNTAN (khusus ADMIN), + scroll fix PeriodeListCard & MitraDashboard (maxHeight + overflowY).
+- **Scroll fix 66320ea**: screenshot periode-setup & mitra versi scroll-fix (bukan kontrol, tidak diubah di merge).
+- **Fase 4 dokumentasi end-user SELESAI + APPROVED** (`48f9843` di branch docs): inventaris fitur per role + 35 screenshot + prosedur support. Draft v2 `2026-08-07-fase4-audit-dokumentasi-enduser-v2.md`.
+- **Merge `d5531a5`** `--no-ff`: docs/fase4-audit-revisi ke main. Artefak di main: screenshot scroll-fix (akuntan-laporan-periode-setup.png 132509 B, mitra.png 143155 B), draft v2, PROSEDUR-SUPPORT.md. Test **590/590 PASS** (0 regresi, dokumentasi murni).
+- **Branch dihapus** (lokal + remote)`: fix/periode-notifikasi-scroll-mitra-auditlog` & `docs/fase4-audit-revisi`. `git branch -a | grep fix/periode|docs/fase4` kosong.
+- Backlog aktif V3 Fase 4 selesai; fase berikutnya: Fase 5 Deployment & env production.
+- Model: [Hermes oc/deepseek-v4-flash-free] + [OpenCode deepseek-v4-flash-free utk verify/audit].
 
 ## Sesi 44 (2026-08-07) — RBAC Fase 3 TUTUP: migrasi route FE + /api-docs guard + OpenAPI RBAC + audit seeder ✅
 - **Commit `3135fef`**: migrasi seluruh route `App.jsx` dari `allowedRoles` → `requiredPerm` (RBAC dinamis) — 41 route non-pilot + 3 pilot, `/setting` auth-only. 6/6 smoke role-route PASS, build/lint 0 error, browser manual PASS (Rozi).

@@ -112,10 +112,11 @@
 - ✅ UI matrix role-resource (TASK 5) — **CLOSED (Verified & Approved) sesi 44 (2026-08-07)**: verifikasi manual dilakukan & disetujui Rozi — tidak perlu diverifikasi ulang. Commit `dc4dbe5`.
 - ✅ Admin sebagai superuser (bypass di requirePermission)
 
-### FASE 4 — Dokumentasi End-User
-- ✅ **Inventaris/audit fitur per role** (2026-08-07, sesi 44) — draft v2 `2026-08-07-fase4-audit-dokumentasi-enduser-v2.md` di branch `docs/fase4-audit-revisi` (commit `48f9843`), APPROVED Rozi. Data: grant per role (rbacSeeder.js), menu+requiredPerm (App.jsx/Layout.jsx), fitur, alur kerja, gap. Tunggu keputusan final Rozi — branch tetap terbuka, belum merge.
-- ⏳ Screenshot alur tiap modul — OPEN (butuh verifikasi UI/browser)
-- ⏳ Prosedur support (troubleshooting umum, kontak, eskalasi) — OPEN
+### FASE 4 — Dokumentasi End-User ✅ TUNTAS + MERGED KE MAIN (2026-08-07, sesi 44, HEAD `d5531a5`)
+- ✅ **Inventaris/audit fitur per role** — draft v2 `2026-08-07-fase4-audit-dokumentasi-enduser-v2.md`, APPROVED Rozi. Data: grant per role (rbacSeeder.js), menu+requiredPerm (App.jsx/Layout.jsx), fitur, alur kerja, gap.
+- ✅ **Screenshot alur tiap modul** — 35 screenshot per role (termasuk versi scroll-fix 66320ea utk periode-setup & mitra).
+- ✅ **Prosedur support** — `docs/user-guide/PROSEDUR-SUPPORT.md` (troubleshooting umum, kontak, eskalasi).
+- ✅ **Merge `d5531a5`** `--no-ff`: branch `docs/fase4-audit-revisi` → main + RBAC audit-log fix `ac472bf` (audit-log HANYA ADMIN) — keduanya TERPUSH + branch dihapus. Test **590/590 PASS**.
 
 ### FASE 5 — Deployment & Environment Production
 - Pisahkan environment production (env file terpisah, build terpisah, proteksi /api-docs production sudah ada — lengkapi sisanya)
