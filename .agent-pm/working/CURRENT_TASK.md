@@ -1,15 +1,17 @@
-# CURRENT TASK — 2026-08-07 (sesi 45) — F5-DOC RUNBOOK DEPLOYMENT PRODUCTION TUNTAS
+# CURRENT TASK — 2026-08-07 (sesi 46) — FASE 7 AI CHATBOT: BACKEND TUNTAS di main
 
-## Status: ✅ F5-DOC SELESAI + APPROVED (commit menunggu FINALIZE)
+## Status: ✅ Fase 7 Backend SELESAI + di main (9 commit, 625/625 test)
 
-- **Keputusan Rozi**: Fase 5 skip implementasi produksi — dokumentasi langkah saja.
-- **Deliverable**: `docs/DEPLOYMENT.md` 159 → 347 baris (+215/-27) — runbook produksi lengkap: Platform Database (Supabase 6543/5432), Env Production Terpisah, Domain & HTTPS, Healthcheck & Uptime Monitoring (langkah saat produksi, `/api/health` belum diimplementasikan), Matrix Env Dev vs Prod, Deploy Checklist, Ops & Pemulihan.
-- **Fix drift**: `trust proxy` sudah di-set (`app.js:29`) — klaim lama "belum di-set" dikoreksi.
-- **Verifikasi OpenCode 5/5 PASS** (scope bersih, 0 duplikasi, konsisten fakta repo).
-- **0 perubahan kode produksi** — doc-only.
+- **Deliverable backend lengkap**: model `ChatApiKey` + `ChatLog` (migration `20260807063342_add_chatbot_step1`), `lib/chat/encryption.js` AES-256-GCM + `providers/openaiCompatible.js`, route `/api/chat` (CRUD api-key + chat endpoint), RBAC `chatbot` READ, OpenAPI 4 endpoint, rate limiter 15/15 mnt/user, `ENCRYPTION_KEY` di .env.example.
+- **baseUrl & model custom** di ChatApiKey — provider enum `['gemini','groq','openai','custom']`, request selalu prioritas atas preset.
+- **Fix adapter kritis**: paksa `stream:false` (proxy 9router default SSE) + regression guard spy-fetch.
+- **Verifikasi independen (ulang sesi ini)**: `npm test` 625/625 PASS (42 files, 166.42s), lint 0/0, E2E manual 9router sukses, RBAC tidak salah blokir, 0 kebocoran apiKey.
+- **Branch `feat/fase7-chatbot-step1`**: merged ke main, lokal + remote DIHAPUS (Rozi approve).
+- Model: [AGY claude-sonnet-4-6 utk build] + [OpenCode deepseek-v4-flash-free utk verify/fix].
 
-## Next Step (backlog aktif — V3 Fase 7-8)
-1. **FASE 7** — AI Chatbot (BYOK, read-only, scope per role, audit)
-2. **FASE 8** — Notifikasi eksternal (Email + WhatsApp)
+## Next Step (backlog Fase 7 lanjutan — butuh TASK_SELECTION)
+1. **UI frontend — widget chat** (kelola API key user + panel chat)
+2. **Tool registry** (chatbot baca data sistem — read-only, tanpa SQL mentah)
+3. **Kebijakan retensi ChatLog** (TTL/anonymization — perlu keputusan Rozi, relevan Fase 6 legal)
 
-Tidak ada item Fase 5 yang tertunda (keputusan: tanpa implementasi).
+Fase 8 (Notifikasi eksternal Email + WhatsApp) masih di backlog setelah Fase 7 tuntas.

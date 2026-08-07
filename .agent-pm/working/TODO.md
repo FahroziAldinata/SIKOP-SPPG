@@ -128,18 +128,17 @@
 - ✅ `docs/DISCLAIMER.md` ADA: project pembelajaran (learning/design exercise), alur mengacu pola MBG, seluruh data dummy/fiktif, tanpa data asli/pribadi/instansi. Verifikasi OpenCode verbatim.
 - Catatan: FASE 6 ditutup sebagai item disclaimer saja; pertanyaan data ownership/handover tetap terbuka bila sistem naik produksi (non-blocker).
 
-### FASE 7 — Fitur AI Chatbot
-- BYOK (bring-your-own-key) — user pakai API key sendiri
-- Default provider: Gemini / Groq
-- Tool calling TANPA SQL langsung (agent tidak pernah eksekusi query mentah)
-- Read-only (chatbot tidak bisa mutasi data)
-- Scope per role (jawaban dibatasi data yang boleh dilihat role tsb)
-- Audit endpoint reusable (log pertanyaan-jawaban-tool-call untuk audit)
-- Desain tool registry (daftar tool terpusat + dokumentasi)
-- UI API key (halaman kelola key user)
-- Endpoint chat (backend)
-- Chat widget (frontend)
-- Pengujian pembatasan akses (uji role A tidak bisa bocorkan data role B)
+### FASE 7 — Fitur AI Chatbot (BACKEND ✅ TUNTAS + di main 2026-08-07, sesi 46 — 9 commit, 625/625 test)
+- ✅ **Backend SELESAI + di main** (9 commit `73737c0` s.d. `d812264`): model `ChatApiKey`+`ChatLog` + migration `20260807063342_add_chatbot_step1` (A); `lib/chat/encryption.js` AES-256-GCM + `providers/openaiCompatible.js` + `ENCRYPTION_KEY` di .env.example (B+C); route `/api/chat` CRUD api-key + chat endpoint + RBAC `chatbot` READ + app.js + OpenAPI 4 endpoint + rate limiter 15/15 mnt/user (D). 625/625 test, lint 0/0, E2E manual 9router sukses (ChatLog status=success), 0 kebocoran apiKey.
+- ✅ baseUrl & model custom di ChatApiKey — provider enum `['gemini','groq','openai','custom']`, request selalu prioritas atas preset (`c3397dd` + openapi sync `2fcc850`)
+- ✅ Fix adapter kritis: paksa `stream:false` (proxy 9router default SSE) `6cbb960` + regression guard spy-fetch `d812264`
+- ✅ RBAC proteksi chatbot:READ pada 4 endpoint `/api/chat` + test role bergrant (`b46eab2`)
+- ✅ Branch `feat/fase7-chatbot-step1` merged → lokal+remote DIHAPUS (Rozi approve)
+- **⏳ LANJUTAN (belum dikerjakan, butuh TASK_SELECTION)**:
+  - UI frontend: widget chat + halaman kelola API key user (BYOK)
+  - Tool registry (daftar tool terpusat + dokumentasi) — chatbot baca data sistem, read-only, TANPA SQL mentah
+  - Kebijakan retensi ChatLog (TTL/anonymization — perlu keputusan Rozi, relevan Fase 6 legal)
+- Pengujian pembatasan akses (uji role A tidak bisa bocorkan data role B) — menyatu dengan tool registry
 
 ### FASE 8 — Notifikasi Eksternal
 - **Email**: Nodemailer + Gmail App Password; integrasi dengan model `Notifikasi` existing; template email; preferensi user (jenis notif via email atau tidak)

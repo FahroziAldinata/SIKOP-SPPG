@@ -1,6 +1,19 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: F5-DOC Runbook Deployment Production TUNTAS + merged (2026-08-07, sesi 45). HEAD main == origin/main == `2b8ab90` → commit baru F5-DOC.**
+**Scope Aktif: Fase 7 AI Chatbot — Backend TUNTAS (9 commit, HEAD main == origin/main == `d812264`). Lanjutan (FE widget, tool registry, retensi ChatLog) belum dikerjakan — butuh TASK_SELECTION.**
+
+## Sesi 46 (2026-08-07) — FASE 7 AI CHATBOT: Backend SELESAI + di main (9 commit, 625/625 test) tervalidasi ulang
+- **Keputusan Rozi**: Fase 7 backend dikerjakan (branch `feat/fase7-chatbot-step1`), setelah selesai di-merge ke main. 9 commit, SEMUA di main (HEAD == origin/main == `d812264`).
+- **Bagian A — Prisma** (`73737c0`): model `ChatApiKey` (userId `@unique`, provider, apiKeyEncrypted, baseUrl, model, Cascade) + `ChatLog` (pertanyaan, jawaban, roleSnapshot, provider, model, toolCalls Json?, status, index userId+createdAt). Migration `20260807063342_add_chatbot_step1` (2 tabel + unique + 2 index + 2 FK). migrate status up to date.
+- **Bagian B+C — lib/chat** (`d55b41b`): `backend/src/lib/chat/encryption.js` (AES-256-GCM, format `iv:tag:ciphertext`, `ENCRYPTION_KEY` 64-hex wajib, IV 12-byte random) + `providers/openaiCompatible.js` (chatCompletion → `POST ${baseUrl}/chat/completions`, Bearer, AbortController 30s, Pino log tanpa kebocoran key). `ENCRYPTION_KEY` di `.env.example`.
+- **Bagian D — route `/api/chat`** (`7a0aff0`): POST/GET/DELETE `/api/chat/api-key` (upsert apiKeyEncrypted, masked response, 404 kalau belum set) + POST `/api/chat` (Zod message 1-4000, system prompt per role 6 role, decrypt → adapter → ChatLog roleSnapshot, error uniform 500). Rate limiter 15/15 mnt per userId (`keyGenerator user:${sub}`). Mount app.js + OpenAPI 4 endpoint (tag chat). RBAC resource `chatbot` READ utk ASLAP/MITRA/AHLI_GIZI/AKUNTAN/KEPALA_SPPG (rbacSeeder +12 baris).
+- **Pitfall di-fix**: mock CJS Vitest v4 (require.cache/resetModules) + IPv6 keyGenerator (`keyGeneratorIpFallback:false`) → `422eed9`. **baseUrl & model custom** di ChatApiKey — provider enum `['gemini','groq','openai','custom']`, baseUrl + model WAJIB dari request (preset auto-fill opsional, request selalu prioritas) `c3397dd` + openapi sync `2fcc850`. **Narrow RBAC** chatbot:READ di 4 endpoint `/api/chat` + test job role `b46eab2` + report gui.
+- **Fix kritis adapter**: proxy 9router default STREAMING (SSE) → paksa `stream:false` di openaiCompatible `6cbb960` + regression guard spy-fetch `d812264` (lihat memori + `chat-adapter.test.js`).
+- **Verifikasi independen (ulang sesi ini)**: `npm test` **625/625 PASS** (42 files, 166.42s, 0 skip), lint 0/0, E2E manual via 9router sukses (ChatLog status=success), RBAC tidak salah blokir. 0 kebocoran apiKey (grep test).
+- **Branch `feat/fase7-chatbot-step1`**: sudah di-merge ke main, branch lokal+remote DIHAPUS (Rozi approve).
+- **Backlog Fase 7 lanjutan (belum dikerjakan, butuh TASK_SELECTION)**: (1) UI frontend widget chat, (2) Tool registry (chatbot baca data sistem), (3) Kebijakan retensi ChatLog (TTL/anonymization — perlu keputusan, relevan Fase 6 legal).
+- Model: [AGY claude-sonnet-4-6 utk build] + [OpenCode deepseek-v4-flash-free utk verify/fix] + [Hermes oc/deepseek-v4-flash-free].
+- ⚠️ State files (CURRENT_STATE/CURRENT_TASK/HANDOFF) TERTINGGAL dari git — sinkronisasi jadi commit docs (aturan GF-012: ketiadaan commit basis di sini).
 
 ## Sesi 45 (2026-08-07) — F5-DOC: Runbook Deployment Production (dokumentasi saja) ✅
 - **Keputusan Rozi**: Fase 5 skip implementasi produksi — cukup dokumen langkah "kalau project dipakai production".
