@@ -393,6 +393,43 @@ const routeDefinitions = [
       limit: z.string().optional().openapi({ description: 'Jumlah per halaman (default 20, maks 100)' })
     }),
     summary: 'Get daftar AuditLog (filter + pagination) — akses AKUNTAN, MITRA, ADMIN'
+  },
+
+  // ================= CHAT (CHATBOT) =================
+  {
+    method: 'post',
+    path: '/api/chat/api-key',
+    module: 'chat',
+    target: 'body',
+    schema: z.object({
+      provider: z.enum(['gemini', 'groq', 'openai']).openapi({ description: 'Provider AI' }),
+      apiKey: z.string().min(8).openapi({ description: 'API key provider (disimpan terenkripsi, tidak pernah dikembalikan)' })
+    }),
+    summary: 'Simpan/update API key chatbot user (terenkripsi AES-256-GCM)'
+  },
+  {
+    method: 'get',
+    path: '/api/chat/api-key',
+    module: 'chat',
+    summary: 'Ambil info API key chatbot user (hanya 4 karakter pertama + mask)'
+  },
+  {
+    method: 'delete',
+    path: '/api/chat/api-key',
+    module: 'chat',
+    summary: 'Hapus API key chatbot user'
+  },
+  {
+    method: 'post',
+    path: '/api/chat',
+    module: 'chat',
+    target: 'body',
+    schema: z.object({
+      message: z.string().min(1).max(4000).openapi({ description: 'Pesan/pertanyaan ke AI' }),
+      provider: z.enum(['gemini', 'groq', 'openai']).optional().openapi({ description: 'Override provider (default dari API key tersimpan)' }),
+      model: z.string().optional().openapi({ description: 'Override model AI (default per provider)' })
+    }),
+    summary: 'Kirim pesan ke AI chatbot (rate-limited 15 req/15 menit per user)'
   }
 ];
 

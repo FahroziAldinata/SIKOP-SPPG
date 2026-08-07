@@ -25,7 +25,8 @@ const RBAC_RESOURCES = [
   { kode: 'admin-user', nama: 'Manajemen User', modul: 'admin' },
   { kode: 'admin-permission', nama: 'Manajemen Permission', modul: 'admin' },
   { kode: 'audit-log', nama: 'Audit Log Sistem', modul: 'admin' },
-  { kode: 'laporan-bug', nama: 'Laporan Bug & Masalah', modul: 'admin' }
+  { kode: 'laporan-bug', nama: 'Laporan Bug & Masalah', modul: 'admin' },
+  { kode: 'chatbot', nama: 'Asisten AI Chatbot', modul: 'chat' }
 ];
 
 const RBAC_ROLE_PERMISSIONS = [
@@ -179,7 +180,14 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'ADMIN', resource: 'audit-log', aksi: 'READ' },
   { role: 'ADMIN', resource: 'laporan-bug', aksi: 'READ' },
   { role: 'ADMIN', resource: 'laporan-bug', aksi: 'CREATE' },
-  { role: 'ADMIN', resource: 'laporan-bug', aksi: 'UPDATE' }
+  { role: 'ADMIN', resource: 'laporan-bug', aksi: 'UPDATE' },
+
+  // CHATBOT — semua role operasional mendapat READ (Admin bypass otomatis)
+  { role: 'ASLAP', resource: 'chatbot', aksi: 'READ' },
+  { role: 'MITRA', resource: 'chatbot', aksi: 'READ' },
+  { role: 'AHLI_GIZI', resource: 'chatbot', aksi: 'READ' },
+  { role: 'AKUNTAN', resource: 'chatbot', aksi: 'READ' },
+  { role: 'KEPALA_SPPG', resource: 'chatbot', aksi: 'READ' }
 ];
 
 async function seedRbacPermissions(prisma) {
