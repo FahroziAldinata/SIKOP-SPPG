@@ -1,6 +1,15 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: Fase 4 dokumentasi end-user TUNTAS + RBAC audit-log fix (2026-08-07, sesi 44). HEAD main == origin/main == `660dde4`.**
+**Scope Aktif: F5-DOC Runbook Deployment Production TUNTAS + merged (2026-08-07, sesi 45). HEAD main == origin/main == `2b8ab90` → commit baru F5-DOC.**
+
+## Sesi 45 (2026-08-07) — F5-DOC: Runbook Deployment Production (dokumentasi saja) ✅
+- **Keputusan Rozi**: Fase 5 skip implementasi produksi — cukup dokumen langkah "kalau project dipakai production".
+- **Deliverable**: `docs/DEPLOYMENT.md` di-expand 159 → 347 baris (+215/-27) jadi runbook lengkap, 1 file (tanpa file baru).
+- **Section baru**: Platform Database (Supabase 6543 runtime / 5432 migrasi), Setup Env Production Terpisah, Setup Domain & HTTPS, Healthcheck & Uptime Monitoring (endpoint `/api/health` = langkah saat produksi, BUKAN implementasi sekarang), Matrix Env Dev vs Prod, Deploy Checklist, Ops & Pemulihan.
+- **Fix drift factual**: klaim `trust proxy` "belum di-set" → SUDAH di-set (`backend/src/app.js:29`) — terverifikasi.
+- **Verifikasi OpenCode 5/5 PASS**: hanya DEPLOYMENT.md modified, 7 section ada, 0 duplikasi, konsisten fakta repo, `/health` tidak diklaim ada.
+- **0 perubahan kode produksi** (doc-only). Test suite tidak perlu dijalankan (tidak menyentuh kode).
+- Model: [Hermes oc/deepseek-v4-flash-free] + [OpenCode deepseek-v4-flash-free utk build/verify].
 
 ## Sesi 44 (2026-08-07) — MERGE docs/fase4 + RBAC audit-log fix; keduanya di main ✅
 - **RBAC audit-log HANYA ADMIN** (`ac472bf`, fix/periode-notifikasi-scroll-mitra-auditlog): cabut akses GET /api/audit-log dari MITRA/AKUNTAN (khusus ADMIN), + scroll fix PeriodeListCard & MitraDashboard (maxHeight + overflowY).

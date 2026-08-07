@@ -118,10 +118,11 @@
 - ✅ **Prosedur support** — `docs/user-guide/PROSEDUR-SUPPORT.md` (troubleshooting umum, kontak, eskalasi).
 - ✅ **Merge `d5531a5`** `--no-ff`: branch `docs/fase4-audit-revisi` → main + RBAC audit-log fix `ac472bf` (audit-log HANYA ADMIN) — keduanya TERPUSH + branch dihapus. Test **590/590 PASS**.
 
-### FASE 5 — Deployment & Environment Production
-- Pisahkan environment production (env file terpisah, build terpisah, proteksi /api-docs production sudah ada — lengkapi sisanya)
-- Setup domain bila perlu
-- Uptime monitoring (healthcheck berkala, alert)
+### FASE 5 — Deployment & Environment Production ✅ SELESAI (2026-08-07, sesi 45) — DOKUMENTASI SAJA (keputusan Rozi: skip implementasi)
+- ✅ `docs/DEPLOYMENT.md` di-expand jadi **runbook produksi lengkap** (159 → 347 baris, commit F5-DOC): Platform Database (Supabase PgBouncer 6543 runtime / direct 5432 migrasi), Setup Env Production Terpisah (contoh `.env.production` + `openssl rand -hex 64` + HTTPS wajib), Setup Domain & HTTPS (CNAME/apex Vercel+Railway, redirect 301 + headers), Healthcheck & Uptime Monitoring (`GET /api/health` + UptimeRobot/BetterStack = **langkah saat produksi, belum diimplementasikan**), Matrix Env Dev vs Prod (8 KEY), Deploy Checklist, Ops & Pemulihan (link DISASTER_RECOVERY, rotasi JWT, rollback).
+- ✅ Fix drift factual: `trust proxy` sudah di-set di `backend/src/app.js:29` — klaim "belum di-set" dikoreksi (terverifikasi OpenCode).
+- ✅ Verifikasi 5/5 PASS (scope bersih: hanya DEPLOYMENT.md; 0 duplikasi; konsisten fakta repo). 0 perubahan kode produksi.
+- **Catatan keputusan**: tidak ada env production file nyata, tidak ada custom domain, tidak ada `/api/health` endpoint, tidak ada monitor — SEMUA didokumentasikan sebagai langkah bila project dipakai production. Test suite tidak dijalankan (doc-only).
 
 ### FASE 6 — Legal/Administratif ✅ SELESAI (2026-08-07, sesi 44) — scope disederhanakan jadi disclaimer saja (keputusan Rozi, bukan proses legal formal)
 - ✅ `docs/DISCLAIMER.md` ADA: project pembelajaran (learning/design exercise), alur mengacu pola MBG, seluruh data dummy/fiktif, tanpa data asli/pribadi/instansi. Verifikasi OpenCode verbatim.
