@@ -78,7 +78,12 @@ describe('Chat API — /api/chat', () => {
     test('401 — tanpa token', async () => {
       const res = await request(app)
         .post('/api/chat/api-key')
-        .send({ provider: 'groq', apiKey: 'test-api-key-12345' });
+        .send({
+          provider: 'groq',
+          apiKey: 'test-api-key-12345',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
       expect(res.status).toBe(401);
     });
 
@@ -86,7 +91,12 @@ describe('Chat API — /api/chat', () => {
       const res = await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
-        .send({ provider: 'groq', apiKey: 'short' });
+        .send({
+          provider: 'groq',
+          apiKey: 'short',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
       expect(res.status).toBe(400);
     });
 
@@ -94,7 +104,38 @@ describe('Chat API — /api/chat', () => {
       const res = await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
-        .send({ provider: 'invalid-provider', apiKey: 'test-api-key-12345' });
+        .send({
+          provider: 'invalid-provider',
+          apiKey: 'test-api-key-12345',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
+      expect(res.status).toBe(400);
+    });
+
+    test('400 — baseUrl tidak valid (bukan URL)', async () => {
+      const res = await request(app)
+        .post('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .send({
+          provider: 'groq',
+          apiKey: 'test-api-key-12345',
+          baseUrl: 'bukan-url-valid',
+          model: 'llama-3.3-70b-versatile'
+        });
+      expect(res.status).toBe(400);
+    });
+
+    test('400 — model kosong', async () => {
+      const res = await request(app)
+        .post('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .send({
+          provider: 'groq',
+          apiKey: 'test-api-key-12345',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: ''
+        });
       expect(res.status).toBe(400);
     });
 
@@ -104,7 +145,12 @@ describe('Chat API — /api/chat', () => {
       const res = await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
-        .send({ provider: 'groq', apiKey: RAW_KEY });
+        .send({
+          provider: 'groq',
+          apiKey: RAW_KEY,
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -119,14 +165,58 @@ describe('Chat API — /api/chat', () => {
       const res = await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
-        .send({ provider: 'openai', apiKey: 'sk-openai-test-key-12345678' });
+        .send({
+          provider: 'openai',
+          apiKey: 'sk-openai-test-key-12345678',
+          baseUrl: 'https://api.openai.com/v1',
+          model: 'gpt-4o-mini'
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
 
-      // Pastikan key tersimpan dengan provider baru
+      // Pastikan key tersimpan dengan provider & baseUrl & model baru
       const record = await prismaDb.chatApiKey.findUnique({ where: { userId: userAslap.id } });
       expect(record.provider).toBe('openai');
+      expect(record.baseUrl).toBe('https://api.openai.com/v1');
+      expect(record.model).toBe('gpt-4o-mini');
+    });
+
+    test('200 — simpan API key provider custom & proxy generic, POST /api/chat memanggil chatCompletion dengan baseUrl & model custom', async () => {
+      const CUSTOM_BASE_URL = 'https://9router.example.com/v1';
+      const CUSTOM_MODEL = 'custom-model-v1';
+
+      const saveRes = await request(app)
+        .post('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .send({
+          provider: 'custom',
+          apiKey: 'sk-custom-key-12345678',
+          baseUrl: CUSTOM_BASE_URL,
+          model: CUSTOM_MODEL
+        });
+
+      expect(saveRes.status).toBe(200);
+      expect(saveRes.body.success).toBe(true);
+
+      chatCompletion.mockResolvedValueOnce({
+        choices: [{ message: { content: 'Response dari custom proxy' } }]
+      });
+
+      const chatRes = await request(app)
+        .post('/api/chat')
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .send({ message: 'Halo Custom AI' });
+
+      expect(chatRes.status).toBe(200);
+      expect(chatRes.body.success).toBe(true);
+      expect(chatRes.body.data.provider).toBe('custom');
+      expect(chatRes.body.data.model).toBe(CUSTOM_MODEL);
+
+      // Verifikasi argumen yang diberikan ke chatCompletion mock
+      const lastCall = chatCompletion.mock.calls[chatCompletion.mock.calls.length - 1][0];
+      expect(lastCall.baseUrl).toBe(CUSTOM_BASE_URL);
+      expect(lastCall.model).toBe(CUSTOM_MODEL);
     });
   });
 
@@ -139,15 +229,20 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(401);
     });
 
-    test('200 — apiKeyMasked menampilkan 4 karakter + ****', async () => {
-      // Pastikan ada key dulu (dari test sebelumnya, provider = openai)
-      // Simpan key baru agar lebih predictable
+    test('200 — mengembalikan provider, baseUrl, model, dan apiKeyMasked (4 karakter + ****)', async () => {
       const RAW_KEY = 'sk-openai-test-key-12345678';
+      const BASE_URL = 'https://api.openai.com/v1';
+      const MODEL = 'gpt-4o-mini';
 
       await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
-        .send({ provider: 'openai', apiKey: RAW_KEY });
+        .send({
+          provider: 'openai',
+          apiKey: RAW_KEY,
+          baseUrl: BASE_URL,
+          model: MODEL
+        });
 
       const res = await request(app)
         .get('/api/chat/api-key')
@@ -157,6 +252,8 @@ describe('Chat API — /api/chat', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data).toBeDefined();
       expect(res.body.data.provider).toBe('openai');
+      expect(res.body.data.baseUrl).toBe(BASE_URL);
+      expect(res.body.data.model).toBe(MODEL);
 
       // Mask: 4 karakter pertama + ****
       const expectedMask = RAW_KEY.slice(0, 4) + '****';
@@ -191,7 +288,12 @@ describe('Chat API — /api/chat', () => {
       await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
-        .send({ provider: 'groq', apiKey: 'gsk-test-delete-key-12345' });
+        .send({
+          provider: 'groq',
+          apiKey: 'gsk-test-delete-key-12345',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
 
       const res = await request(app)
         .delete('/api/chat/api-key')
@@ -215,7 +317,12 @@ describe('Chat API — /api/chat', () => {
       await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
-        .send({ provider: 'groq', apiKey: 'gsk-real-test-api-key-12345678' });
+        .send({
+          provider: 'groq',
+          apiKey: 'gsk-real-test-api-key-12345678',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
     });
 
     test('401 — tanpa token', async () => {
@@ -313,7 +420,12 @@ describe('Chat API — /api/chat', () => {
       await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAkuntan}`)
-        .send({ provider: 'openai', apiKey: 'sk-openai-test-12345678' });
+        .send({
+          provider: 'openai',
+          apiKey: 'sk-openai-test-12345678',
+          baseUrl: 'https://api.openai.com/v1',
+          model: 'gpt-4o-mini'
+        });
 
       const MOCK_JAWABAN_AKUNTAN = 'Jurnal transaksi adalah catatan keuangan.';
       chatCompletion.mockResolvedValueOnce({
@@ -366,7 +478,12 @@ describe('Chat API — /api/chat', () => {
         await request(app)
           .post('/api/chat/api-key')
           .set('Authorization', `Bearer ${tokenAslap}`)
-          .send({ provider: 'groq', apiKey: 'gsk-rate-limit-test-12345' });
+          .send({
+            provider: 'groq',
+            apiKey: 'gsk-rate-limit-test-12345',
+            baseUrl: 'https://api.groq.com/openai/v1',
+            model: 'llama-3.3-70b-versatile'
+          });
       }
 
       // Kirim 15 request — semua harus OK (200)
@@ -401,7 +518,12 @@ describe('Chat API — /api/chat', () => {
       const res = await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAkuntan}`)
-        .send({ provider: 'openai', apiKey: SENSITIVE_KEY });
+        .send({
+          provider: 'openai',
+          apiKey: SENSITIVE_KEY,
+          baseUrl: 'https://api.openai.com/v1',
+          model: 'gpt-4o-mini'
+        });
 
       const bodyStr = JSON.stringify(res.body);
       expect(bodyStr).not.toContain(SENSITIVE_KEY);

@@ -1300,8 +1300,10 @@ model ChatApiKey {
   id              String   @id @default(cuid())
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider        String   // 'gemini' | 'groq' | 'openai'
+  provider        String   // 'gemini' | 'groq' | 'openai' | 'custom'
   apiKeyEncrypted String
+  baseUrl         String
+  model           String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

@@ -26,14 +26,14 @@ const router = express.Router();
 // ---------------------------------------------------------------------------
 
 const apiKeyBodySchema = z.object({
-  provider: z.enum(['gemini', 'groq', 'openai']),
-  apiKey: z.string().min(8)
+  provider: z.enum(['gemini', 'groq', 'openai', 'custom']),
+  apiKey: z.string().min(8),
+  baseUrl: z.string().url(),
+  model: z.string().min(1)
 });
 
 const chatBodySchema = z.object({
-  message: z.string().min(1).max(4000),
-  provider: z.enum(['gemini', 'groq', 'openai']).optional(),
-  model: z.string().optional()
+  message: z.string().min(1).max(4000)
 });
 
 // ---------------------------------------------------------------------------
@@ -64,7 +64,10 @@ const chatLimiter = rateLimit({
 });
 
 // ---------------------------------------------------------------------------
-// Konfigurasi default model per provider
+// Konfigurasi PRESET default model & base URL per provider
+// CATATAN: Ini HANYA digunakan sebagai PRESET (nilai default / auto-fill UI).
+// Route chat TIDAK PERNAH menggunakan preset ini untuk baseUrl/model.
+// Nilai dari request user SELALU disimpan di DB dan dijadikan prioritas utama.
 // ---------------------------------------------------------------------------
 
 const DEFAULT_MODELS = {
@@ -73,7 +76,7 @@ const DEFAULT_MODELS = {
   openai: 'gpt-4o-mini'
 };
 
-// Base URL OpenAI-compatible per provider
+// Base URL OpenAI-compatible per provider (preset UI)
 const PROVIDER_BASE_URLS = {
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai',
   groq: 'https://api.groq.com/openai/v1',
@@ -124,7 +127,7 @@ router.post('/api-key', requireAuth, async (req, res) => {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
-  const { provider, apiKey } = parsed.data;
+  const { provider, apiKey, baseUrl, model } = parsed.data;
   const userId = req.user.sub;
 
   try {
@@ -132,8 +135,8 @@ router.post('/api-key', requireAuth, async (req, res) => {
 
     await prisma.chatApiKey.upsert({
       where: { userId },
-      update: { provider, apiKeyEncrypted },
-      create: { userId, provider, apiKeyEncrypted }
+      update: { provider, apiKeyEncrypted, baseUrl, model },
+      create: { userId, provider, apiKeyEncrypted, baseUrl, model }
     });
 
     // JANGAN return apiKey mentah
@@ -166,6 +169,8 @@ router.get('/api-key', requireAuth, async (req, res) => {
       success: true,
       data: {
         provider: record.provider,
+        baseUrl: record.baseUrl,
+        model: record.model,
         apiKeyMasked
       }
     });
@@ -201,7 +206,7 @@ router.post('/', requireAuth, chatLimiter, async (req, res) => {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
-  const { message, model: modelOverride } = parsed.data;
+  const { message } = parsed.data;
   const userId = req.user.sub;
   const userRole = req.user.role;
 
@@ -221,8 +226,8 @@ router.post('/', requireAuth, chatLimiter, async (req, res) => {
   }
 
   const provider = keyRecord.provider;
-  const model = modelOverride || DEFAULT_MODELS[provider] || 'gpt-4o-mini';
-  const baseUrl = PROVIDER_BASE_URLS[provider];
+  const model = keyRecord.model;
+  const baseUrl = keyRecord.baseUrl;
 
   // Dekripsi key — JANGAN log key ini
   let apiKey;
@@ -317,3 +322,5 @@ router.post('/', requireAuth, chatLimiter, async (req, res) => {
 
 module.exports = router;
 module.exports.chatLimiter = chatLimiter;
+module.exports.DEFAULT_MODELS = DEFAULT_MODELS;
+module.exports.PROVIDER_BASE_URLS = PROVIDER_BASE_URLS;
