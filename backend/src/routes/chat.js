@@ -44,7 +44,12 @@ const chatBodySchema = z.object({
 const chatLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 15,
-  keyGenerator: (req) => req.user ? req.user.sub : req.ip,
+  keyGenerator: (req) => {
+    // Gunakan userId sebagai key (bukan IP) — lebih adil & aman per user
+    if (req.user && req.user.sub) return `user:${req.user.sub}`;
+    // Fallback ke remoteAddress bila user belum auth (middleware order)
+    return req.socket.remoteAddress || 'unknown';
+  },
   skip: (_req) => {
     if (process.env.NODE_ENV !== 'test') return false;
     return !process.env.RATE_LIMIT_TEST;
@@ -53,7 +58,9 @@ const chatLimiter = rateLimit({
     res.status(429).json({ error: 'Terlalu banyak permintaan chat, coba lagi dalam 15 menit' });
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  // Matikan validasi IPv6 — kita pakai userId bukan req.ip sebagai key
+  validate: { keyGeneratorIpFallback: false }
 });
 
 // ---------------------------------------------------------------------------
@@ -114,7 +121,7 @@ function buildSystemPrompt(role) {
 router.post('/api-key', requireAuth, async (req, res) => {
   const parsed = apiKeyBodySchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.errors[0].message });
+    return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
   const { provider, apiKey } = parsed.data;
@@ -191,7 +198,7 @@ router.delete('/api-key', requireAuth, async (req, res) => {
 router.post('/', requireAuth, chatLimiter, async (req, res) => {
   const parsed = chatBodySchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: parsed.error.errors[0].message });
+    return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
   const { message, model: modelOverride } = parsed.data;
@@ -234,7 +241,6 @@ router.post('/', requireAuth, chatLimiter, async (req, res) => {
   ];
 
   let jawaban = '';
-  let status = 'success';
   let chatLogData = null;
 
   try {
@@ -255,7 +261,6 @@ router.post('/', requireAuth, chatLimiter, async (req, res) => {
     };
 
   } catch (err) {
-    status = 'error';
     jawaban = '';
 
     // Log error tanpa apiKey

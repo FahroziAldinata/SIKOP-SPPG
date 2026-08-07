@@ -3,19 +3,24 @@
 // =============================================================================
 // Integration Test: /api/chat — Route Chatbot
 // =============================================================================
-// Strategi mock: stub global fetch + vi.mock pada openaiCompatible
+// Strategi mock: Vitest v4 TIDAK bisa intercept modul yang di-load via
+// require() (CJS). Maka kita patch require.cache SEBELUM app di-require
+// agar modul openaiCompatible diganti mock (chatCompletion = vi.fn()).
 // =============================================================================
 
 const request = require('supertest');
-const { describe, test, expect, beforeAll, afterAll, vi } = require('vitest');
 const { PrismaClient } = require('@prisma/client');
 
-// Mock adapter provider sebelum require app
-vi.mock('../../lib/chat/providers/openaiCompatible', () => ({
-  chatCompletion: vi.fn()
-}));
+// Mock adapter provider sebelum require app — patch require.cache (CJS)
+const chatCompletion = vi.fn();
+const providerPath = require.resolve('../../lib/chat/providers/openaiCompatible');
+require.cache[providerPath] = {
+  id: providerPath,
+  filename: providerPath,
+  loaded: true,
+  exports: { chatCompletion }
+};
 
-const { chatCompletion } = require('../../lib/chat/providers/openaiCompatible');
 const { app } = require('../../app');
 
 const TEST_PASSWORD = process.env.TEST_PASSWORD || 'ganti-password-ini';

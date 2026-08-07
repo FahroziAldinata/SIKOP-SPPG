@@ -8,8 +8,6 @@
 // Gunakan vi.isolateModules() agar require fresh setiap describe.
 // =============================================================================
 
-const { describe, test, expect, beforeAll, afterAll, vi } = require('vitest');
-
 // Key test 64 karakter hex yang valid (32 byte)
 const TEST_KEY = 'a'.repeat(64); // 64 x 'a' = valid hex 32-byte
 
@@ -77,39 +75,42 @@ describe('encryption — modul enkripsi AES-256-GCM', () => {
   test('decrypt payload dengan auth tag salah → melempar Error', () => {
     const payload = encrypt('data-asli');
     const parts = payload.split(':');
-    // Ubah satu karakter di ciphertext (tamper)
-    const tamperedCiphertext = parts[2].slice(0, -2) + 'ff';
+    // Ubah satu karakter di ciphertext (tamper) — PASTIKAN berubah,
+    // jangan hardcode 'ff' (bisa sama dengan karakter asli → tidak throw)
+    const lastChar = parts[2].slice(-1);
+    const flipChar = lastChar === '0' ? '1' : '0';
+    const tamperedCiphertext = parts[2].slice(0, -1) + flipChar;
     const tampered = [parts[0], parts[1], tamperedCiphertext].join(':');
     expect(() => decrypt(tampered)).toThrow();
   });
 });
 
 describe('encryption — validasi ENCRYPTION_KEY saat module load', () => {
-  test('ENCRYPTION_KEY tidak ada → melempar Error saat require', async () => {
-    const originalKey = process.env.ENCRYPTION_KEY;
-    delete process.env.ENCRYPTION_KEY;
+  // Catatan: module encryption.js sudah ter-cache oleh require cache DAN
+  // registry vitest. vi.resetModules() saja TIDAK cukup me-reload modul CJS
+  // yang sudah pernah di-load — harus dikombinasi dengan delete require.cache.
+  // Setiap test diakhiri vi.unstubAllEnvs() + vi.resetModules() agar env &
+  // cache kembali normal (test roundtrip butuh ENCRYPTION_KEY valid).
 
-    await expect(async () => {
-      await vi.importFresh('../../lib/chat/encryption');
-    }).rejects.toThrow('ENCRYPTION_KEY');
+  test('ENCRYPTION_KEY tidak ada → melempar Error saat require', () => {
+    vi.resetModules();
+    delete require.cache[require.resolve('../../lib/chat/encryption')];
+    vi.stubEnv('ENCRYPTION_KEY', '');
 
-    // Restore
-    if (originalKey) process.env.ENCRYPTION_KEY = originalKey;
+    expect(() => require('../../lib/chat/encryption')).toThrow('ENCRYPTION_KEY');
+
+    vi.unstubAllEnvs();
+    vi.resetModules();
   });
 
-  test('ENCRYPTION_KEY format salah (bukan 64 hex) → melempar Error', async () => {
-    const originalKey = process.env.ENCRYPTION_KEY;
-    process.env.ENCRYPTION_KEY = 'terlalu-pendek';
+  test('ENCRYPTION_KEY format salah (bukan 64 hex) → melempar Error', () => {
+    vi.resetModules();
+    delete require.cache[require.resolve('../../lib/chat/encryption')];
+    vi.stubEnv('ENCRYPTION_KEY', 'terlalu-pendek');
 
-    await expect(async () => {
-      await vi.importFresh('../../lib/chat/encryption');
-    }).rejects.toThrow('ENCRYPTION_KEY');
+    expect(() => require('../../lib/chat/encryption')).toThrow('ENCRYPTION_KEY');
 
-    // Restore
-    if (originalKey) {
-      process.env.ENCRYPTION_KEY = originalKey;
-    } else {
-      delete process.env.ENCRYPTION_KEY;
-    }
+    vi.unstubAllEnvs();
+    vi.resetModules();
   });
 });
