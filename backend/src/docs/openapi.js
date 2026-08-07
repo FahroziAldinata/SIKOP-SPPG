@@ -402,16 +402,18 @@ const routeDefinitions = [
     module: 'chat',
     target: 'body',
     schema: z.object({
-      provider: z.enum(['gemini', 'groq', 'openai']).openapi({ description: 'Provider AI' }),
-      apiKey: z.string().min(8).openapi({ description: 'API key provider (disimpan terenkripsi, tidak pernah dikembalikan)' })
+      provider: z.enum(['gemini', 'groq', 'openai', 'custom']).openapi({ description: 'Provider AI — custom untuk baseUrl proxy OpenAI-compatible (mis. 9router)' }),
+      apiKey: z.string().min(8).openapi({ description: 'API key provider (disimpan terenkripsi, tidak pernah dikembalikan)' }),
+      baseUrl: z.string().url().openapi({ description: 'Base URL OpenAI-compatible (wajib, selalu prioritas dari request)' }),
+      model: z.string().min(1).openapi({ description: 'Model AI yang dipakai (wajib, selalu prioritas dari request)' })
     }),
-    summary: 'Simpan/update API key chatbot user (terenkripsi AES-256-GCM)'
+    summary: 'Simpan/update API key chatbot user (terenkripsi AES-256-GCM) — baseUrl & model wajib'
   },
   {
     method: 'get',
     path: '/api/chat/api-key',
     module: 'chat',
-    summary: 'Ambil info API key chatbot user (hanya 4 karakter pertama + mask)'
+    summary: 'Ambil info API key chatbot user — provider, baseUrl, model, dan apiKeyMasked (hanya 4 karakter pertama + mask)'
   },
   {
     method: 'delete',
@@ -425,11 +427,9 @@ const routeDefinitions = [
     module: 'chat',
     target: 'body',
     schema: z.object({
-      message: z.string().min(1).max(4000).openapi({ description: 'Pesan/pertanyaan ke AI' }),
-      provider: z.enum(['gemini', 'groq', 'openai']).optional().openapi({ description: 'Override provider (default dari API key tersimpan)' }),
-      model: z.string().optional().openapi({ description: 'Override model AI (default per provider)' })
+      message: z.string().min(1).max(4000).openapi({ description: 'Pesan/pertanyaan ke AI' })
     }),
-    summary: 'Kirim pesan ke AI chatbot (rate-limited 15 req/15 menit per user)'
+    summary: 'Kirim pesan ke AI chatbot (rate-limited 15 req/15 menit per user) — memakai baseUrl & model tersimpan dari API key user'
   }
 ];
 
