@@ -1,16 +1,32 @@
-# CURRENT TASK — 2026-08-08 (sesi 47) — TASK 4: UI Form Resource + Guard DELETE 409 + Test CRUD Resource
+# CURRENT TASK — 2026-08-08 (sesi 47 lanjutan) — FASE 7 LANJUTAN: WIDGET CHAT FE + MIGRASI API KEY
 
-## Status: ✅ Task 4 SELESAI + APPROVED Rozi (suite 635/635) — commit FINALIZE sesi ini
+## Status: ✅ BUILD + COMMIT selesai (637/637 PASS) — MENUNGGU UJI MANUAL USER (Task 5)
 
-- **Task A — guard 409** (admin.js:337-341): DELETE `/api/admin/resources/:id` → count grant aktif > 0 → `409 { error: "Resource masih memiliki N grant aktif..." }`. Soft-delete tetap + invalidatePermissionCache. Guard cek grant aktif (bukan cek App.jsx literal — BE tidak baca file React runtime).
-- **Task B — test CRUD resource** (`rbac-resource.test.js` BARU, 9 test): POST 201, duplikat 409, tanpa field 400, PUT 200, PUT aktif:false → 403, **PUT aktif:true → 200 (jalur pemulihan)**, DELETE grant nempel → 409, DELETE setelah grant dicabut → 200, DELETE tak ada → 404.
-- **Task C — FE form resource** (RolePermissionMatrixPage.jsx +319/-4): form tambah (nama/kode/modul dropdown), tabel Daftar Resource, toggle nonaktifkan/aktifkan + ConfirmDialog, useApi + toast + refetch. Revisi Rozi: tabel 5 baris + scroll (maxHeight 200px + overflowY auto + header sticky).
-- **Verifikasi**: `npm test` backend **635/635 PASS** (626 + 9 baru), lint 0/0, FE build exit 0. Scope: 3 file.
-- **Backlog**: folder `.agent-pm/backlog/` DIHAPUS (keputusan Rozi) — backlog `ui-form-resource-baru.md` selesai dikerjakan.
-- Model: [AGY claude-sonnet-4-6 utk build] + [OpenCode deepseek-v4-flash-free utk verify] + [Hermes oc/deepseek-v4-flash-free].
+**ROZI SEDANG ISTIRAHAT** — lanjut sesi berikutnya: jalankan uji manual dulu.
 
-## Next Step (backlog V3 — butuh TASK_SELECTION)
-1. **FASE 7 lanjutan**: UI frontend widget chat (kelola API key + panel chat) + tool registry (baca data sistem read-only) + kebijakan retensi ChatLog (keputusan Rozi)
-2. **FASE 8**: Notifikasi eksternal (Email Nodemailer + WhatsApp) — setelah Fase 7 tuntas
+## Yang sudah selesai sesi ini
+1. **Widget chat FE**: `ChatWidget.jsx` (BARU) + mount di `Layout.jsx` (guard `hasPerm('chatbot','READ')`) + section "AI Assistant" di `SettingPage.jsx` (kelola API key user awalnya; lalu di-migrasi jadi admin-managed)
+2. **Migrasi API key**: `ChatApiKey` per-user → `SystemConfig` singleton (1 key global, hanya ADMIN bisa set) — schema + migration `20260808165619` + rbacSeeder (`chatbot-config:MANAGE` hanya ADMIN) + `chat.js` rewrite (guard MANAGE, key dari config, 400 'API key belum diatur, hubungi admin') + test update
+3. **Guard FE Task 3 poin 3**: `{hasPerm('chatbot-config','MANAGE') && <AiApiKeySection />}` — non-ADMIN tidak melihat section + tidak fetch `/chat/api-key` sama sekali
 
-Tidak ada sisa task RBAC. Backlog Aktif: V3 Fase 7 (lanjutan) → Fase 8.
+### Verifikasi yang sudah jalan (semua PASS)
+- `npm test` backend: **637/637 PASS** (buhttttng enum MANAGE non-breaking)
+- `npm run lint` backend (oxlint): 0/0
+- FE `npm run build`: exit 0
+- Grep `chatApiKey` sisa: 0
+- DB: grant `chatbot-config:MANAGE` = ADMIN ada
+
+## Langkah berikutnya (BUTUH USER)
+1. **UJI MANUAL** (jangan mulai task baru sebelum ini):
+   - Restart BE dulu (migration `1276` belum aktif di BE yang jalan) — ingat aturan: Hermes boleh kill, WAJIB minta Rozi hidupkan ulang; atau task eksplisit minta BE jalan → start `npm run dev` bg + info Rozi
+   - ADMIN login → `/setting` → section AI muncul → set API key
+   - Role lain (mis. AKUNTAN) login → `/setting` → section AI TIDAK muncul
+   - Role lain buka chat → kirim pesan → jawaban OK (key dari config)
+   - ADMIN hapus key → role lain chat → pesan error 'API key belum diatur, hubungi admin'
+2. Setelah uji OK → sesi berikutnya bisa mulai **Fase 7 item 2: Tool registry** (read-only, tanpa SQL mentah)
+3. **Fase 7 item 3: retensi ChatLog** (TTL/anonymization — butuh keputusan Rozi)
+4. **Fase 8: notifikasi eksternal** (Email + WhatsApp)
+
+## Catatan runtime
+- AGY claude-sonnet-4-6 quota 9router habis → sesi ini pakai **AGY gemini-3.6-flash-medium** (approved Rozi)
+- 3x AGY timeout "tool jalan teks mati" → kerja di disk, verify independen OpenCode + npx oxlint

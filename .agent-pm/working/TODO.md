@@ -1,4 +1,15 @@
-# TODO — SPPG (diperbarui 2026-08-08)
+# TODO — SPPG (diperbarui 2026-08-08 malam)
+
+## FASE 7 LANJUTAN — Widget Chat FE + Migrasi API Key (2026-08-08, sesi 47 lanjutan) ✅ BUILD + COMMIT SELESAI (menunggu uji manual)
+- ✅ **Widget chat FE**: `ChatWidget.jsx` BARU + mount Layout (guard `hasPerm('chatbot','READ')`) — modal overlay pola Bug Report, POST /chat, loading, error API key not set → link /setting. tanpa SSE.
+- ✅ **UI kelola API key** `SettingPage.jsx` section AI Assistant (+363): form provider/baseUrl/model/apiKey password, masked display, hapus ConfirmDialog, toast.
+- ✅ **Migrasi API key BYOK → SystemConfig singleton** (keputusan Rozi): model SystemConfig (id 'system') + HAPUS ChatApiKey + relasi balik User; enum PermissionAksi +MANAGE; migration `20260808165619`; rbacSeeder `chatbot-config` (L30) + MANAGE hanya ADMIN (L176); chat.js guard `requirePermission('chatbot-config','MANAGE')` + POST /chat dapat key dari config + 400 'API key belum diatur, hubungi admin' persis + ChatLog tetap per-user; test chat.test.js update (admin 200 / non-admin 403 / chat sukses / no-key 400).
+- ✅ **Guard FE Task 3 poin 3**: `{hasPerm('chatbot-config','MANAGE') && <AiApiKeySection />}` — non-ADMIN: TIDAK render + TIDAK fetch GET /chat/api-key sama sekali (verified OpenCode).
+- ✅ **Verifikasi**: npm test 637/637 PASS (43 files), lint 0/0, FE build exit 0, grep chatApiKey 0 sisa, DB grant ADMIN MANAGE ada.
+- ⏳ **UJI MANUAL TASK 5 (4 skenario)** — menunggu user: (1) Admin perlu BE restart dulu (migration belum aktif); (2) skenario 1-4 per plan migrasi.
+- ⏳ Lanjut: Fase 7 item 2 Tool registry · item 3 Retensi ChatLog · Fase 8 Notifikasi eksternal
+
+### FASE 7 item 2 — Tool registry (next setelah uji manual)
 
 ## TASK 4 — UI Form Resource + Guard DELETE 409 + Test CRUD Resource (2026-08-08, sesi 47) ✅ SELESAI + APPROVED (commit FINALIZE sesi ini)
 - ✅ **Task A — guard 409** (admin.js:337-341): DELETE `/api/admin/resources/:id` → count grant aktif > 0 → `409 { error }`. Soft-delete tetap + invalidatePermissionCache.

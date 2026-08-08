@@ -1,19 +1,31 @@
-# Handoff — 2026-08-08 (sesi 47) — TASK 4: UI Form Resource + Guard DELETE 409 + Test CRUD Resource
+# Handoff — 2026-08-08 (sesi 47 lanjutan) — FASE 7 LANJUTAN: WIDGET CHAT FE + MIGRASI API KEY
 
 ## Status Terakhir
-- **Task 4 SELESAI + APPROVED Rozi** (2026-08-08): guard 409 DELETE resource (admin.js:337-341), test CRUD resource 9 case (rbac-resource.test.js, 635/635 PASS), FE form resource + tabel 5 baris scroll (RolePermissionMatrixPage.jsx +319/-4). Folder `.agent-pm/backlog/` DIHAPUS (keputusan Rozi). Menunggu commit FINALIZE.
-- **Sebelumnya**: Fix RBAC sesi 47 (`4f8ec31`) — bypass ADMIN dicabut, grant KEPALA_SPPG dicabut, CRUD resource API + invalidate cache.
+- **BUILD + COMMIT selesai**: widget chat FE (ChatWidget.jsx + Layout + SettingPage section AI) + migrasi API key BYOK → SystemConfig admin-managed. Backend **637/637 PASS**, lint 0/0, FE build exit 0. Semua di-commit sesi ini.
+- **BELUM diuji manual** oleh Rozi (Task 5 plan migrasi: 4 skenario). Rozi istirahat — **sesi berikutnya WAJIB uji manual dulu sebelum task baru**.
+- **Commit** (lihat git log untuk hash):
+  - `feat(chat): widget chat FE + UI kelola API key (admin-managed)` (t5: ...)
+  - `feat(chat): migrasi ChatApiKey → SystemConfig singleton + RBAC chatbotConfig MANAGE` (skema+migration+seeder+chat.js+test)
+  - + `chore/state` dsb.
 
-## Next Step (butuh TASK_SELECTION)
-1. **FASE 7 lanjutan**: UI widget chat FE (kelola API key + panel chat), tool registry, retensi ChatLog
-2. **FASE 8**: Notifikasi eksternal (Email Nodemailer + WhatsApp)
-
-## Pola yang Terbukti (sesi 47)
-- AGY 3x timeout "tool jalan, teks mati" — pekerjaan selesai di disk; verifikasi OpenCode independen = bukti final (GF-009).
-- Guard DELETE resource pakai cek grant aktif (count RolePermission), bukan cek App.jsx — backend tidak baca file FE.
-- FE form pattern: UserManagementPage (section card + form onSubmit + input + Dropdown); toggle nonaktif/aktif pakai ConfirmDialog + useApi + toast.
+## Yang Perlu Diketahui Sesi Berikutnya
+1. **BE restart WAJIB** sebelum uji manual — migration `20260808165619_migrate_chat_apikey_to_system_config` belum aktif di BE yang sedang jalan (kalau masih jalan dari sesi sebelumnya). Aturan: Hermes boleh kill BE, minta Rozi nyalakan ulang; JANGAN biarkan BE jalan dengan kode lama (prisma client lama → `prisma.systemConfig` tidak dikenal).
+2. **Pola yang Terbukti sesi ini**:
+   - AGY claude quota habis → pakai **AGY gemini-3.6-flash-medium** (model valid, Rozi approved 2026-08-08)
+   - AGY 3x timeout "tool jalan teks mati" → kerja selesai di disk, verifikasi independen OpenCode + npx oxlint jadi bukti final
+   - opencode kadang hang lama untuk lint (rtk alias rusak → `npx oxlint src` langsung dari Hermes terminal OK, lint read-only)
+3. **FE guard pattern**: `{hasPerm('chatbot-config','MANAGE') && <AiApiKeySection />}` — non-ADMIN tidak render section. `hasPerm` dual-signature: `(resource, aksi)` atau `'resource:aksi'` (AuthContext.jsx:49).
 
 ## Risiko / Pitfall
-- Test cache invalidation resource CRUD sekarang COVERED (test #5/#6: aktif:false→403, aktif:true→200).
-- `/api/chat` tanpa API key tersimpan → 400; error provider → 500 uniform.
-- GF-011: agent bisa revert uncommitted — cek git status sebelum tiap session agent.
+- `lib/chat/encryption.js` tetap dipakai (reuse, tidak dibongkar) — jangan diubah di task berikutnya
+- ChatLog menumpuk (belum ada retensi) — task retensi ChatLog (TTL) setelah tool registry
+- Sync state: git adalah sumber kebenaran (GF-012) — `git status --short` sebelum percaya doc
+
+## Next Steps (priority order)
+1. **UJI MANUAL Task 5** (4 skenario — butuh Rozi + BE restart)
+2. Tool registry chatbot (read-only)
+3. Retensi ChatLog (keputusan Rozi soal TTL)
+4. Fase 8 notifikasi eksternal
+
+## Model sesi ini
+[AGY gemini-3.6-flash-medium build] + [OpenCode deepseek-v4-flash-free verify] + [Hermes oc/deepseek-v4-flash-free]

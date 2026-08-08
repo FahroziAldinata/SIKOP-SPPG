@@ -275,6 +275,41 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-08 (sesi 47 lanjutan) — FASE 7 LANJUTAN: Widget Chat FE + Migrasi API Key → SystemConfig (BUILD COMMIT, menunggu uji manual user)
+
+### Keputusan desain (Rozi, plan `.agent-pm/plans/2026-08-08-prompt-migrasi-apikey-admin-managed.md`)
+- **API key BUKAN per-user (BYOK dibatalkan)** — 1 key untuk seluruh SPPG, diatur HANYA ADMIN (admin-managed). Role lain tinggal pakai chat. Satu instance = 1 SPPG (konsisten keputusan sppgId dibatalkan). Tujuannya portabilitas deploy: sekali admin set key, tidak perlu bongkar kode.
+- Migrasi data testing lama: DIKOSONGKAN (fresh start, bukan migrate data).
+- Aksi enum `MANAGE` ditambahkan — bukti non-breaking: suite 637/637 PASS (bukan hanya 626).
+
+### Hasil build
+- **Widget chat FE**: `ChatWidget.jsx` (baru) — overlay modal pola Bug Report, tombol floating, POST /chat `{message}` → `data.jawaban` (non-stream), loading, error "API key belum diatur" → link `/setting`, guard `hasPerm('chatbot','READ')` (Layout:697). Tanpa SSE, tanpa dep baru.
+- **Section "AI Assistant" SettingPage.jsx** (+363): form provider dropdown (gemini/groq/openai/custom) + baseUrl + model + apiKey password, GET masked key, DELETE + ConfirmDialog, toast.
+- **Migrasi schema**: model `SystemConfig` (singleton id "system"; provider, apiKeyEncrypted, baseUrl?, model?, timestamps) + HAPUS `ChatApiKey` + relasi balik di `User`; enum `PermissionAksi` + `MANAGE`. Migration `20260808165619_migrate_chat_apikey_to_system_config` (ALTER TYPE + DROP TABLE + CREATE TABLE). `npx prisma generate` OK.
+- **RBAC**: resource `chatbot-config` (rbacSeeder.js:30), grant `chatbot-config:MANAGE` HANYA ADMIN (:176); `chatbot:READ` semua 6 role tetap (:180-185). DB grant verified.
+- **chat.js**: GET/POST/DELETE api-key → `systemConfig` id 'system', guard `requirePermission('chatbot-config','MANAGE')`; POST /chat ambil key dari config (bukan user), kalau belum diset → `400 { error: 'API key belum diatur, hubungi admin' }`; ChatLog tetap `userId: req.user.sub`; enkripsi reuse `lib/chat/encryption.js` (0 bongkar).
+- **Guard FE Task 3**: `{hasPerm('chatbot-config','MANAGE') && <AiApiKeySection />}` — non-ADMIN: section tidak render, GET /chat/api-key tidak pernah dipanggil (4 pemanggilan /chat semua di dalam AiApiKeySection L671/717/727/746).
+
+### Verifikasi
+- `npm test` backend: **637/637 PASS (43 files)** — bukti enum MANAGE non-breaking RBAC
+- `npm run lint` (oxlint): 0 warnings 0 errors
+- FE `npm run build`: exit 0
+- grep `chatApiKey` backend/src: 0 sisa
+- DB: row rolePermission `{ role: ADMIN, aksi: MANAGE, resource: chatbot-config, aktif: true }`
+
+### Proses & model
+- AGY claude-sonnet-4-6 quota 9router habis → **AGY gemini-3.6-flash-medium** (Rozi approve, model valid)
+- AGY 3x timeout "tool jalan, teks mati" — kerja di disk; verifikasi OpenCode independen + npx oxlint (read-only) jadi bukti final
+- Catatan opencode: `rtk` alias rusak (JSON parse EOF) → pakai `npx oxlint src` langsung
+
+### Menunggu uji manual (Task 5, 4 skenario)
+1. ADMIN `/setting` → section AI muncul → set key
+2. Role lain `/setting` → section AI TIDAK muncul
+3. Role lain chat → jawaban OK (key dari config)
+4. ADMIN hapus key → chat → error 'API key belum diatur, hubungi admin'
+
+---
+
 ## 2026-08-08 (sesi 47 lanjutan) — TASK 4: UI Form Resource + Guard DELETE 409 + Test CRUD Resource ✅ APPROVED
 
 ### Backlog `ui-form-resource-baru.md` selesai — folder `.agent-pm/backlog/` dihapus (keputusan Rozi)
