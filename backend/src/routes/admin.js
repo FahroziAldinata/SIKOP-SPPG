@@ -237,6 +237,124 @@ router.get("/resources", requirePermission("admin-permission", "READ"), async (r
   }
 });
 
+// POST /api/admin/resources - Create new resource (Task A gap fix: admin bisa buat resource baru dari UI)
+router.post("/resources", requirePermission("admin-permission", "CREATE"), async (req, res) => {
+  try {
+    const { kode, nama, modul } = req.body || {};
+
+    if (!kode || !nama || !modul) {
+      return res.status(400).json({ error: "kode, nama, dan modul wajib diisi" });
+    }
+
+    // Validasi format kode: lowercase, huruf/angka/dash saja
+    if (!/^[a-z0-9-]+$/.test(kode)) {
+      return res.status(400).json({ error: "kode harus lowercase, huruf/angka/dash saja (contoh: mitra-setup-periode)" });
+    }
+
+    const newResource = await prisma.$transaction(async (tx) => {
+      const rec = await tx.resource.create({
+        data: { kode, nama, modul, aktif: true }
+      });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Resource",
+        entityId: rec.id,
+        aksi: "CREATE",
+        dataLama: null,
+        dataBaru: { kode: rec.kode, nama: rec.nama, modul: rec.modul }
+      });
+      return rec;
+    });
+
+    // Resource baru bisa langsung di-grant ke role — cache harus di-refresh
+    invalidatePermissionCache();
+    res.status(201).json(newResource);
+  } catch (error) {
+    logger.error(error);
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: "Kode resource sudah digunakan" });
+    }
+    res.status(500).json({ error: "Gagal membuat resource baru" });
+  }
+});
+
+// PUT /api/admin/resources/:id - Update resource (nama/modul/aktif)
+router.put("/resources/:id", requirePermission("admin-permission", "UPDATE"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nama, modul, aktif } = req.body || {};
+
+    const data = {};
+    if (nama !== undefined) data.nama = nama;
+    if (modul !== undefined) data.modul = modul;
+    if (aktif !== undefined) data.aktif = aktif;
+
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ error: "Tidak ada field yang diperbarui" });
+    }
+
+    const existing = await prisma.resource.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ error: "Resource tidak ditemukan" });
+    }
+
+    const updatedResource = await prisma.$transaction(async (tx) => {
+      const rec = await tx.resource.update({ where: { id }, data });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Resource",
+        entityId: rec.id,
+        aksi: "UPDATE",
+        dataLama: { kode: existing.kode, nama: existing.nama, modul: existing.modul, aktif: existing.aktif },
+        dataBaru: { kode: rec.kode, nama: rec.nama, modul: rec.modul, aktif: rec.aktif }
+      });
+      return rec;
+    });
+
+    // Resource diubah (nama/modul/aktif) bisa mempengaruhi set permission valid — flush cache
+    invalidatePermissionCache();
+    res.json(updatedResource);
+  } catch (error) {
+    logger.error(error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: "Resource tidak ditemukan" });
+    }
+    res.status(500).json({ error: "Gagal memperbarui resource" });
+  }
+});
+
+// DELETE /api/admin/resources/:id - Soft delete (nonaktifkan resource)
+// Hard delete tidak disediakan karena resource yang aktif bisa punya RolePermission terkait.
+router.delete("/resources/:id", requirePermission("admin-permission", "DELETE"), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const existing = await prisma.resource.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ error: "Resource tidak ditemukan" });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.resource.update({ where: { id }, data: { aktif: false } });
+      await logAudit(tx, {
+        userId: req.user.sub,
+        entityType: "Resource",
+        entityId: id,
+        aksi: "DELETE",
+        dataLama: { kode: existing.kode, nama: existing.nama, aktif: existing.aktif },
+        dataBaru: { aktif: false }
+      });
+    });
+
+    // Resource dinonaktifkan: semua RolePermission terkait tidak lagi valid di cache
+    invalidatePermissionCache();
+    res.json({ success: true, message: `Resource '${existing.kode}' berhasil dinonaktifkan` });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ error: "Gagal menonaktifkan resource" });
+  }
+});
+
 // GET /api/admin/permissions - List role permissions (filter by role, resourceId, resource kode)
 router.get("/permissions", requirePermission("admin-permission", "READ"), async (req, res) => {
   try {

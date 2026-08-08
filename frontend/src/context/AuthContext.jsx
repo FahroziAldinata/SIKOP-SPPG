@@ -47,7 +47,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const hasPerm = (resourceOrPerm, aksi) => {
-    if (user?.role === 'ADMIN') return true;
+    // Catatan: bypass ADMIN dihapus (2026-08-08, Task C).
+    // Semua role termasuk ADMIN diperiksa via permissions array dari /api/my-permissions.
     if (!permissions || !Array.isArray(permissions)) return false;
 
     let res = resourceOrPerm;

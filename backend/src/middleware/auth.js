@@ -111,10 +111,9 @@ function requirePermission(resource, aksi) {
 
     const { role } = req.user;
 
-    // Superuser bypass: role ADMIN diizinkan untuk semua resource & aksi
-    if (role === 'ADMIN') {
-      return next();
-    }
+    // Catatan: bypass ADMIN dihapus (2026-08-08, Task C).
+    // ADMIN diperiksa sama seperti role lain — wajib punya grant eksplisit di RolePermission.
+    // Grant ADMIN: admin-user, admin-permission, audit-log, laporan-bug (R/C/U), chatbot (R).
 
     try {
       // Reload bila role user TIDAK ada di cache (bukan hanya saat cache kosong total).

@@ -275,6 +275,20 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-08 (sesi 47) — Fix RBAC: bypass ADMIN + grant KEPALA_SPPG berlebih dicabut ✅ APPROVED
+
+### Fix RBAC — permission = satu-satunya sumber kebenaran (KEPUTUSAN ROZI: tanpa role-gate, tanpa Sppg/per-SPPG)
+- **Latar**: temuan kritis sesi 46 — fix AND-logic `1dd9c70` (role+perm) tertimpa `3135fef` (migrasi 43 route requiredPerm-only). Efek: ADMIN (bypass `hasPerm`) bisa akses 43 halaman operasional via URL; KEPALA_SPPG (grant READ luas) 34 route via URL, 19 di antaranya operasional-detail. Arah Rozi: JANGAN kembalikan role-gate — permission (`requiredPerm`) = satu-satunya sumber kebenaran; Task 3 model Sppg/sppgId DIBATALKAN (sistem single instance per SPPG).
+- **Task B**: 10 grant KEPALA_SPPG dicabut (aslap-input, gizi-menu, mitra-po, mitra-pemeriksaan, akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, laporan-resmi CREATE/DELETE). Pertahankan: akuntan-rab READ+APPROVE (kepala approve RAB), kepala-approval, ringkasan/laporan, laporan-bug, chatbot.
+- **Task C**: bypass ADMIN dicabut FE (`AuthContext.jsx`) + BE (`auth.js`) → grant eksplisit ADMIN (12 grant admin-only + chatbot:READ). ADMIN 403 di 38 halaman operasional; halaman admin tetap 200.
+- **Task A**: CRUD resource API `POST/PUT/DELETE /api/admin/resources` (admin.js +118, guard per-permission, validasi format+duplikat) + `invalidatePermissionCache()` di 3 endpoint (admin.js:270/315/350). UI form resource → backlog.
+- **Task D**: 4 test lama di-update (coverage-mitra 3× 200→403; rbac-permission bypass dibalik → grant eksplisit next / tanpa grant 403). Suite **626/626 PASS** (625 baseline + 1), lint 0/0, FE build exit 0. Gap: test otomatis cache invalidation resource CRUD belum ada.
+- **Proses**: AGY claude-sonnet-4-6 2x timeout ("tool jalan, teks mati") — kerja finish di disk, verifikasi OpenCode independen 2x jadi bukti final (GF-009). AGY auth expired 1x → Rozi login ulang Google OAuth.
+- **Artefak**: laporan `.agent-pm/plans/2026-08-07-fix-rbac-eksekusi.md` (dibersihkan saat archive), backlog `.agent-pm/backlog/ui-form-resource-baru.md`.
+- **Backlog baru**: UI form resource baru (admin) + test resource CRUD cache invalidation.
+
+---
+
 ## Catatan Umum
 
 - **AGY**: Mode `-p` = text-only. Butuh `-i` + PTY untuk eksekusi tool. Settings di `C:\Users\Administrator\.gemini\antigravity-cli\settings.json`

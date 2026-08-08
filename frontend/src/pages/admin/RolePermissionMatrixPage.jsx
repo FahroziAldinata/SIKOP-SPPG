@@ -228,7 +228,7 @@ export const RolePermissionMatrixPage = () => {
               fontStyle: 'italic',
             }}
           >
-            ADMIN selalu memiliki akses penuh dan tidak ditampilkan di matriks ini.
+            ADMIN hanya punya akses pada resource administratif (admin-user, admin-permission, audit-log, laporan-bug, chatbot) via grant eksplisit — tidak ditampilkan di matriks ini.
           </span>
         </div>
 

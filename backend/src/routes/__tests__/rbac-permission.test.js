@@ -28,8 +28,30 @@ describe('Dynamic RBAC Foundation — middleware & cache', () => {
     expect(next).not.toHaveBeenCalled();
   });
 
-  test('requirePermission: role ADMIN superuser bypass -> next() dipanggil', async () => {
+  // Task C: bypass ADMIN dicabut. ADMIN tanpa grant eksplisit di cache → 403
+  test('requirePermission: role ADMIN tanpa grant eksplisit → 403 (bypass dicabut)', async () => {
+    // Cache kosong (dari beforeEach) — ADMIN tidak ada di permissionCache
     const middleware = requirePermission('ANY_RESOURCE', 'DELETE');
+    const req = { user: { role: 'ADMIN' } };
+    const res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn()
+    };
+    const next = vi.fn();
+
+    await middleware(req, res, next);
+
+    // ADMIN tidak punya grant ANY_RESOURCE:DELETE → 403
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  // Task C (tambahan): ADMIN dengan grant eksplisit di cache → next() dipanggil
+  test('requirePermission: role ADMIN dengan grant eksplisit di cache → next() dipanggil', async () => {
+    // Simulasikan ADMIN punya grant admin-user:READ (dari seeder eksplisit)
+    permissionCache.set('ADMIN', new Set(['admin-user:READ']));
+
+    const middleware = requirePermission('admin-user', 'READ');
     const req = { user: { role: 'ADMIN' } };
     const res = {};
     const next = vi.fn();

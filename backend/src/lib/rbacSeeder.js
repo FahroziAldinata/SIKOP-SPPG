@@ -79,33 +79,24 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'AKUNTAN', resource: 'laporan-resmi', aksi: 'EXPORT' },
   { role: 'AKUNTAN', resource: 'laporan-bug', aksi: 'CREATE' },
 
-  // KEPALA_SPPG
+  // KEPALA_SPPG — grant minimal: modul sendiri + ringkasan lintas modul + approve RAB
+  // DICABUT (2026-08-08, Task B): aslap-input, gizi-menu, gizi-target, mitra-po, mitra-pemeriksaan,
+  //   akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, laporan-resmi:CREATE/DELETE
   { role: 'KEPALA_SPPG', resource: 'kepala-approval', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'kepala-approval', aksi: 'CREATE' },
   { role: 'KEPALA_SPPG', resource: 'kepala-approval', aksi: 'APPROVE' },
   { role: 'KEPALA_SPPG', resource: 'aslap-master', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'aslap-periode', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'aslap-input', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'aslap-laporan', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'aslap-laporan', aksi: 'EXPORT' },
   { role: 'KEPALA_SPPG', resource: 'gizi-master', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'gizi-target', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'gizi-menu', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'gizi-laporan', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'gizi-laporan', aksi: 'EXPORT' },
   { role: 'KEPALA_SPPG', resource: 'mitra-master', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'mitra-po', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'mitra-pemeriksaan', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'akuntan-master', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'akuntan-akun', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'akuntan-jenis-pekerjaan', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'akuntan-rab', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'akuntan-rab', aksi: 'APPROVE' },
-  { role: 'KEPALA_SPPG', resource: 'akuntan-jurnal', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'akuntan-upah', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'laporan-resmi', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'laporan-resmi', aksi: 'CREATE' },
-  { role: 'KEPALA_SPPG', resource: 'laporan-resmi', aksi: 'DELETE' },
   { role: 'KEPALA_SPPG', resource: 'laporan-resmi', aksi: 'EXPORT' },
   { role: 'KEPALA_SPPG', resource: 'laporan-bug', aksi: 'CREATE' },
 
@@ -182,12 +173,14 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'ADMIN', resource: 'laporan-bug', aksi: 'CREATE' },
   { role: 'ADMIN', resource: 'laporan-bug', aksi: 'UPDATE' },
 
-  // CHATBOT — semua role operasional mendapat READ (Admin bypass otomatis)
+  // CHATBOT — semua role (termasuk ADMIN) mendapat READ via grant eksplisit
+  // (setelah bypass ADMIN dicabut Task C, ADMIN tidak lagi otomatis dapat semua resource)
   { role: 'ASLAP', resource: 'chatbot', aksi: 'READ' },
   { role: 'MITRA', resource: 'chatbot', aksi: 'READ' },
   { role: 'AHLI_GIZI', resource: 'chatbot', aksi: 'READ' },
   { role: 'AKUNTAN', resource: 'chatbot', aksi: 'READ' },
-  { role: 'KEPALA_SPPG', resource: 'chatbot', aksi: 'READ' }
+  { role: 'KEPALA_SPPG', resource: 'chatbot', aksi: 'READ' },
+  { role: 'ADMIN', resource: 'chatbot', aksi: 'READ' }
 ];
 
 async function seedRbacPermissions(prisma) {

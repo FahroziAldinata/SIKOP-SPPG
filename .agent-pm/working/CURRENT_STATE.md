@@ -1,6 +1,16 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: Fase 7 AI Chatbot — Backend TUNTAS (9 commit, HEAD main == origin/main == `d812264`). Lanjutan (FE widget, tool registry, retensi ChatLog) belum dikerjakan — butuh TASK_SELECTION.**
+**Scope Aktif: Fix RBAC (cabut bypass ADMIN + grant KEPALA_SPPG berlebih) TUNTAS 2026-08-08 — suite 626/626, menunggu commit. Next: Fase 7 lanjutan (widget chat FE / tool registry / retensi) + backlog UI form resource.**
+
+## Sesi 47 (2026-08-08) — FIX RBAC: cabut ADMIN bypass + grant berlebih KEPALA_SPPG + resource CRUD API ✅ APPROVED (menunggu commit)
+- **Latar**: temuan kritis sesi 46 — fix AND-logic `1dd9c70` tertimpa `3135fef` (requiredPerm-only), ADMIN bisa akses 43 halaman via URL (bypass `hasPerm`), KEPALA_SPPG 34 route via URL (19 operasional-detail). Arah Rozi: JANGAN kembalikan role-gate — permission = satu-satunya sumber kebenaran (Task 3 Sppg/per-SPPG DIBATALKAN, single instance per SPPG).
+- **Task B — grant KEPALA_SPPG dicabut** (rbacSeeder.js): aslap-input, gizi-menu, mitra-po, mitra-pemeriksaan, akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, laporan-resmi CREATE/DELETE → CABUT. PERTAHANKAN: akuntan-rab READ+APPROVE, kepala-approval, laporan/ringkasan (aslap-laporan, gizi-laporan, laporan-resmi READ/EXPORT, laporan-bug, chatbot).
+- **Task C — bypass ADMIN dicabut** (AuthContext.jsx:50 FE + auth.js:115 BE) → grant eksplisit ADMIN (admin-user/admin-permission/audit-log/laporan-bug + chatbot:READ). ADMIN tidak lagi buka 38 halaman operasional.
+- **Task A — resource CRUD API** (admin.js +118): POST/PUT/DELETE `/api/admin/resources` (guard per-permission, validasi format+duplikat) + `invalidatePermissionCache()` di 3 endpoint (admin.js:270/315/350 — fix-minimal Task 2). UI form resource BELUM ada → backlog.
+- **Task D — test**: 4 test lama di-update (coverage-mitra 3× 200→403, rbac-permission bypass dibalik) + suite hijau **626/626 PASS**, lint 0/0, FE build exit 0. Gap: test otomatis cache invalidation CRUD resource belum ada (backlog bersama UI form).
+- **Proses**: AGY claude-sonnet-4-6 2x timeout "tool jalan teks mati" (kerja di disk, verifikasi OpenCode jadi bukti final — GF-009). Verifikasi OpenCode independen 2x.
+- **Artefak**: laporan `.agent-pm/plans/2026-08-07-fix-rbac-eksekusi.md` + backlog `.agent-pm/backlog/ui-form-resource-baru.md` (laporan/plan dibersihkan saat archive sesuai aturan cleanup).
+- Model: [AGY claude-sonnet-4-6 utk build] + [OpenCode deepseek-v4-flash-free utk verify] + [Hermes oc/deepseek-v4-flash-free].
 
 ## Sesi 46 (2026-08-07) — FASE 7 AI CHATBOT: Backend SELESAI + di main (9 commit, 625/625 test) tervalidasi ulang
 - **Keputusan Rozi**: Fase 7 backend dikerjakan (branch `feat/fase7-chatbot-step1`), setelah selesai di-merge ke main. 9 commit, SEMUA di main (HEAD == origin/main == `d812264`).

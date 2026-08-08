@@ -1,4 +1,13 @@
-# TODO — SPPG (diperbarui 2026-08-03)
+# TODO — SPPG (diperbarui 2026-08-08)
+
+## Fix RBAC — bypass ADMIN + grant KEPALA_SPPG berlebih (2026-08-08, sesi 47) ✅ SELESAI + APPROVED (menunggu commit)
+- ✅ **Task B — grant KEPALA_SPPG dicabut** (rbacSeeder.js): aslap-input, gizi-menu, mitra-po, mitra-pemeriksaan, akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, laporan-resmi CREATE/DELETE. PERTAHANKAN: akuntan-rab READ+APPROVE, kepala-approval, ringkasan/laporan, laporan-bug, chatbot.
+- ✅ **Task C — bypass ADMIN dicabut** FE (AuthContext.jsx) + BE (auth.js) → grant eksplisit ADMIN (admin-user/admin-permission/audit-log/laporan-bug + chatbot:READ). ADMIN 403 di 38 halaman operasional.
+- ✅ **Task A — CRUD resource API** POST/PUT/DELETE `/api/admin/resources` (admin.js, guard per-permission, validasi format+duplikat) + invalidatePermissionCache di 3 endpoint (admin.js:270/315/350).
+- ✅ **Task D — test**: 4 test lama di-update (coverage-mitra 3× 200→403, rbac-permission dibalik), suite **626/626 PASS**, lint 0/0, build exit 0.
+- ✅ **Backlog UI form** tercatat: `.agent-pm/backlog/ui-form-resource-baru.md`
+- ⚠️ **Gap terdokumentasi**: test otomatis cache invalidation resource CRUD belum ada (backlog).
+- **Arah Rozi**: Task 3 Sppg/per-SPPG DIBATALKAN (single instance per SPPG); permission = satu-satunya sumber kebenaran, JANGAN kembalikan role-gate.
 
 ## Setup Perangkat Baru (2026-08-03) ✅
 - ✅ Setup lokal lengkap: npm install (backend 269 + frontend 140 pkg), .env dibuat (DB `sppg` Postgres 18 lokal), 18 migration applied, seed sukses, FE build PASS.
