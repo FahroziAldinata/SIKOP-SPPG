@@ -26,7 +26,8 @@ const RBAC_RESOURCES = [
   { kode: 'admin-permission', nama: 'Manajemen Permission', modul: 'admin' },
   { kode: 'audit-log', nama: 'Audit Log Sistem', modul: 'admin' },
   { kode: 'laporan-bug', nama: 'Laporan Bug & Masalah', modul: 'admin' },
-  { kode: 'chatbot', nama: 'Asisten AI Chatbot', modul: 'chat' }
+  { kode: 'chatbot', nama: 'Asisten AI Chatbot', modul: 'chat' },
+  { kode: 'chatbot-config', nama: 'Konfigurasi Chatbot', modul: 'chatbot' }
 ];
 
 const RBAC_ROLE_PERMISSIONS = [
@@ -172,6 +173,7 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'ADMIN', resource: 'laporan-bug', aksi: 'READ' },
   { role: 'ADMIN', resource: 'laporan-bug', aksi: 'CREATE' },
   { role: 'ADMIN', resource: 'laporan-bug', aksi: 'UPDATE' },
+  { role: 'ADMIN', resource: 'chatbot-config', aksi: 'MANAGE' },
 
   // CHATBOT — semua role (termasuk ADMIN) mendapat READ via grant eksplisit
   // (setelah bypass ADMIN dicabut Task C, ADMIN tidak lagi otomatis dapat semua resource)

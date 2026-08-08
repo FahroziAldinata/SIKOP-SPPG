@@ -121,22 +121,21 @@ function buildSystemPrompt(role) {
 // POST /api/chat/api-key — simpan/upsert API key (terenkripsi)
 // ---------------------------------------------------------------------------
 
-router.post('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async (req, res) => {
+router.post('/api-key', requireAuth, requirePermission('chatbot-config', 'MANAGE'), async (req, res) => {
   const parsed = apiKeyBodySchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.issues[0].message });
   }
 
   const { provider, apiKey, baseUrl, model } = parsed.data;
-  const userId = req.user.sub;
 
   try {
     const apiKeyEncrypted = encrypt(apiKey);
 
-    await prisma.chatApiKey.upsert({
-      where: { userId },
+    await prisma.systemConfig.upsert({
+      where: { id: 'system' },
       update: { provider, apiKeyEncrypted, baseUrl, model },
-      create: { userId, provider, apiKeyEncrypted, baseUrl, model }
+      create: { id: 'system', provider, apiKeyEncrypted, baseUrl, model }
     });
 
     // JANGAN return apiKey mentah
@@ -151,13 +150,11 @@ router.post('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async
 // GET /api/chat/api-key — ambil info key (masked)
 // ---------------------------------------------------------------------------
 
-router.get('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async (req, res) => {
-  const userId = req.user.sub;
-
+router.get('/api-key', requireAuth, requirePermission('chatbot-config', 'MANAGE'), async (req, res) => {
   try {
-    const record = await prisma.chatApiKey.findUnique({ where: { userId } });
+    const record = await prisma.systemConfig.findUnique({ where: { id: 'system' } });
 
-    if (!record) {
+    if (!record || !record.apiKeyEncrypted) {
       return res.status(404).json({ error: 'API key belum diatur' });
     }
 
@@ -181,14 +178,12 @@ router.get('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async 
 });
 
 // ---------------------------------------------------------------------------
-// DELETE /api/chat/api-key — hapus key user
+// DELETE /api/chat/api-key — hapus key system
 // ---------------------------------------------------------------------------
 
-router.delete('/api-key', requireAuth, requirePermission('chatbot', 'READ'), async (req, res) => {
-  const userId = req.user.sub;
-
+router.delete('/api-key', requireAuth, requirePermission('chatbot-config', 'MANAGE'), async (req, res) => {
   try {
-    await prisma.chatApiKey.deleteMany({ where: { userId } });
+    await prisma.systemConfig.deleteMany({ where: { id: 'system' } });
     return res.json({ success: true });
   } catch (err) {
     logger.error({ msg: 'Gagal menghapus API key chatbot', errMessage: err.message });
@@ -210,18 +205,18 @@ router.post('/', requireAuth, requirePermission('chatbot', 'READ'), chatLimiter,
   const userId = req.user.sub;
   const userRole = req.user.role;
 
-  // Ambil API key user
+  // Ambil API key system
   let keyRecord;
   try {
-    keyRecord = await prisma.chatApiKey.findUnique({ where: { userId } });
+    keyRecord = await prisma.systemConfig.findUnique({ where: { id: 'system' } });
   } catch (err) {
-    logger.error({ msg: 'Gagal membaca ChatApiKey', errMessage: err.message });
+    logger.error({ msg: 'Gagal membaca SystemConfig', errMessage: err.message });
     return res.status(500).json({ error: 'Gagal menghubungi AI provider' });
   }
 
-  if (!keyRecord) {
+  if (!keyRecord || !keyRecord.apiKeyEncrypted) {
     return res.status(400).json({
-      error: 'API key belum diatur. Silakan atur API key chatbot terlebih dahulu di pengaturan.'
+      error: 'API key belum diatur, hubungi admin'
     });
   }
 

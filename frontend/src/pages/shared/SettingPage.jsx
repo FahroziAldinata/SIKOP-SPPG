@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
-import { Eraser, Upload, Trash2 } from 'lucide-react';
+import { Eraser, Upload, Trash2, Key, Save } from 'lucide-react';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 export const SettingPage = () => {
-    const { user, token, login } = useAuth();
+    const { user, token, login, hasPerm } = useAuth();
     const { request } = useApi();
     const toast = useToast();
 
@@ -553,6 +554,366 @@ export const SettingPage = () => {
                     )}
                 </div>
             </div>
+
+            {/* ===== SECTION AI ASSISTANT (API KEY) ===== */}
+            {hasPerm('chatbot-config', 'MANAGE') && <AiApiKeySection />}
         </div>
     );
 };
+
+// ---------------------------------------------------------------------------
+// Sub-komponen: AiApiKeySection
+// ---------------------------------------------------------------------------
+
+const PROVIDER_OPTIONS = ['gemini', 'groq', 'openai', 'custom'];
+
+const DEFAULT_BASE_URLS = {
+    gemini: 'https://generativelanguage.googleapis.com/v1beta/openai',
+    groq: 'https://api.groq.com/openai/v1',
+    openai: 'https://api.openai.com/v1',
+    custom: '',
+};
+
+const DEFAULT_MODELS = {
+    gemini: 'gemini-2.0-flash',
+    groq: 'llama-3.3-70b-versatile',
+    openai: 'gpt-4o-mini',
+    custom: '',
+};
+
+function AiApiKeySection() {
+    const { request } = useApi();
+    const toast = useToast();
+
+    const [status, setStatus] = useState(null); // null = belum load
+    const [statusLoading, setStatusLoading] = useState(true);
+
+    // Form state
+    const [provider, setProvider] = useState('gemini');
+    const [baseUrl, setBaseUrl] = useState(DEFAULT_BASE_URLS['gemini']);
+    const [model, setModel] = useState(DEFAULT_MODELS['gemini']);
+    const [apiKey, setApiKey] = useState('');
+    const [showForm, setShowForm] = useState(false);
+    const [saving, setSaving] = useState(false);
+
+    // ConfirmDialog delete
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    const labelStyle = {
+        textTransform: 'uppercase',
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: '0.07em',
+        color: 'var(--text-muted)',
+        display: 'block',
+        marginBottom: '6px',
+    };
+
+    const cardStyle = {
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-md)',
+        padding: '24px',
+        backgroundColor: 'var(--bg-elevated)',
+        boxShadow: 'var(--shadow)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+    };
+
+    const btnPrimaryStyle = {
+        padding: '10px 20px',
+        backgroundColor: 'var(--btn-primary-bg)',
+        color: 'var(--btn-primary-text)',
+        border: 'none',
+        borderRadius: 'var(--radius-sm)',
+        cursor: 'pointer',
+        fontWeight: 600,
+        fontSize: '14px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+    };
+
+    const btnSecondaryStyle = {
+        padding: '8px 14px',
+        backgroundColor: 'transparent',
+        color: 'var(--text-muted)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+        cursor: 'pointer',
+        fontWeight: 600,
+        fontSize: '13px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+    };
+
+    const btnDangerStyle = {
+        padding: '8px 14px',
+        backgroundColor: 'transparent',
+        color: '#dc2626',
+        border: '1px solid #dc2626',
+        borderRadius: 'var(--radius-sm)',
+        cursor: 'pointer',
+        fontWeight: 600,
+        fontSize: '13px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+    };
+
+    // Load status on mount
+    useEffect(() => {
+        const load = async () => {
+            setStatusLoading(true);
+            try {
+                const res = await request('/chat/api-key', { method: 'GET' });
+                if (res.ok) {
+                    const d = await res.json();
+                    setStatus(d.data); // { provider, baseUrl, model, apiKeyMasked }
+                    setShowForm(false);
+                } else {
+                    setStatus(null);
+                    setShowForm(true);
+                }
+            } catch {
+                setStatus(null);
+                setShowForm(true);
+            } finally {
+                setStatusLoading(false);
+            }
+        };
+        load();
+    }, []);
+
+    const handleProviderChange = (val) => {
+        setProvider(val);
+        if (val !== 'custom') {
+            setBaseUrl(DEFAULT_BASE_URLS[val] || '');
+            setModel(DEFAULT_MODELS[val] || '');
+        } else {
+            setBaseUrl('');
+            setModel('');
+        }
+    };
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        if (!apiKey.trim()) {
+            toast.error('API Key wajib diisi.');
+            return;
+        }
+        if (!baseUrl.trim()) {
+            toast.error('Base URL wajib diisi.');
+            return;
+        }
+        if (!model.trim()) {
+            toast.error('Model wajib diisi.');
+            return;
+        }
+        setSaving(true);
+        try {
+            const res = await request('/chat/api-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ provider, apiKey, baseUrl, model }),
+            });
+            const d = await res.json().catch(() => ({}));
+            if (res.ok) {
+                toast.success('API key berhasil disimpan.');
+                setApiKey('');
+                // Reload status
+                const res2 = await request('/chat/api-key', { method: 'GET' });
+                if (res2.ok) {
+                    const d2 = await res2.json();
+                    setStatus(d2.data);
+                    setShowForm(false);
+                }
+            } else {
+                toast.error(d.error || 'Gagal menyimpan API key.');
+            }
+        } catch {
+            toast.error('Terjadi kesalahan koneksi.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        setDeleting(true);
+        try {
+            const res = await request('/chat/api-key', { method: 'DELETE' });
+            if (res.ok) {
+                toast.success('API key berhasil dihapus.');
+                setStatus(null);
+                setShowForm(true);
+                setApiKey('');
+                setProvider('gemini');
+                setBaseUrl(DEFAULT_BASE_URLS['gemini']);
+                setModel(DEFAULT_MODELS['gemini']);
+            } else {
+                const d = await res.json().catch(() => ({}));
+                toast.error(d.error || 'Gagal menghapus API key.');
+            }
+        } catch {
+            toast.error('Terjadi kesalahan koneksi.');
+        } finally {
+            setDeleting(false);
+            setConfirmOpen(false);
+        }
+    };
+
+    return (
+        <div style={{ marginTop: '28px' }}>
+            <h3 style={{ color: 'var(--text)', marginBottom: '8px', fontSize: '16px', fontWeight: 700 }}>
+                AI Assistant (API Key)
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '0', marginBottom: '16px' }}>
+                Masukkan API key dari provider AI untuk menggunakan fitur AI Assistant. Key disimpan terenkripsi.
+            </p>
+
+            <div style={cardStyle}>
+                {statusLoading ? (
+                    <div className="skeleton-shimmer" style={{ height: '40px', borderRadius: 'var(--radius-sm)' }} />
+                ) : status ? (
+                    /* === Status: sudah ada key === */
+                    <div>
+                        <label style={labelStyle}>API Key Saat Ini</label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center', marginBottom: '12px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Provider</span>
+                                <span style={{
+                                    fontSize: '13px', fontWeight: 700, color: 'var(--text)',
+                                    textTransform: 'uppercase', letterSpacing: '0.05em'
+                                }}>
+                                    {status.provider}
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Model</span>
+                                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace' }}>
+                                    {status.model}
+                                </span>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>API Key</span>
+                                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace' }}>
+                                    {status.apiKeyMasked}
+                                </span>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                            <button
+                                type="button"
+                                onClick={() => setShowForm(!showForm)}
+                                style={btnSecondaryStyle}
+                            >
+                                <Key size={14} />
+                                {showForm ? 'Batal Ganti' : 'Ganti API Key'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setConfirmOpen(true)}
+                                disabled={deleting}
+                                style={{ ...btnDangerStyle, opacity: deleting ? 0.6 : 1, cursor: deleting ? 'not-allowed' : 'pointer' }}
+                            >
+                                <Trash2 size={14} />
+                                {deleting ? 'Menghapus...' : 'Hapus API Key'}
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    /* === Status: belum ada key === */
+                    <p style={{ color: 'var(--text-muted)', fontSize: '13px', fontStyle: 'italic', margin: '0' }}>
+                        Belum ada API key yang terdaftar.
+                    </p>
+                )}
+
+                {/* === Form Input === */}
+                {showForm && (
+                    <>
+                        <hr style={{ border: '0', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+                        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                            <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                                {/* Provider */}
+                                <div style={{ flex: '1 1 160px' }}>
+                                    <label style={labelStyle}>Provider</label>
+                                    <select
+                                        value={provider}
+                                        onChange={(e) => handleProviderChange(e.target.value)}
+                                        className="form-field"
+                                        style={{ width: '100%' }}
+                                    >
+                                        {PROVIDER_OPTIONS.map(p => (
+                                            <option key={p} value={p}>{p}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {/* Model */}
+                                <div style={{ flex: '1 1 200px' }}>
+                                    <label style={labelStyle}>Model</label>
+                                    <input
+                                        type="text"
+                                        className="form-field"
+                                        value={model}
+                                        onChange={(e) => setModel(e.target.value)}
+                                        placeholder="Contoh: gemini-2.0-flash"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Base URL */}
+                            <div>
+                                <label style={labelStyle}>Base URL</label>
+                                <input
+                                    type="text"
+                                    className="form-field"
+                                    value={baseUrl}
+                                    onChange={(e) => setBaseUrl(e.target.value)}
+                                    placeholder="https://..."
+                                    required
+                                />
+                            </div>
+
+                            {/* API Key */}
+                            <div>
+                                <label style={labelStyle}>API Key</label>
+                                <input
+                                    type="password"
+                                    className="form-field"
+                                    value={apiKey}
+                                    onChange={(e) => setApiKey(e.target.value)}
+                                    placeholder="Masukkan API key baru"
+                                    required
+                                    minLength={8}
+                                    autoComplete="new-password"
+                                />
+                            </div>
+
+                            <div style={{ marginTop: '4px' }}>
+                                <button
+                                    type="submit"
+                                    disabled={saving}
+                                    style={{ ...btnPrimaryStyle, opacity: saving ? 0.7 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}
+                                >
+                                    <Save size={14} />
+                                    {saving ? 'Menyimpan...' : 'Simpan API Key'}
+                                </button>
+                            </div>
+                        </form>
+                    </>
+                )}
+            </div>
+
+            <ConfirmDialog
+                open={confirmOpen}
+                title="Hapus API Key"
+                message="API key akan dihapus secara permanen. Fitur AI Assistant tidak dapat digunakan sampai Anda menambahkan API key baru."
+                onConfirm={handleDelete}
+                onCancel={() => setConfirmOpen(false)}
+            />
+        </div>
+    );
+}

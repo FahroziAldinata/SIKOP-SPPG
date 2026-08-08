@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { useApi } from '../../hooks/useApi';
+import { ChatWidget } from './ChatWidget';
 import {
   Sun,
   Moon,
@@ -691,6 +692,9 @@ export const Layout = () => {
       }}>
         <Outlet />
       </main>
+
+      {/* Chat Widget — hanya tampil kalau user login + punya perm chatbot:READ */}
+      {user && hasPerm('chatbot', 'READ') && <ChatWidget />}
 
       {/* Bug Report Overlay Form */}
       {bugFormOpen && (

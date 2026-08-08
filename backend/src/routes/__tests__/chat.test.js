@@ -1,15 +1,12 @@
 'use strict';
 
 // =============================================================================
-// Integration Test: /api/chat — Route Chatbot
-// =============================================================================
-// Strategi mock: Vitest v4 TIDAK bisa intercept modul yang di-load via
-// require() (CJS). Maka kita patch require.cache SEBELUM app di-require
-// agar modul openaiCompatible diganti mock (chatCompletion = vi.fn()).
+// Integration Test: /api/chat — Route Chatbot & SystemConfig API Key Migration
 // =============================================================================
 
 const request = require('supertest');
 const { PrismaClient } = require('@prisma/client');
+const { seedRbacPermissions } = require('../../lib/rbacSeeder');
 
 // Mock adapter provider sebelum require app — patch require.cache (CJS)
 const chatCompletion = vi.fn();
@@ -43,11 +40,19 @@ async function login(username) {
 // Setup
 // ---------------------------------------------------------------------------
 describe('Chat API — /api/chat', () => {
+  let tokenAdmin, userAdmin;
   let tokenAslap, userAslap;
   let tokenAkuntan, userAkuntan;
 
   beforeAll(async () => {
-    // Login dengan 2 user berbeda untuk test isolasi
+    // Seed RBAC permissions agar chatbot-config:MANAGE ter-register
+    await seedRbacPermissions(prismaDb);
+
+    // Login dengan 3 role berbeda
+    const dataAdmin = await login('admin');
+    tokenAdmin = dataAdmin.token;
+    userAdmin = dataAdmin.user;
+
     const dataAslap = await login('aslap');
     tokenAslap = dataAslap.token;
     userAslap = dataAslap.user;
@@ -57,8 +62,8 @@ describe('Chat API — /api/chat', () => {
     userAkuntan = dataAkuntan.user;
 
     // Bersihkan data chatbot test sebelumnya
-    await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAslap.id, userAkuntan.id] } } });
-    await prismaDb.chatApiKey.deleteMany({ where: { userId: { in: [userAslap.id, userAkuntan.id] } } });
+    await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAdmin.id, userAslap.id, userAkuntan.id] } } });
+    await prismaDb.systemConfig.deleteMany({});
 
     // Reset mock sebelum semua test
     chatCompletion.mockReset();
@@ -66,13 +71,13 @@ describe('Chat API — /api/chat', () => {
 
   afterAll(async () => {
     // Cleanup
-    await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAslap.id, userAkuntan.id] } } });
-    await prismaDb.chatApiKey.deleteMany({ where: { userId: { in: [userAslap.id, userAkuntan.id] } } });
+    await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAdmin.id, userAslap.id, userAkuntan.id] } } });
+    await prismaDb.systemConfig.deleteMany({});
     await prismaDb.$disconnect();
   });
 
   // --------------------------------------------------------------------------
-  // POST /api/chat/api-key — simpan API key
+  // POST /api/chat/api-key — simpan API key (hanya ADMIN / chatbot-config:MANAGE)
   // --------------------------------------------------------------------------
   describe('POST /api/chat/api-key', () => {
     test('401 — tanpa token', async () => {
@@ -87,10 +92,34 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(401);
     });
 
-    test('400 — apiKey terlalu pendek (< 8 char)', async () => {
-      const res = await request(app)
+    test('403 — NON-ADMIN (aslap/akuntan) mencoba POST api-key', async () => {
+      const resAslap = await request(app)
         .post('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`)
+        .send({
+          provider: 'groq',
+          apiKey: 'test-api-key-12345',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
+      expect(resAslap.status).toBe(403);
+
+      const resAkuntan = await request(app)
+        .post('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAkuntan}`)
+        .send({
+          provider: 'groq',
+          apiKey: 'test-api-key-12345',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
+      expect(resAkuntan.status).toBe(403);
+    });
+
+    test('400 — ADMIN: apiKey terlalu pendek (< 8 char)', async () => {
+      const res = await request(app)
+        .post('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'groq',
           apiKey: 'short',
@@ -100,10 +129,10 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(400);
     });
 
-    test('400 — provider tidak valid', async () => {
+    test('400 — ADMIN: provider tidak valid', async () => {
       const res = await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'invalid-provider',
           apiKey: 'test-api-key-12345',
@@ -113,10 +142,10 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(400);
     });
 
-    test('400 — baseUrl tidak valid (bukan URL)', async () => {
+    test('400 — ADMIN: baseUrl tidak valid (bukan URL)', async () => {
       const res = await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'groq',
           apiKey: 'test-api-key-12345',
@@ -126,10 +155,10 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(400);
     });
 
-    test('400 — model kosong', async () => {
+    test('400 — ADMIN: model kosong', async () => {
       const res = await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'groq',
           apiKey: 'test-api-key-12345',
@@ -139,12 +168,12 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(400);
     });
 
-    test('200 — simpan API key sukses, response TIDAK mengandung apiKey mentah', async () => {
+    test('200 — ADMIN: simpan API key sukses, response TIDAK mengandung apiKey mentah', async () => {
       const RAW_KEY = 'gsk-test-api-key-groq-12345678';
 
       const res = await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'groq',
           apiKey: RAW_KEY,
@@ -159,12 +188,16 @@ describe('Chat API — /api/chat', () => {
       const bodyStr = JSON.stringify(res.body);
       expect(bodyStr).not.toContain(RAW_KEY);
       expect(bodyStr).not.toContain('apiKey');
+
+      const sysConfig = await prismaDb.systemConfig.findUnique({ where: { id: 'system' } });
+      expect(sysConfig).not.toBeNull();
+      expect(sysConfig.provider).toBe('groq');
     });
 
-    test('200 — upsert (simpan ulang) menggunakan provider berbeda', async () => {
+    test('200 — ADMIN: upsert (simpan ulang) menggunakan provider berbeda', async () => {
       const res = await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'openai',
           apiKey: 'sk-openai-test-key-12345678',
@@ -175,20 +208,20 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
 
-      // Pastikan key tersimpan dengan provider & baseUrl & model baru
-      const record = await prismaDb.chatApiKey.findUnique({ where: { userId: userAslap.id } });
+      // Pastikan key tersimpan di SystemConfig
+      const record = await prismaDb.systemConfig.findUnique({ where: { id: 'system' } });
       expect(record.provider).toBe('openai');
       expect(record.baseUrl).toBe('https://api.openai.com/v1');
       expect(record.model).toBe('gpt-4o-mini');
     });
 
-    test('200 — simpan API key provider custom & proxy generic, POST /api/chat memanggil chatCompletion dengan baseUrl & model custom', async () => {
+    test('200 — ADMIN simpan API key custom, POST /api/chat oleh ASLAP memanggil chatCompletion dengan config system', async () => {
       const CUSTOM_BASE_URL = 'https://9router.example.com/v1';
       const CUSTOM_MODEL = 'custom-model-v1';
 
       const saveRes = await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'custom',
           apiKey: 'sk-custom-key-12345678',
@@ -229,24 +262,26 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(401);
     });
 
-    test('200 — role dengan grant chatbot:READ tetap mendapat respons normal (requirePermission tidak memblokir)', async () => {
-      const res = await request(app)
+    test('403 — NON-ADMIN (aslap/akuntan) mencoba GET api-key', async () => {
+      const resAslap = await request(app)
         .get('/api/chat/api-key')
         .set('Authorization', `Bearer ${tokenAslap}`);
+      expect(resAslap.status).toBe(403);
 
-      // ASLAP punya grant chatbot:READ — harus lolos requirePermission, bukan 403
-      expect(res.status).not.toBe(403);
-      expect([200, 404]).toContain(res.status);
+      const resAkuntan = await request(app)
+        .get('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAkuntan}`);
+      expect(resAkuntan.status).toBe(403);
     });
 
-    test('200 — mengembalikan provider, baseUrl, model, dan apiKeyMasked (4 karakter + ****)', async () => {
+    test('200 — ADMIN GET api-key mengembalikan provider, baseUrl, model, dan apiKeyMasked (4 karakter + ****)', async () => {
       const RAW_KEY = 'sk-openai-test-key-12345678';
       const BASE_URL = 'https://api.openai.com/v1';
       const MODEL = 'gpt-4o-mini';
 
       await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'openai',
           apiKey: RAW_KEY,
@@ -256,7 +291,7 @@ describe('Chat API — /api/chat', () => {
 
       const res = await request(app)
         .get('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAdmin}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -274,11 +309,13 @@ describe('Chat API — /api/chat', () => {
       expect(bodyStr).not.toContain(RAW_KEY);
     });
 
-    test('404 — user belum punya API key', async () => {
-      // Login sebagai akuntan yang belum set key
+    test('404 — ADMIN GET api-key ketika belum diatur', async () => {
+      // Hapus key system dulu
+      await prismaDb.systemConfig.deleteMany({});
+
       const res = await request(app)
         .get('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAkuntan}`);
+        .set('Authorization', `Bearer ${tokenAdmin}`);
 
       expect(res.status).toBe(404);
     });
@@ -293,11 +330,18 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(401);
     });
 
-    test('200 — hapus key sukses', async () => {
-      // Pastikan aslap punya key dulu
+    test('403 — NON-ADMIN (aslap/akuntan) mencoba DELETE api-key', async () => {
+      const resAslap = await request(app)
+        .delete('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAslap}`);
+      expect(resAslap.status).toBe(403);
+    });
+
+    test('200 — ADMIN hapus key sukses', async () => {
+      // Pastikan ada key dulu
       await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'groq',
           apiKey: 'gsk-test-delete-key-12345',
@@ -307,13 +351,13 @@ describe('Chat API — /api/chat', () => {
 
       const res = await request(app)
         .delete('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAdmin}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
 
-      // Pastikan key benar-benar dihapus
-      const record = await prismaDb.chatApiKey.findUnique({ where: { userId: userAslap.id } });
+      // Pastikan key benar-benar dihapus dari SystemConfig
+      const record = await prismaDb.systemConfig.findUnique({ where: { id: 'system' } });
       expect(record).toBeNull();
     });
   });
@@ -323,10 +367,10 @@ describe('Chat API — /api/chat', () => {
   // --------------------------------------------------------------------------
   describe('POST /api/chat', () => {
     beforeAll(async () => {
-      // Setup: aslap set API key (groq)
+      // Setup: ADMIN set API key (groq)
       await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAslap}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'groq',
           apiKey: 'gsk-real-test-api-key-12345678',
@@ -358,21 +402,33 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(400);
     });
 
-    test('400 — chat tanpa API key (user belum set key)', async () => {
-      // akuntan belum punya key
+    test('400 — chat tanpa API key (key belum diset) error persis API key belum diatur, hubungi admin', async () => {
+      // Hapus key system
+      await prismaDb.systemConfig.deleteMany({});
+
       const res = await request(app)
         .post('/api/chat')
         .set('Authorization', `Bearer ${tokenAkuntan}`)
         .send({ message: 'Halo AI' });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toMatch(/API key belum diatur/);
+      expect(res.body.error).toBe('API key belum diatur, hubungi admin');
+
+      // Restore key system untuk test berikutnya
+      await request(app)
+        .post('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAdmin}`)
+        .send({
+          provider: 'groq',
+          apiKey: 'gsk-real-test-api-key-12345678',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile'
+        });
     });
 
-    test('200 — chat sukses: jawaban diterima, ChatLog TERBENTUK dengan roleSnapshot benar', async () => {
+    test('200 — user biasa (ASLAP/AKUNTAN) chat sukses: jawaban diterima, ChatLog TERBENTUK dengan userId user yang request', async () => {
       const MOCK_JAWABAN = 'Halo! Saya adalah asisten AI untuk sistem SPPG.';
 
-      // Setup mock chatCompletion return value
       chatCompletion.mockResolvedValueOnce({
         choices: [{ message: { content: MOCK_JAWABAN } }]
       });
@@ -388,13 +444,14 @@ describe('Chat API — /api/chat', () => {
       expect(res.body.data.role).toBe(userAslap.role);
       expect(res.body.data.provider).toBe('groq');
 
-      // Verifikasi ChatLog terbentuk di DB
+      // Verifikasi ChatLog terbentuk di DB dengan userId ASLAP
       const log = await prismaDb.chatLog.findFirst({
         where: { userId: userAslap.id, pertanyaan: 'Apa fungsi SPPG?' },
         orderBy: { createdAt: 'desc' }
       });
 
       expect(log).not.toBeNull();
+      expect(log.userId).toBe(userAslap.id);
       expect(log.roleSnapshot).toBe(userAslap.role);
       expect(log.pertanyaan).toBe('Apa fungsi SPPG?');
       expect(log.jawaban).toBe(MOCK_JAWABAN);
@@ -403,7 +460,6 @@ describe('Chat API — /api/chat', () => {
     });
 
     test('500 — provider error: mock reject → 500 pesan seragam, ChatLog status error', async () => {
-      // Mock reject
       chatCompletion.mockRejectedValueOnce(new Error('Gagal menghubungi AI provider'));
 
       const res = await request(app)
@@ -414,7 +470,7 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(500);
       expect(res.body.error).toBe('Gagal menghubungi AI provider');
 
-      // Verifikasi ChatLog error tersimpan
+      // Verifikasi ChatLog error tersimpan dengan userId ASLAP
       const log = await prismaDb.chatLog.findFirst({
         where: { userId: userAslap.id, pertanyaan: 'Test provider error' },
         orderBy: { createdAt: 'desc' }
@@ -422,21 +478,11 @@ describe('Chat API — /api/chat', () => {
 
       expect(log).not.toBeNull();
       expect(log.status).toBe('error');
+      expect(log.userId).toBe(userAslap.id);
       expect(log.roleSnapshot).toBe(userAslap.role);
     });
 
-    test('ChatLog roleSnapshot sesuai role user yang request', async () => {
-      // Setup akuntan key
-      await request(app)
-        .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAkuntan}`)
-        .send({
-          provider: 'openai',
-          apiKey: 'sk-openai-test-12345678',
-          baseUrl: 'https://api.openai.com/v1',
-          model: 'gpt-4o-mini'
-        });
-
+    test('ChatLog roleSnapshot sesuai role user AKUNTAN yang request', async () => {
       const MOCK_JAWABAN_AKUNTAN = 'Jurnal transaksi adalah catatan keuangan.';
       chatCompletion.mockResolvedValueOnce({
         choices: [{ message: { content: MOCK_JAWABAN_AKUNTAN } }]
@@ -455,19 +501,19 @@ describe('Chat API — /api/chat', () => {
       });
 
       expect(log).not.toBeNull();
+      expect(log.userId).toBe(userAkuntan.id);
       expect(log.roleSnapshot).toBe('AKUNTAN');
     });
   });
 
   // --------------------------------------------------------------------------
-  // Rate Limit — POST /api/chat (16 request → ke-16 → 429)
+  // Rate Limit — POST /api/chat (15 request → ke-16 → 429)
   // --------------------------------------------------------------------------
   describe('Rate Limit — POST /api/chat', () => {
     const originalRateLimitTest = process.env.RATE_LIMIT_TEST;
 
     beforeAll(() => {
       process.env.RATE_LIMIT_TEST = '1';
-      // Mock selalu return success untuk test rate limit
       chatCompletion.mockResolvedValue({
         choices: [{ message: { content: 'ok' } }]
       });
@@ -482,12 +528,12 @@ describe('Chat API — /api/chat', () => {
     });
 
     test('15 request OK → ke-16 → 429', async () => {
-      // Pastikan aslap masih punya key
-      const keyCheck = await prismaDb.chatApiKey.findUnique({ where: { userId: userAslap.id } });
+      // Pastikan ada key system
+      const keyCheck = await prismaDb.systemConfig.findUnique({ where: { id: 'system' } });
       if (!keyCheck) {
         await request(app)
           .post('/api/chat/api-key')
-          .set('Authorization', `Bearer ${tokenAslap}`)
+          .set('Authorization', `Bearer ${tokenAdmin}`)
           .send({
             provider: 'groq',
             apiKey: 'gsk-rate-limit-test-12345',
@@ -527,7 +573,7 @@ describe('Chat API — /api/chat', () => {
     test('POST api-key response tidak mengandung key mentah', async () => {
       const res = await request(app)
         .post('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAkuntan}`)
+        .set('Authorization', `Bearer ${tokenAdmin}`)
         .send({
           provider: 'openai',
           apiKey: SENSITIVE_KEY,
@@ -537,7 +583,6 @@ describe('Chat API — /api/chat', () => {
 
       const bodyStr = JSON.stringify(res.body);
       expect(bodyStr).not.toContain(SENSITIVE_KEY);
-      // Tidak ada field apiKey di response sama sekali
       expect(res.body).not.toHaveProperty('apiKey');
       expect(res.body).not.toHaveProperty('apiKeyEncrypted');
     });
@@ -545,15 +590,13 @@ describe('Chat API — /api/chat', () => {
     test('GET api-key response tidak mengandung key mentah (hanya masked)', async () => {
       const res = await request(app)
         .get('/api/chat/api-key')
-        .set('Authorization', `Bearer ${tokenAkuntan}`);
+        .set('Authorization', `Bearer ${tokenAdmin}`);
 
       const bodyStr = JSON.stringify(res.body);
       expect(bodyStr).not.toContain(SENSITIVE_KEY);
-      // Hanya apiKeyMasked yang ada
       if (res.status === 200) {
         expect(res.body.data).not.toHaveProperty('apiKey');
         expect(res.body.data).not.toHaveProperty('apiKeyEncrypted');
-        // Masked harus mengandung **** dan bukan key penuh
         expect(res.body.data.apiKeyMasked).toMatch(/\*\*\*\*/);
         expect(res.body.data.apiKeyMasked.length).toBeLessThan(SENSITIVE_KEY.length);
       }

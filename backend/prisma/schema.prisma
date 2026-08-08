@@ -299,6 +299,7 @@ enum PermissionAksi {
   DELETE
   APPROVE
   EXPORT
+  MANAGE
 }
 
 
@@ -337,7 +338,6 @@ model User {
   poDiterima            TransaksiPembelian[]         @relation("AslapTerimaPO")
   poItemUpdated         TransaksiPembelianItem[]     @relation("MitraUpdatePOItem")
   buktiLpd2m            DokumenBuktiLpd2m[]
-  chatApiKey            ChatApiKey?
   chatLogs              ChatLog[]
 
   @@index([role])
@@ -1291,19 +1291,15 @@ model RolePermission {
 }
 
 // -----------------------------------------------------------------------------
-// CHATBOT — API Key & Log (Fase 7 Step 1)
+// CHATBOT — System Config & Log (Fase 7)
 // -----------------------------------------------------------------------------
 
-// Menyimpan API key enkripsi per user (1 user = 1 key aktif per provider).
-// apiKeyEncrypted disimpan dalam format "iv:tag:ciphertext" via AES-256-GCM.
-model ChatApiKey {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider        String   // 'gemini' | 'groq' | 'openai' | 'custom'
+model SystemConfig {
+  id              String   @id
+  provider        String
   apiKeyEncrypted String
-  baseUrl         String
-  model           String
+  baseUrl         String?
+  model           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
