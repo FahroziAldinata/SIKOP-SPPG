@@ -1,23 +1,19 @@
-# Handoff — 2026-08-08 (sesi 47) — FIX RBAC: bypass ADMIN + grant KEPALA_SPPG berlebih dicabut
+# Handoff — 2026-08-08 (sesi 47) — TASK 4: UI Form Resource + Guard DELETE 409 + Test CRUD Resource
 
 ## Status Terakhir
-- **Fix RBAC SELESAI + APPROVED Rozi** (2026-08-08): Task B (10 grant KEPALA_SPPG dicabut), Task C (bypass ADMIN dicabut FE+BE → grant eksplisit + chatbot:READ), Task A (CRUD resource API + invalidatePermissionCache admin.js:270/315/350), Task D (4 test lama di-update, suite **626/626 PASS**, lint 0/0, build exit 0).
-- **Latar**: temuan kritis sesi 46 — AND-logic ProtectedRoute tertimpa `3135fef`, ADMIN + KEPALA_SPPG bocor via URL langsung. Arah Rozi: permission = satu-satunya sumber kebenaran, JANGAN kembalikan role-gate, Task 3 per-SPPG DIBATALKAN.
-- ⚠️ **Menunggu**: commit FINALIZE (OpenCode) + cleanup plans/prompts sesuai aturan archive.
+- **Task 4 SELESAI + APPROVED Rozi** (2026-08-08): guard 409 DELETE resource (admin.js:337-341), test CRUD resource 9 case (rbac-resource.test.js, 635/635 PASS), FE form resource + tabel 5 baris scroll (RolePermissionMatrixPage.jsx +319/-4). Folder `.agent-pm/backlog/` DIHAPUS (keputusan Rozi). Menunggu commit FINALIZE.
+- **Sebelumnya**: Fix RBAC sesi 47 (`4f8ec31`) — bypass ADMIN dicabut, grant KEPALA_SPPG dicabut, CRUD resource API + invalidate cache.
 
 ## Next Step (butuh TASK_SELECTION)
-1. **UI frontend — widget chat** (halaman kelola API key + widget chat)
-2. **Tool registry** (chatbot baca data sistem, read-only)
-3. **Kebijakan retensi ChatLog** (TTL/anonymization — keputusan Rozi, relevan Fase 6 legal)
-4. Fase 8 — Notifikasi eksternal (Email Nodemailer + WhatsApp) setelah Fase 7 tuntas
-5. **Backlog baru**: UI form resource baru (admin) + test CRUD resource cache invalidation — `.agent-pm/backlog/ui-form-resource-baru.md`
+1. **FASE 7 lanjutan**: UI widget chat FE (kelola API key + panel chat), tool registry, retensi ChatLog
+2. **FASE 8**: Notifikasi eksternal (Email Nodemailer + WhatsApp)
 
 ## Pola yang Terbukti (sesi 47)
-- AGY 2x timeout "tool jalan, teks mati" — pekerjaan selesai di disk; verifikasi OpenCode independen = bukti final (GF-009, jangan percaya self-report).
-- AGY auth bisa expired — "Authentication required... google.com/o/oauth2" → Rozi login ulang manual, lalu AGY jalan lagi.
-- Fix-minimal Rozi: 2 gap wajib (4 test + invalidate cache) dulu, UI form → backlog terdokumentasi.
+- AGY 3x timeout "tool jalan, teks mati" — pekerjaan selesai di disk; verifikasi OpenCode independen = bukti final (GF-009).
+- Guard DELETE resource pakai cek grant aktif (count RolePermission), bukan cek App.jsx — backend tidak baca file FE.
+- FE form pattern: UserManagementPage (section card + form onSubmit + input + Dropdown); toggle nonaktif/aktif pakai ConfirmDialog + useApi + toast.
 
 ## Risiko / Pitfall
-- Test cache invalidation resource CRUD belum ada — kalau nanti resource diubah via API, cache dipastikan refresh via kode (admin.js:270/315/350) tapi tanpa regression guard.
+- Test cache invalidation resource CRUD sekarang COVERED (test #5/#6: aktif:false→403, aktif:true→200).
 - `/api/chat` tanpa API key tersimpan → 400; error provider → 500 uniform.
 - GF-011: agent bisa revert uncommitted — cek git status sebelum tiap session agent.

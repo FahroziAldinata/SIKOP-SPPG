@@ -334,6 +334,12 @@ router.delete("/resources/:id", requirePermission("admin-permission", "DELETE"),
       return res.status(404).json({ error: "Resource tidak ditemukan" });
     }
 
+    // Guard 409: tolak soft-delete bila resource masih punya grant aktif
+    const activeGrants = await prisma.rolePermission.count({ where: { resourceId: id } });
+    if (activeGrants > 0) {
+      return res.status(409).json({ error: `Resource masih memiliki ${activeGrants} grant aktif. Cabut grant terlebih dahulu.` });
+    }
+
     await prisma.$transaction(async (tx) => {
       await tx.resource.update({ where: { id }, data: { aktif: false } });
       await logAudit(tx, {

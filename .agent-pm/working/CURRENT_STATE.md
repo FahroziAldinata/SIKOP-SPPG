@@ -1,6 +1,15 @@
 # CURRENT STATE — SPPG
 
-**Scope Aktif: Fix RBAC (cabut bypass ADMIN + grant KEPALA_SPPG berlebih) TUNTAS 2026-08-08 — suite 626/626, menunggu commit. Next: Fase 7 lanjutan (widget chat FE / tool registry / retensi) + backlog UI form resource.**
+**Scope Aktif: Task 4 (UI form resource + guard 409 + test CRUD resource) TUNTAS + APPROVED 2026-08-08 — commit FINALIZE sesi ini. Next: Fase 7 lanjutan (widget chat FE / tool registry / retensi ChatLog).**
+
+## Sesi 47 lanjutan (2026-08-08) — TASK 4: UI Form Resource + Guard DELETE 409 + Test CRUD Resource ✅ APPROVED + COMMITTED
+- **Backlog `ui-form-resource-baru.md` SELESAI dikerjakan** — folder `.agent-pm/backlog/` DIHAPUS (keputusan Rozi 2026-08-08: "hapus folder backlog itu diluar workflow kita").
+- **Task A — guard 409** (admin.js:337-341): DELETE `/api/admin/resources/:id` → count grant aktif → kalau > 0 → `409 { error: "Resource masih memiliki N grant aktif..." }`. Menjawab pertanyaan Rozi: guard cek grant aktif (bukan cek App.jsx literal — backend tidak baca file React runtime). Soft-delete tetap + invalidatePermissionCache.
+- **Task B — test CRUD resource** (`rbac-resource.test.js`, BARU 9 test): POST 201, duplikat 409, tanpa field 400, PUT 200, PUT aktif:false → 403, **PUT aktif:true → 200 (jalur pemulihan)**, DELETE grant nempel → 409, DELETE setelah grant dicabut → 200, DELETE tak ada → 404.
+- **Task C — FE form resource** (RolePermissionMatrixPage.jsx +319/-4): form tambah resource (nama/kode/modul dropdown), tabel Daftar Resource (Kode/Nama/Modul/Status/Aksi), tombol nonaktifkan/aktifkan + ConfirmDialog, useApi + toast + refetch. **Revisi Rozi**: tabel dibatasi 5 baris + scroll (maxHeight 200px + overflowY auto + header sticky, baris 376-461).
+- **Verifikasi**: `npm test` backend **635/635 PASS** (626 + 9 baru), lint 0/0, FE build exit 0. Scope: 3 file.
+- **Proses**: AGY claude-sonnet-4-6 2x timeout ("tool jalan, teks mati") — kerja di disk, verifikasi OpenCode independen jadi bukti final (GF-009). FIX_SUBLOOP scroll via AGY.
+- Model: [AGY claude-sonnet-4-6 utk build] + [OpenCode deepseek-v4-flash-free utk verify] + [Hermes oc/deepseek-v4-flash-free].
 
 ## Sesi 47 (2026-08-08) — FIX RBAC: cabut ADMIN bypass + grant berlebih KEPALA_SPPG + resource CRUD API ✅ APPROVED (menunggu commit)
 - **Latar**: temuan kritis sesi 46 — fix AND-logic `1dd9c70` tertimpa `3135fef` (requiredPerm-only), ADMIN bisa akses 43 halaman via URL (bypass `hasPerm`), KEPALA_SPPG 34 route via URL (19 operasional-detail). Arah Rozi: JANGAN kembalikan role-gate — permission = satu-satunya sumber kebenaran (Task 3 Sppg/per-SPPG DIBATALKAN, single instance per SPPG).

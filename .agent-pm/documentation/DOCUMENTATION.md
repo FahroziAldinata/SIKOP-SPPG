@@ -275,7 +275,16 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
-## 2026-08-08 (sesi 47) — Fix RBAC: bypass ADMIN + grant KEPALA_SPPG berlebih dicabut ✅ APPROVED
+## 2026-08-08 (sesi 47 lanjutan) — TASK 4: UI Form Resource + Guard DELETE 409 + Test CRUD Resource ✅ APPROVED
+
+### Backlog `ui-form-resource-baru.md` selesai — folder `.agent-pm/backlog/` dihapus (keputusan Rozi)
+- **Task A — guard 409** (admin.routes.js:337-341): DELETE resource ditolak kalau masih punya grant aktif (`rolePermission.count > 0` → 409). Menjawab pertanyaan Rozi: guard pilih cek grant aktif, bukan cek App.jsx literal dari backend. Soft-delete tetap + invalidatePermissionCache.
+- **Task B — test CRUD resource** (`rbac-resource.test.js` baru, 9 test): create 201, duplikat 409, validasi 400, update 200, nonaktif → 403, **reaktivasi (aktif:true) → akses pulih 200**, DELETE saat grant nempel → 409, DELETE setelah grant dicabut → 200, 404. **Jalur pemulihan diuji** (keputusan Rozi).
+- **Task C — FE form** (RolePermissionMatrixPage.jsx +319/-4): form tambah resource, tabel daftar resource dengan tombol aksi nonaktif/aktifkan + ConfirmDialog; **revisi UI**: tabel dibatasi ~5 baris + scroll (maxHeight 200px, overflowY auto, header sticky, baris 376-461).
+- **Verifikasi**: backend **635/635 PASS** (626+9), lint 0/0, FE build exit 0. Scope 3 file.
+- **Proses**: AGY 2x timeout "tool jalan, teks mati" — kerja selesai di disk, verifikasi OpenCode independen. FIX_SUBLOOP scroll via AGY sekali.
+
+---
 
 ### Fix RBAC — permission = satu-satunya sumber kebenaran (KEPUTUSAN ROZI: tanpa role-gate, tanpa Sppg/per-SPPG)
 - **Latar**: temuan kritis sesi 46 — fix AND-logic `1dd9c70` (role+perm) tertimpa `3135fef` (migrasi 43 route requiredPerm-only). Efek: ADMIN (bypass `hasPerm`) bisa akses 43 halaman operasional via URL; KEPALA_SPPG (grant READ luas) 34 route via URL, 19 di antaranya operasional-detail. Arah Rozi: JANGAN kembalikan role-gate — permission (`requiredPerm`) = satu-satunya sumber kebenaran; Task 3 model Sppg/sppgId DIBATALKAN (sistem single instance per SPPG).

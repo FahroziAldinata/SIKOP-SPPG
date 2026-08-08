@@ -1,5 +1,13 @@
 # TODO — SPPG (diperbarui 2026-08-08)
 
+## TASK 4 — UI Form Resource + Guard DELETE 409 + Test CRUD Resource (2026-08-08, sesi 47) ✅ SELESAI + APPROVED (commit FINALIZE sesi ini)
+- ✅ **Task A — guard 409** (admin.js:337-341): DELETE `/api/admin/resources/:id` → count grant aktif > 0 → `409 { error }`. Soft-delete tetap + invalidatePermissionCache.
+- ✅ **Task B — test CRUD** (`rbac-resource.test.js` BARU 9 test): POST 201, duplikat 409, tanpa field 400, PUT 200, aktif:false → 403, **aktif:true → 200 (pemulihan)**, DELETE grant nempel → 409, DELETE setelah grant dicabut → 200, DELETE tak ada → 404. Suite **635/635 PASS**.
+- ✅ **Task C — FE form resource** (RolePermissionMatrixPage.jsx +319/-4): form tambah (nama/kode/modul dropdown), tabel Daftar Resource, toggle nonaktifkan/aktifkan + ConfirmDialog, useApi + toast + refetch.
+- ✅ **Revisi Rozi**: tabel resource dibatasi 5 baris + scroll (maxHeight 200px, overflowY auto, header sticky).
+- ✅ **Folder `.agent-pm/backlog/` DIHAPUS** (keputusan Rozi 2026-08-08 — "hapus folder backlog itu diluar workflow kita").
+- **Backlog terdahulu `ui-form-resource-baru.md`**: SELESAI dikerjakan → tidak ada sisa backlog folder.
+
 ## Fix RBAC — bypass ADMIN + grant KEPALA_SPPG berlebih (2026-08-08, sesi 47) ✅ SELESAI + APPROVED (menunggu commit)
 - ✅ **Task B — grant KEPALA_SPPG dicabut** (rbacSeeder.js): aslap-input, gizi-menu, mitra-po, mitra-pemeriksaan, akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, laporan-resmi CREATE/DELETE. PERTAHANKAN: akuntan-rab READ+APPROVE, kepala-approval, ringkasan/laporan, laporan-bug, chatbot.
 - ✅ **Task C — bypass ADMIN dicabut** FE (AuthContext.jsx) + BE (auth.js) → grant eksplisit ADMIN (admin-user/admin-permission/audit-log/laporan-bug + chatbot:READ). ADMIN 403 di 38 halaman operasional.

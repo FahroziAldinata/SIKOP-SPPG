@@ -3,6 +3,7 @@ import { useApi } from '../../hooks/useApi';
 import { useToast } from '../../context/ToastContext';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import Dropdown from '../../components/ui/Dropdown';
 
 const ROLES = ['AKUNTAN', 'ASLAP', 'AHLI_GIZI', 'KEPALA_SPPG', 'MITRA'];
 
@@ -28,23 +29,64 @@ const MODUL_LABELS = {
   admin: 'ADMIN',
 };
 
+const MODUL_OPTIONS = [
+  { value: 'aslap', label: 'ASLAP' },
+  { value: 'gizi', label: 'GIZI' },
+  { value: 'mitra', label: 'MITRA' },
+  { value: 'akuntan', label: 'AKUNTAN' },
+  { value: 'kepala', label: 'KEPALA SPPG' },
+  { value: 'laporan', label: 'LAPORAN' },
+  { value: 'admin', label: 'ADMIN' },
+  { value: 'chat', label: 'CHAT' },
+];
+
+const EMPTY_RESOURCE_FORM = { nama: '', kode: '', modul: '' };
+
 export const RolePermissionMatrixPage = () => {
   const { request } = useApi();
   const toast = useToast();
 
-  const [, setResources] = useState([]);
+  const [resources, setResources] = useState([]);
   const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
-  // Confirm delete dialog state
+  // Confirm delete dialog state (revoke permission)
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null); // { permId, role, aksi, resourceNama }
 
   // Grouped resources by modul
   const [groupedResources, setGroupedResources] = useState({});
 
+  // ── KELOLA RESOURCE STATE ─────────────────────────────────────────────────
+  const [resourceForm, setResourceForm] = useState(EMPTY_RESOURCE_FORM);
+  const [resourceSubmitting, setResourceSubmitting] = useState(false);
+
+  // Confirm nonaktifkan / aktifkan resource
+  const [resourceConfirmOpen, setResourceConfirmOpen] = useState(false);
+  const [pendingResourceToggle, setPendingResourceToggle] = useState(null); // { id, kode, aktif }
+
   // ── FETCH DATA ────────────────────────────────────────────────────────────
+  const fetchResources = async () => {
+    try {
+      const resResources = await request('/admin/resources');
+      if (!resResources.ok) return;
+      const resourceData = await resResources.json();
+      setResources(resourceData);
+
+      // Group resources by modul
+      const grouped = {};
+      resourceData.forEach((res) => {
+        const modul = res.modul || 'lainnya';
+        if (!grouped[modul]) grouped[modul] = [];
+        grouped[modul].push(res);
+      });
+      setGroupedResources(grouped);
+    } catch {
+      // silent — errors from fetchData will surface
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setLoadError(false);
@@ -157,6 +199,72 @@ export const RolePermissionMatrixPage = () => {
     }
   };
 
+  // ── TAMBAH RESOURCE ───────────────────────────────────────────────────────
+  const handleCreateResource = async (e) => {
+    e.preventDefault();
+    if (!resourceForm.nama || !resourceForm.kode || !resourceForm.modul) {
+      toast.error('Nama, kode, dan modul wajib diisi');
+      return;
+    }
+    setResourceSubmitting(true);
+    try {
+      const res = await request('/admin/resources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resourceForm),
+      });
+      if (res.ok) {
+        toast.success(`Resource "${resourceForm.kode}" berhasil ditambahkan`);
+        setResourceForm(EMPTY_RESOURCE_FORM);
+        await fetchResources();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        toast.error(d.error || 'Gagal menambahkan resource');
+      }
+    } catch {
+      toast.error('Terjadi kesalahan koneksi');
+    } finally {
+      setResourceSubmitting(false);
+    }
+  };
+
+  // ── TOGGLE RESOURCE AKTIF / NONAKTIF ─────────────────────────────────────
+  const openResourceToggleConfirm = (resource) => {
+    setPendingResourceToggle({ id: resource.id, kode: resource.kode, aktif: resource.aktif });
+    setResourceConfirmOpen(true);
+  };
+
+  const handleResourceToggle = async () => {
+    setResourceConfirmOpen(false);
+    if (!pendingResourceToggle) return;
+    const { id, kode, aktif } = pendingResourceToggle;
+    try {
+      let res;
+      if (aktif) {
+        // Nonaktifkan → DELETE (soft-delete / aktif:false)
+        res = await request(`/admin/resources/${id}`, { method: 'DELETE' });
+      } else {
+        // Aktifkan kembali → PUT aktif:true
+        res = await request(`/admin/resources/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ aktif: true }),
+        });
+      }
+      if (res.ok) {
+        toast.success(aktif ? `Resource "${kode}" dinonaktifkan` : `Resource "${kode}" diaktifkan kembali`);
+        await fetchResources();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        toast.error(d.error || 'Gagal mengubah status resource');
+      }
+    } catch {
+      toast.error('Terjadi kesalahan koneksi');
+    } finally {
+      setPendingResourceToggle(null);
+    }
+  };
+
   // ── ORDERED MODUL KEYS ────────────────────────────────────────────────────
   const orderedModuls = [
     ...MODUL_ORDER.filter((m) => groupedResources[m]),
@@ -165,11 +273,197 @@ export const RolePermissionMatrixPage = () => {
     ),
   ];
 
+  const inputStyle = {
+    width: '100%',
+    padding: '9px 12px',
+    borderRadius: 'var(--radius-sm)',
+    border: '1px solid var(--border)',
+    backgroundColor: 'var(--bg)',
+    color: 'var(--text)',
+    fontSize: '13px',
+    outline: 'none',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
+  };
+
+  const labelStyle = {
+    fontSize: '11px',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    color: 'var(--text-muted)',
+    display: 'block',
+    marginBottom: '6px',
+  };
+
   // ── RENDER ────────────────────────────────────────────────────────────────
   return (
     <div>
       <h2 style={{ margin: '0 0 24px 0', color: 'var(--text)' }}>Kelola Akses &amp; Permission</h2>
 
+      {/* ── SECTION: KELOLA RESOURCE ─────────────────────────────────────── */}
+      <section
+        style={{
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)',
+          padding: '24px',
+          backgroundColor: 'var(--bg-elevated)',
+          boxShadow: 'var(--shadow)',
+          marginBottom: '32px',
+        }}
+      >
+        <h3 style={{ margin: '0 0 20px 0', fontSize: '15px', fontWeight: 700, color: 'var(--text)' }}>
+          Kelola Resource
+        </h3>
+
+        {/* Form tambah resource */}
+        <form onSubmit={handleCreateResource}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+            <div>
+              <label style={labelStyle}>Nama Resource</label>
+              <input
+                style={inputStyle}
+                placeholder="Contoh: Master Data Aslap"
+                value={resourceForm.nama}
+                onChange={(e) => setResourceForm((f) => ({ ...f, nama: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Kode (kebab-case lowercase)</label>
+              <input
+                style={inputStyle}
+                placeholder="Contoh: aslap-master"
+                value={resourceForm.kode}
+                onChange={(e) => setResourceForm((f) => ({ ...f, kode: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }))}
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Modul</label>
+              <Dropdown
+                options={MODUL_OPTIONS}
+                value={resourceForm.modul}
+                onChange={(val) => setResourceForm((f) => ({ ...f, modul: val }))}
+                placeholder="Pilih modul..."
+                style={{ width: '100%' }}
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={resourceSubmitting}
+            style={{
+              padding: '9px 24px',
+              backgroundColor: 'var(--btn-primary-bg)',
+              color: 'var(--btn-primary-text)',
+              border: 'none',
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: resourceSubmitting ? 'not-allowed' : 'pointer',
+              opacity: resourceSubmitting ? 0.7 : 1,
+            }}
+          >
+            {resourceSubmitting ? 'Menyimpan...' : 'Tambah Resource'}
+          </button>
+        </form>
+
+        {/* Tabel daftar resource */}
+        {!loading && !loadError && resources.length > 0 && (
+          <div style={{ marginTop: '24px' }}>
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Daftar Resource ({resources.length})
+            </h4>
+            {/* Wrapper scroll: max 5 baris (~200px), header sticky */}
+            <div style={{ overflowX: 'auto' }}>
+              <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                  <thead>
+                    <tr>
+                      {['Kode', 'Nama', 'Modul', 'Status', 'Aksi'].map((h) => (
+                        <th
+                          key={h}
+                          style={{
+                            padding: '8px 12px',
+                            textAlign: 'left',
+                            backgroundColor: 'var(--table-header-bg)',
+                            color: 'var(--table-header-text)',
+                            fontWeight: 700,
+                            fontSize: '11px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            borderBottom: '1px solid var(--border)',
+                            whiteSpace: 'nowrap',
+                            position: 'sticky',
+                            top: 0,
+                            zIndex: 1,
+                          }}
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {resources.map((res, idx) => (
+                      <tr
+                        key={res.id}
+                        style={{
+                          backgroundColor: idx % 2 === 0 ? 'var(--bg-elevated)' : 'var(--bg)',
+                          transition: 'background var(--transition-fast)',
+                        }}
+                      >
+                        <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', fontFamily: 'monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                          {res.kode}
+                        </td>
+                        <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text)' }}>
+                          {res.nama}
+                        </td>
+                        <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+                          {MODUL_LABELS[res.modul] || res.modul}
+                        </td>
+                        <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              padding: '2px 10px',
+                              borderRadius: '999px',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              backgroundColor: res.aktif ? 'var(--color-success, #16a34a)' : 'var(--color-danger, #dc2626)',
+                              color: '#fff',
+                            }}
+                          >
+                            {res.aktif ? 'Aktif' : 'Nonaktif'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
+                          <button
+                            onClick={() => openResourceToggleConfirm(res)}
+                            style={{
+                              padding: '4px 12px',
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              border: 'none',
+                              borderRadius: 'var(--radius-sm)',
+                              backgroundColor: res.aktif ? 'var(--color-danger, #dc2626)' : 'var(--color-success, #16a34a)',
+                              color: 'white',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {res.aktif ? 'Nonaktifkan' : 'Aktifkan'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ── SECTION: MATRIX PERMISSION ───────────────────────────────────── */}
       <section
         style={{
           border: '1px solid var(--border)',
@@ -384,8 +678,13 @@ export const RolePermissionMatrixPage = () => {
                                   verticalAlign: 'middle',
                                 }}
                               >
-                                <div style={{ fontWeight: 600, color: 'var(--text)' }}>
+                                <div style={{ fontWeight: 600, color: resource.aktif ? 'var(--text)' : 'var(--text-muted)' }}>
                                   {resource.nama}
+                                  {!resource.aktif && (
+                                    <span style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--color-danger, #dc2626)', fontWeight: 700 }}>
+                                      [nonaktif]
+                                    </span>
+                                  )}
                                 </div>
                                 <div
                                   style={{
@@ -499,7 +798,7 @@ export const RolePermissionMatrixPage = () => {
         )}
       </section>
 
-      {/* ── CONFIRM DELETE DIALOG ──────────────────────────────────────────── */}
+      {/* ── CONFIRM REVOKE PERMISSION DIALOG ─────────────────────────────── */}
       <ConfirmDialog
         open={confirmOpen}
         title="Hapus Izin"
@@ -512,6 +811,22 @@ export const RolePermissionMatrixPage = () => {
         onCancel={() => {
           setConfirmOpen(false);
           setPendingDelete(null);
+        }}
+      />
+
+      {/* ── CONFIRM TOGGLE RESOURCE DIALOG ───────────────────────────────── */}
+      <ConfirmDialog
+        open={resourceConfirmOpen}
+        title={pendingResourceToggle?.aktif ? 'Nonaktifkan Resource' : 'Aktifkan Resource'}
+        message={
+          pendingResourceToggle?.aktif
+            ? `Resource "${pendingResourceToggle?.kode}" akan dinonaktifkan. Semua grant aktif harus dicabut terlebih dahulu. Lanjutkan?`
+            : `Resource "${pendingResourceToggle?.kode}" akan diaktifkan kembali. Lanjutkan?`
+        }
+        onConfirm={handleResourceToggle}
+        onCancel={() => {
+          setResourceConfirmOpen(false);
+          setPendingResourceToggle(null);
         }}
       />
     </div>
