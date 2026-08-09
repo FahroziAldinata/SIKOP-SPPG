@@ -1,18 +1,17 @@
 # LIVE CONTEXT (auto-snapshot)
-_Generated: 2026-08-03 — snapshot ringkas; sumber: CURRENT_TASK.md & CURRENT_STATE.md_
+_Generated: 2026-08-09 — snapshot ringkas; sumber: CURRENT_STATE.md & CURRENT_TASK.md & sesi aktif_
 
-### dari CURRENT_TASK.md
-## Status: ✅ SELESAI — V2-1 TTD Basah APPROVED Rozi (2026-08-03). DOCUMENTATION_ARCHIVE → CYCLE_END.
-- Tahap 1 Backend `3a4da6c` | Tahap 2 Frontend `2a1abb0` | Tahap 3 PDF `81899e7`
-- Fix 1 (TTD tidak muncul) `acc8d6b` — path getTtdBase64 `../../` → `../../../`
-- Fix 2 (ukuran/kecil + tidak tengah) `24f640a` — canvas FE 480px rasio 3:1 + img 55px/220px + wrapper max(ruangTtd,55)
-- Tes HTTP 7/7 + PDF E2E PASS + verifikasi visual Rozi OK. Docs archived `72064a2`.
-- HEAD: `72064a2`, semua pushed. Next: V2-2/V2-3 (TASK_SELECTION baru).
+## Status: Fase 7 item 2 — Tool Registry Chatbot v1 ✅ SELESAI + VERIFIED + APPROVED Rozi (2026-08-09)
+- 4 tool P0 read-only (7 fungsi): gizi-menu-status, akuntan-rab-status, mitra-po-status, aslap-input-status. P1 ditunda.
+- Grant 11 row READ sesuai matriks final (AHLI_GIZI eksplisit TIDAK di akuntan-rab-status).
+- Integrasi: `lib/chat/tools/` registry + chat.js filtering/execution + ChatLog.toolCalls + `hasUserPermission` (auth.js) + tools param adapter (openaiCompatible.js).
+- Negatif test per tool + prompt injection → ditolak di level kode, tool TIDAK dieksekusi.
+- Verifikasi: 660/660 PASS (45 files), lint 0/0, grant DB 11/11. Test baru 23 total.
+- COMMITTED + PUSHED ke origin/main (2026-08-09).
 
-### dari CURRENT_STATE.md
-**Scope Aktif: V2-1 TTD Basah SELESAI + APPROVED ✅ (2026-08-03). CYCLE_END — next: V2-2/V2-3 (TASK_SELECTION baru).**
-## Sesi 31 (2026-08-03) — V2-1 TTD Basah: APPROVED ✅ + ARCHIVE (CYCLE_END)
-- Rozi approve setelah verifikasi visual revisi ukuran (canvas 480px, TTD 55px/220px terpusat di PDF).
-- HEAD `24f640a` (3 feat + 2 fix) + arsip `72064a2`, semua pushed. BUG-003 logged (resolved).
-- ⚠️ Catatan pending (bukan blocker): re-test HTTP penuh BUG-001 (fix `b9ba07b` verified fungsi, tes HTTP belum).
-- ⚠️ migration_lock.toml: modified CRLF-only (jangan di-commit).
+### dari git (2026-08-09)
+HEAD == origin/main (sinkron, state files + kode tool registry di-commit).
+Perlu BE restart agar permissionCache role memuat grant baru setelah seed.
+
+### Notifikasi
+Rozi approve → commit+push final. NEXT: Fase 7 item 3 retensi ChatLog (keputusan Rozi), lalu Fase 8 notifikasi eksternal.

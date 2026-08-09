@@ -25,7 +25,7 @@ const TIMEOUT_MS = 30 * 1000; // 30 detik
  * @returns {Promise<object>} Response JSON dari provider
  * @throws {Error} Pesan seragam 'Gagal menghubungi AI provider' untuk semua error
  */
-async function chatCompletion({ baseUrl, apiKey, model, messages }) {
+async function chatCompletion({ baseUrl, apiKey, model, messages, tools }) {
   // Hapus trailing slash dari baseUrl agar konsisten
   const url = `${baseUrl.replace(/\/+$/, '')}/chat/completions`;
 
@@ -33,6 +33,11 @@ async function chatCompletion({ baseUrl, apiKey, model, messages }) {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   const startTime = Date.now();
+
+  const requestBody = { model, messages, stream: false };
+  if (tools && Array.isArray(tools) && tools.length > 0) {
+    requestBody.tools = tools;
+  }
 
   try {
     const response = await fetch(url, {
@@ -45,7 +50,7 @@ async function chatCompletion({ baseUrl, apiKey, model, messages }) {
       // stream:false eksplisit — OpenAI-compatible spec default non-streaming,
       // tapi sebagian proxy (mis. 9router lokal) default streaming (SSE) yang
       // membuat response.json() di bawah gagal.
-      body: JSON.stringify({ model, messages, stream: false }),
+      body: JSON.stringify(requestBody),
       signal: controller.signal
     });
 

@@ -1,31 +1,24 @@
-# Handoff — 2026-08-08 (sesi 47 lanjutan) — FASE 7 LANJUTAN: WIDGET CHAT FE + MIGRASI API KEY
+# Handoff — 2026-08-09 — FASE 7 ITEM 2: TOOL REGISTRY CHATBOT v1 ✅ SELESAI + VERIFIED + APPROVED
 
 ## Status Terakhir
-- **BUILD + COMMIT selesai**: widget chat FE (ChatWidget.jsx + Layout + SettingPage section AI) + migrasi API key BYOK → SystemConfig admin-managed. Backend **637/637 PASS**, lint 0/0, FE build exit 0. Semua di-commit sesi ini.
-- **BELUM diuji manual** oleh Rozi (Task 5 plan migrasi: 4 skenario). Rozi istirahat — **sesi berikutnya WAJIB uji manual dulu sebelum task baru**.
-- **Commit** (lihat git log untuk hash):
-  - `feat(chat): widget chat FE + UI kelola API key (admin-managed)` (t5: ...)
-  - `feat(chat): migrasi ChatApiKey → SystemConfig singleton + RBAC chatbotConfig MANAGE` (skema+migration+seeder+chat.js+test)
-  - + `chore/state` dsb.
+- **Tool Registry Chatbot v1 COMMITTED + PUSHED ke origin/main (2026-08-09)**, APPROVED eksplisit Rozi.
+- 4 tool P0 read-only (7 fungsi) + grant 11 row READ + integrasi function calling `chat.js` + ChatLog.toolCalls. Backend **660/660 PASS (45 files)**, lint 0/0, grant DB 11/11. 23 test baru (positip per tool + negatif per tool + prompt injection).
+- **Next: Fase 7 item 3 — Retensi ChatLog** (TTL/anonymization), butuh keputusan Rozi. Setelah itu Fase 8 notifikasi eksternal.
 
 ## Yang Perlu Diketahui Sesi Berikutnya
-1. **BE restart WAJIB** sebelum uji manual — migration `20260808165619_migrate_chat_apikey_to_system_config` belum aktif di BE yang sedang jalan (kalau masih jalan dari sesi sebelumnya). Aturan: Hermes boleh kill BE, minta Rozi nyalakan ulang; JANGAN biarkan BE jalan dengan kode lama (prisma client lama → `prisma.systemConfig` tidak dikenal).
-2. **Pola yang Terbukti sesi ini**:
-   - AGY claude quota habis → pakai **AGY gemini-3.6-flash-medium** (model valid, Rozi approved 2026-08-08)
-   - AGY 3x timeout "tool jalan teks mati" → kerja selesai di disk, verifikasi independen OpenCode + npx oxlint jadi bukti final
-   - opencode kadang hang lama untuk lint (rtk alias rusak → `npx oxlint src` langsung dari Hermes terminal OK, lint read-only)
-3. **FE guard pattern**: `{hasPerm('chatbot-config','MANAGE') && <AiApiKeySection />}` — non-ADMIN tidak render section. `hasPerm` dual-signature: `(resource, aksi)` atau `'resource:aksi'` (AuthContext.jsx:49).
+1. **⚠️ BE perlu restart** agar `permissionCache` role yang ter-cache SEBELUM seed grant baru aktif — tanpa restart, grant tool-status belum dikenal sampai cache reload.
+2. **Pendekatan RBAC tool**: definisi tool di registry di-enrich `resourceStatus`; `chat.js` filter tool per role via `hasUserPermission` + re-cek sebelum eksekusi (denial di level kode/server, fungsi TIDAK dieksekusi). Negatif test per tool + prompt injection menjaga ini.
+3. **Pola terproven**: build AGY gemini-3.6-flash-medium, verify/finalize OpenCode deepseek-v4-flash-free, Hermes oc/deepseek-v4-flash-free.
+4. UJI MANUAL opsional item 2: Rozi bisa tes chat tanya status via widget (butuh BE restart).
 
 ## Risiko / Pitfall
-- `lib/chat/encryption.js` tetap dipakai (reuse, tidak dibongkar) — jangan diubah di task berikutnya
-- ChatLog menumpuk (belum ada retensi) — task retensi ChatLog (TTL) setelah tool registry
-- Sync state: git adalah sumber kebenaran (GF-012) — `git status --short` sebelum percaya doc
+- `lib/chat/encryption.js` reuse — jangan ubah
+- Retensi ChatLog (TTL) — belum ada, chat + toolCalls terus menumpuk (item 3 PRIORITAS berikutnya)
+- Grant tool-status bila diganti di DB perlu invalidatePermissionCache (pola existing admin.js)
 
-## Next Steps (priority order)
-1. **UJI MANUAL Task 5** (4 skenario — butuh Rozi + BE restart)
-2. Tool registry chatbot (read-only)
-3. Retensi ChatLog (keputusan Rozi soal TTL)
-4. Fase 8 notifikasi eksternal
+## Next Steps (priority)
+1. **Fase 7 item 3 — Retensi ChatLog** (TTL/anonymization — keputusan Rozi)
+2. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp)
 
 ## Model sesi ini
-[AGY gemini-3.6-flash-medium build] + [OpenCode deepseek-v4-flash-free verify] + [Hermes oc/deepseek-v4-flash-free]
+[AGY gemini-3.6-flash-medium build] + [OpenCode deepseek-v4-flash-free verify/finalize] + [Hermes oc/deepseek-v4-flash-free]

@@ -27,7 +27,12 @@ const RBAC_RESOURCES = [
   { kode: 'audit-log', nama: 'Audit Log Sistem', modul: 'admin' },
   { kode: 'laporan-bug', nama: 'Laporan Bug & Masalah', modul: 'admin' },
   { kode: 'chatbot', nama: 'Asisten AI Chatbot', modul: 'chat' },
-  { kode: 'chatbot-config', nama: 'Konfigurasi Chatbot', modul: 'chatbot' }
+  { kode: 'chatbot-config', nama: 'Konfigurasi Chatbot', modul: 'chatbot' },
+  // Tool Registry v1 — resource status (READ-only, terpisah dari resource data penuh)
+  { kode: 'gizi-menu-status', nama: 'Status Menu Harian (Chatbot)', modul: 'gizi' },
+  { kode: 'akuntan-rab-status', nama: 'Status RAB Harian (Chatbot)', modul: 'akuntan' },
+  { kode: 'mitra-po-status', nama: 'Status PO (Chatbot)', modul: 'mitra' },
+  { kode: 'aslap-input-status', nama: 'Status Input Penerima Manfaat (Chatbot)', modul: 'aslap' }
 ];
 
 const RBAC_ROLE_PERMISSIONS = [
@@ -182,7 +187,33 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'AHLI_GIZI', resource: 'chatbot', aksi: 'READ' },
   { role: 'AKUNTAN', resource: 'chatbot', aksi: 'READ' },
   { role: 'KEPALA_SPPG', resource: 'chatbot', aksi: 'READ' },
-  { role: 'ADMIN', resource: 'chatbot', aksi: 'READ' }
+  { role: 'ADMIN', resource: 'chatbot', aksi: 'READ' },
+
+  // Tool Registry v1 — grant READ per resource-status
+  // Prinsip: READ saja, tidak ada aksi lain. Role per keputusan FINAL Rozi.
+
+  // gizi-menu-status: AHLI_GIZI (pemilik), ASLAP, KEPALA_SPPG (approver), AKUNTAN
+  { role: 'AHLI_GIZI', resource: 'gizi-menu-status', aksi: 'READ' },
+  { role: 'ASLAP', resource: 'gizi-menu-status', aksi: 'READ' },
+  { role: 'KEPALA_SPPG', resource: 'gizi-menu-status', aksi: 'READ' },
+  { role: 'AKUNTAN', resource: 'gizi-menu-status', aksi: 'READ' },
+  // MITRA dan role lain TIDAK mendapat gizi-menu-status
+
+  // akuntan-rab-status: AKUNTAN (pemilik), KEPALA_SPPG (approver). AHLI_GIZI eksplisit TIDAK.
+  { role: 'AKUNTAN', resource: 'akuntan-rab-status', aksi: 'READ' },
+  { role: 'KEPALA_SPPG', resource: 'akuntan-rab-status', aksi: 'READ' },
+  // AHLI_GIZI, ASLAP, MITRA TIDAK mendapat akuntan-rab-status
+
+  // mitra-po-status: MITRA (pemilik), KEPALA_SPPG, AKUNTAN
+  { role: 'MITRA', resource: 'mitra-po-status', aksi: 'READ' },
+  { role: 'KEPALA_SPPG', resource: 'mitra-po-status', aksi: 'READ' },
+  { role: 'AKUNTAN', resource: 'mitra-po-status', aksi: 'READ' },
+  // ASLAP, AHLI_GIZI, dan role lain TIDAK mendapat mitra-po-status
+
+  // aslap-input-status: ASLAP (pemilik), KEPALA_SPPG
+  { role: 'ASLAP', resource: 'aslap-input-status', aksi: 'READ' },
+  { role: 'KEPALA_SPPG', resource: 'aslap-input-status', aksi: 'READ' }
+  // MITRA, AHLI_GIZI, AKUNTAN TIDAK mendapat aslap-input-status
 ];
 
 async function seedRbacPermissions(prisma) {

@@ -14,10 +14,11 @@ const express = require('express');
 const { z } = require('zod');
 const rateLimit = require('express-rate-limit');
 const prisma = require('../lib/prisma');
-const { requireAuth, requirePermission } = require('../middleware/auth');
+const { requireAuth, requirePermission, hasUserPermission } = require('../middleware/auth');
 const { logger } = require('../lib/logger');
 const { encrypt, decrypt } = require('../lib/chat/encryption');
 const { chatCompletion } = require('../lib/chat/providers/openaiCompatible');
+const { ALL_TOOL_DEFINITIONS, RESOLVER_MAP } = require('../lib/chat/tools');
 
 const router = express.Router();
 
@@ -240,14 +241,110 @@ router.post('/', requireAuth, requirePermission('chatbot', 'READ'), chatLimiter,
     { role: 'user', content: message }
   ];
 
+  // Filter tool yang role user boleh akses (READ)
+  const allowedToolDefs = [];
+  for (const toolDef of ALL_TOOL_DEFINITIONS) {
+    const hasPerm = await hasUserPermission(userRole, toolDef.resourceStatus, 'READ');
+    if (hasPerm) {
+      allowedToolDefs.push(toolDef);
+    }
+  }
+
+  // Format tool JSON Schema untuk LLM (tanpa metadata internal resourceStatus)
+  const llmTools = allowedToolDefs.length > 0
+    ? allowedToolDefs.map((t) => ({ type: t.type, function: t.function }))
+    : undefined;
+
   let jawaban = '';
   let chatLogData = null;
+  let executedToolCalls = null;
 
   try {
-    const aiResponse = await chatCompletion({ baseUrl, apiKey, model, messages });
+    const aiResponse = await chatCompletion({
+      baseUrl,
+      apiKey,
+      model,
+      messages,
+      tools: llmTools
+    });
 
-    // Ekstrak jawaban dari format OpenAI-compatible
-    jawaban = aiResponse?.choices?.[0]?.message?.content || '';
+    const responseMessage = aiResponse?.choices?.[0]?.message;
+    const requestedToolCalls = responseMessage?.tool_calls;
+
+    if (requestedToolCalls && Array.isArray(requestedToolCalls) && requestedToolCalls.length > 0) {
+      executedToolCalls = [];
+      messages.push(responseMessage);
+
+      for (const call of requestedToolCalls) {
+        const toolName = call.function?.name;
+        let params = {};
+        try {
+          params = JSON.parse(call.function?.arguments || '{}');
+        } catch {
+          params = {};
+        }
+
+        const resolver = RESOLVER_MAP[toolName];
+        let toolResult;
+        let hasAccess = false;
+
+        if (resolver) {
+          hasAccess = await hasUserPermission(userRole, resolver.resourceStatus, 'READ');
+        }
+
+        if (resolver && hasAccess) {
+          try {
+            toolResult = await resolver.fn(params);
+            executedToolCalls.push({
+              toolName,
+              params,
+              result: toolResult
+            });
+          } catch (toolErr) {
+            toolResult = { error: toolErr.message };
+            executedToolCalls.push({
+              toolName,
+              params,
+              result: { error: toolErr.message }
+            });
+          }
+          messages.push({
+            role: 'tool',
+            tool_call_id: call.id,
+            name: toolName,
+            content: JSON.stringify(toolResult)
+          });
+        } else {
+          // TIDAK lolos hak akses: JANGAN jalankan fungsi tool!
+          executedToolCalls.push({
+            toolName,
+            params,
+            result: 'Ditolak: Tidak memiliki hak akses'
+          });
+          const politeDenial = 'Maaf, saya tidak punya izin untuk mengakses info itu untuk akun Anda.';
+          messages.push({
+            role: 'tool',
+            tool_call_id: call.id,
+            name: toolName,
+            content: politeDenial
+          });
+        }
+      }
+
+      // Re-call LLM untuk merangkai jawaban natural dengan hasil tool / penolakan
+      const followUpResponse = await chatCompletion({
+        baseUrl,
+        apiKey,
+        model,
+        messages
+      });
+
+      jawaban = followUpResponse?.choices?.[0]?.message?.content ||
+        'Maaf, saya tidak punya izin untuk mengakses info itu untuk akun Anda.';
+    } else {
+      // Tidak ada tool_calls
+      jawaban = responseMessage?.content || '';
+    }
 
     chatLogData = {
       userId,
@@ -256,7 +353,7 @@ router.post('/', requireAuth, requirePermission('chatbot', 'READ'), chatLimiter,
       roleSnapshot: userRole,
       provider,
       model,
-      toolCalls: null,
+      toolCalls: executedToolCalls,
       status: 'success'
     };
 

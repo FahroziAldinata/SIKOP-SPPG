@@ -102,6 +102,16 @@ function requireRole(...allowedRoles) {
   };
 }
 
+async function hasUserPermission(role, resource, aksi) {
+  if (!role || !resource || !aksi) return false;
+  if (!permissionCache.has(role)) {
+    await loadPermissionCache();
+  }
+  const rolePermissions = permissionCache.get(role);
+  const permKey = `${resource}:${aksi}`;
+  return !!(rolePermissions && rolePermissions.has(permKey));
+}
+
 // Dipanggil SETELAH requireAuth. Express middleware untuk dynamic RBAC
 function requirePermission(resource, aksi) {
   return async (req, res, next) => {
@@ -111,22 +121,9 @@ function requirePermission(resource, aksi) {
 
     const { role } = req.user;
 
-    // Catatan: bypass ADMIN dihapus (2026-08-08, Task C).
-    // ADMIN diperiksa sama seperti role lain — wajib punya grant eksplisit di RolePermission.
-    // Grant ADMIN: admin-user, admin-permission, audit-log, laporan-bug (R/C/U), chatbot (R).
-
     try {
-      // Reload bila role user TIDAK ada di cache (bukan hanya saat cache kosong total).
-      // invalidatePermissionCache(role) menghapus key role dari Map — tanpa cek ini,
-      // role yang di-invalidate admin akan terkunci 403 sampai server restart.
-      if (!permissionCache.has(role)) {
-        await loadPermissionCache();
-      }
-
-      const rolePermissions = permissionCache.get(role);
-      const permKey = `${resource}:${aksi}`;
-
-      if (rolePermissions && rolePermissions.has(permKey)) {
+      const allowed = await hasUserPermission(role, resource, aksi);
+      if (allowed) {
         return next();
       }
 
@@ -142,6 +139,7 @@ module.exports = {
   requireAuth,
   requireRole,
   requirePermission,
+  hasUserPermission,
   permissionCache,
   loadPermissionCache,
   invalidatePermissionCache,
