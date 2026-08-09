@@ -275,10 +275,16 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
-## 2026-08-08 (sesi 47 lanjutan) — FASE 7 LANJUTAN: Widget Chat FE + Migrasi API Key → SystemConfig (BUILD COMMIT, menunggu uji manual user)
+## 2026-08-08 (sesi 47 lanjutan) — FASE 7 LANJUTAN: Widget Chat FE + Migrasi API Key → SystemConfig ✅ SELESAI + VERIFIED MANUAL (Rozi)
 
-### Keputusan desain (Rozi, plan `.agent-pm/plans/2026-08-08-prompt-migrasi-apikey-admin-managed.md`)
-- **API key BUKAN per-user (BYOK dibatalkan)** — 1 key untuk seluruh SPPG, diatur HANYA ADMIN (admin-managed). Role lain tinggal pakai chat. Satu instance = 1 SPPG (konsisten keputusan sppgId dibatalkan). Tujuannya portabilitas deploy: sekali admin set key, tidak perlu bongkar kode.
+### UJI MANUAL (Task 5, 4 skenario)
+1. ADMIN `/setting` → section AI muncul → set key OK
+2. Role lain (AKUNTAN) `/setting` → section AI TIDAK muncul OK
+3. Role lain chat → jawaban OK (key dari config)
+4. ADMIN hapus key → chat → error 'API key belum diatur, hubungi admin' OK
+
+### Keputusan desain (Rozi, plan `.agent-pm/plans/2026-08-08-prompt-migrasi-apikey-admin-managed.md`) 
+ - **API key BUKAN per-user (BYOK dibatalkan)** — 1 key untuk seluruh SPPG, diatur HANYA ADMIN (admin-managed). Role lain tinggal pakai chat. Satu instance = 1 SPPG (konsisten keputusan sppgId dibatalkan). Tujuannya portabilitas deploy: sekali admin set key, tidak perlu bongkar kode.
 - Migrasi data testing lama: DIKOSONGKAN (fresh start, bukan migrate data).
 - Aksi enum `MANAGE` ditambahkan — bukti non-breaking: suite 637/637 PASS (bukan hanya 626).
 
@@ -302,11 +308,7 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 - AGY 3x timeout "tool jalan, teks mati" — kerja di disk; verifikasi OpenCode independen + npx oxlint (read-only) jadi bukti final
 - Catatan opencode: `rtk` alias rusak (JSON parse EOF) → pakai `npx oxlint src` langsung
 
-### Menunggu uji manual (Task 5, 4 skenario)
-1. ADMIN `/setting` → section AI muncul → set key
-2. Role lain `/setting` → section AI TIDAK muncul
-3. Role lain chat → jawaban OK (key dari config)
-4. ADMIN hapus key → chat → error 'API key belum diatur, hubungi admin'
+### Uji manual — SELESAI (Rozi, 2026-08-08 malam): 4/4 skenario LULUS
 
 ---
 
