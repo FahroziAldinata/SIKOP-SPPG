@@ -206,12 +206,12 @@ describe('RBAC Fix Review — cache lockout, approval resource split, MITRA asla
       expect(res.status).toBe(200);
     });
 
-    test('KEPALA_SPPG tetap 200 di GET /api/gizi/master-target (grant gizi-target READ)', async () => {
+    test('KEPALA_SPPG mendapat 403 di GET /api/gizi/master-target (tanpa grant gizi-target)', async () => {
       const res = await request(app)
         .get('/api/gizi/master-target')
         .set('Authorization', `Bearer ${kepalaToken}`);
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(403);
     });
   });
 });

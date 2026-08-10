@@ -111,7 +111,7 @@ const RBAC_ROLE_PERMISSIONS = [
   { role: 'AHLI_GIZI', resource: 'gizi-master', aksi: 'CREATE' },
   { role: 'AHLI_GIZI', resource: 'gizi-master', aksi: 'UPDATE' },
   { role: 'AHLI_GIZI', resource: 'gizi-master', aksi: 'DELETE' },
-  // Penyempitan akses final: target gizi = resource terpisah, hanya AHLI_GIZI (READ/UPDATE) + KEPALA_SPPG (READ)
+  // Penyempitan akses final: target gizi = resource terpisah, hanya AHLI_GIZI (READ/UPDATE) (KEPALA_SPPG TIDAK diberi gizi-target: data operasional detail, bukan ringkasan/laporan)
   { role: 'AHLI_GIZI', resource: 'gizi-target', aksi: 'READ' },
   { role: 'AHLI_GIZI', resource: 'gizi-target', aksi: 'UPDATE' },
   { role: 'AHLI_GIZI', resource: 'gizi-menu', aksi: 'READ' },

@@ -1,6 +1,6 @@
 # CURRENT STATE — SPPG
 
-**Status aktif: Fase 7 item 3 (Retensi ChatLog) + Fix Chat Error ✅ SELESAI + COMMITTED + PUSHED (8ead008 + 31b2163, 2026-08-10). FASE 7 TUNTAS. Next: Fase 8 Notifikasi eksternal (butuh TASK_SELECTION).**
+**Status aktif: PDF E2E Validation Suite ✅ SELESAI + PUSHED (6091861, 2026-08-10) — 32 endpoint PDF divalidasi struktur + GF-014 tercatat. Next: backlog pilihan (GF-014 T1 setupFiles vitest / Fase 8 notifikasi).**
 
 ## Sesi 2026-08-09 — FASE 7 ITEM 2: TOOL REGISTRY CHATBOT v1 ✅ SELESAI + VERIFIED (660/660) + APPROVED (Rozi)
 - **4 tool P0, 7 fungsi, READ-only, TANPA SQL mentah** (keputusan final Rozi, P1 ditunda): `gizi-menu-status` (cek_status_menu_harian, hitung_menu_pending) · `akuntan-rab-status` (cek_status_rab_harian, hitung_rab_pending) · `mitra-po-status` (hitung_po_pending, cek_status_po_supplier) · `aslap-input-status` (cek_status_input_pm).

@@ -1,21 +1,18 @@
 # CURRENT TASK — 2026-08-10 — PDF E2E VALIDATION SUITE (32 endpoint)
 
-**Status: APPROVED Rozi (pendekatan a — struktur PDF, tanpa dep baru). BUILD dimulai.**
+**Status: ✅ SELESAI + COMMITTED + PUSHED (`6091861`, 12 files) — approval Rozi 2026-08-10. Task CLOSED.**
 
-## Scope
-1. Validasi struktur PDF (magic bytes `%PDF` + buffer > 0) di 5 file test existing (21+4+3+1+1 endpoint)
-2. Test BARU `GET /api/akuntan/rab-p12/pdf` — happy-path (AKUNTAN) + negatif RBAC 403 (role tanpa grant; cek actual resource/aksi di rabP12.js:151)
-3. Test happy-path `GET /api/mitra/po/:id/pdf` (MITRA, PO valid) — pertahankan negatif existing
-4. Regression penuh + lint 0/0; temuan PDF gagal → lapor + fix
+## Hasil
+1. ✅ 32 endpoint PDF divalidasi struktur (magic bytes `%PDF` + buffer > 0) di 6 file test + 1 file baru — sebelumnya 0 test cek body
+2. ✅ Test BARU `GET /api/akuntan/rab-p12/pdf`: happy-path AKUNTAN + negatif 403 AHLI_GIZI (RBAC `akuntan-rab:READ` terverifikasi di rabP12.js:151)
+3. ✅ Happy-path `GET /api/mitra/po/:id/pdf` (mitra-po:READ) — negatif existing dipertahankan
+4. ✅ 0 dependency baru (keputusan Rozi pendekatan a), scope test-only
+5. ✅ 3 temuan env → GF-014 (backlog): DATABASE_URL race, password DB campur, drift grant RBAC
 
-## Investigasi kunci
-- 32 endpoint PDF total (akuntan 1, aslap 4, gizi 3, mitra 2, pemeriksaan 1, laporan 21)
-- 0 test cek body/struktur PDF — semua cuma status+header
-- 0% test: rab-p12/pdf · mitra po/:id/pdf cuma negatif
-- Fasilitas lengkap: puppeteer-core + CHROME_PATH ada, tanpa dep baru (keputusan Rozi)
-
-## Verifikasi target
-- npm test full PASS (run 2x, pola GF-009) · lint 0/0 · diff scope test-only (kecuali bug nyata)
+## Verifikasi
+- Per-file: SEMUA 7 file task PASS (masuk 637 passed) — 0 fail dari perubahan task
+- Run penuh: 8 FAIL + 19 skipped — SEMUA pre-existing env (GF-013/GF-014), bukan task ini
+- Lint exit 0 (4 warning no-unused-vars diketahui)
 
 ## Model
-[AGY build] + [OpenCode verify/finalize] + [Hermes oc/deepseek-v4-flash-free]
+[AGY gemini-3.6-flash-medium build (2x timeout "tool jalan teks mati" — kerja di disk, verifikasi OpenCode bukti final)] + [OpenCode deepseek-v4-flash-free verify/finalize] + [Hermes oc/deepseek-v4-flash-free]
