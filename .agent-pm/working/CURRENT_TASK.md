@@ -1,18 +1,18 @@
-# CURRENT TASK — 2026-08-10 — PDF E2E VALIDATION SUITE (32 endpoint)
+# CURRENT TASK — 2026-08-10 — T3: DRIFT GRANT RBAC GIZI-TARGET (GF-014)
 
-**Status: ✅ SELESAI + COMMITTED + PUSHED (`6091861`, 12 files) — approval Rozi 2026-08-10. Task CLOSED.**
+**Status: ✅ SELESAI + COMMITTED + PUSHED (`d9d6a44`) — approval Rozi 2026-08-10 (keputusan B). Task CLOSED.**
 
-## Hasil
-1. ✅ 32 endpoint PDF divalidasi struktur (magic bytes `%PDF` + buffer > 0) di 6 file test + 1 file baru — sebelumnya 0 test cek body
-2. ✅ Test BARU `GET /api/akuntan/rab-p12/pdf`: happy-path AKUNTAN + negatif 403 AHLI_GIZI (RBAC `akuntan-rab:READ` terverifikasi di rabP12.js:151)
-3. ✅ Happy-path `GET /api/mitra/po/:id/pdf` (mitra-po:READ) — negatif existing dipertahankan
-4. ✅ 0 dependency baru (keputusan Rozi pendekatan a), scope test-only
-5. ✅ 3 temuan env → GF-014 (backlog): DATABASE_URL race, password DB campur, drift grant RBAC
+## Temuan investigasi (OpenCode)
+- `4f8ec31` (Task B sesi 47) SENGAJA cabut grant KEPALA_SPPG gizi-target — konsisten keputusan Task B, tapi test rbac-fix-review TIDAK diupdate + komentar rbacSeeder.js:114 masih klaim READ → kontradiksi 2 keputusan terdokumentasi (c20a864 vs Task B sesi 47).
+- Seeder cuma upsert (tidak delete) → DB pasca-4f8ec31 benar, tidak drift.
 
-## Verifikasi
-- Per-file: SEMUA 7 file task PASS (masuk 637 passed) — 0 fail dari perubahan task
-- Run penuh: 8 FAIL + 19 skipped — SEMUA pre-existing env (GF-013/GF-014), bukan task ini
-- Lint exit 0 (4 warning no-unused-vars diketahui)
+## Keputusan Rozi: (B) — KEPALA_SPPG TIDAK dapat gizi-target (keputusan lebih baru, already approved sesi 47)
+## Fix (scope persis Rozi)
+1. ✅ `rbac-fix-review.test.js` — ekspektasi gizi-target KEPALA_SPPG 200 → 403 (semua blok relevan)
+2. ✅ `src/lib/rbacSeeder.js` — komentar klaim "KEPALA_SPPG READ" dihapus/diganti (alasan: data operasional detail, bukan ringkasan); definisi grant TIDAK tersentuh
+3. ✅ DB tidak di-reseed (sudah benar sejak 4f8ec31)
+4. Verifikasi: route guard `masterTargetGizi.js:11` requirePermission('gizi-target','READ') + seeder tanpa grant → token kepala valid = 403. Suite penuh 43 fail/35 file SEMUA pre-existing env (GF-013/GF-014 — 401 password drift, DATABASE_URL race). 0 regresi dari fix.
+5. ✅ Commit terpisah pesan jelas: `fix: sinkronkan test + komentar seeder dengan keputusan Task B - KEPALA_SPPG tidak dapat gizi-target`
 
 ## Model
-[AGY gemini-3.6-flash-medium build (2x timeout "tool jalan teks mati" — kerja di disk, verifikasi OpenCode bukti final)] + [OpenCode deepseek-v4-flash-free verify/finalize] + [Hermes oc/deepseek-v4-flash-free]
+[AGY gemini-3.6-flash-medium build (timeout, kerja di disk)] + [OpenCode deepseek-v4-flash-free verify/finalize] + [Hermes oc/deepseek-v4-flash-free]
