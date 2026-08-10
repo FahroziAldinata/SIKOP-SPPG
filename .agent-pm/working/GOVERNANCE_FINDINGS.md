@@ -17,6 +17,20 @@
 | GF-010 | 2026-08-04 | Source Attribution | Frasa "12 jam + refresh token" (instruksi STEP 3 V3 F1) TIDAK punya sumber di riwayat/sesi/prompt/file state — hanya muncul di pesan Rozi sendiri; "refresh token" bersumber dari backlog V3 FASE 1 (TODO.md:79) tanpa angka durasi | RESOLVED (dokumentasi) |
 | GF-011 | 2026-08-05 | Process Violation | Perubahan uncommitted TASK A (errorHandler.js) HILANG dari working copy saat session OpenCode leak fix — tidak di reflog/stash/commit; kemungkinan `git reset`/`restore` tak sengaja oleh agent. Terdeteksi saat FINALIZE (OpenCode lapor "identik HEAD"). Recovery: re-apply diff verbatim (index hash identik), verifikasi 123/123 + lint 0/0, commit `92fcba5`. Plus file stray `"how 9dc3c7f --stat"` di root (untracked sampah) | RESOLVED (aturan diadopsi) |
 | GF-012 | 2026-08-05 | Source of Truth | State files (CURRENT_STATE/TODO/HANDOFF) klaim "commit BELUM push" padahal `git log origin/main` menunjukkan SUDAH pushed — state files tertinggal dari kondisi git remote. Aturan: setiap awal sesi, `git log origin/main` = sumber kebenaran PRIMARY; state files = referensi SEKUNDER | RESOLVED (aturan diadopsi) |
+| GF-013 | 2026-08-10 | Structural Gap | Test suite backend jalan di DB YANG SAMA dengan dev/uji manual (tanpa DB test terpisah) — chat.test.js login user seed produksi + deleteMany ChatLog by userId seed (ChatLog produksi-dev ikut terhapus, count 0); SystemConfig pernah hilang total oleh test. DIMITIGASI: backup/restore SystemConfig di afterAll. Keputusan Rozi: KNOWN RISK, jangan fix sekarang (pola bukti-lpd2m) | KNOWN RISK (tercatat) |
+
+## Detail GF-013 — Test suite backend berjalan di DATABASE YANG SAMA dengan dev/uji manual (2026-08-10)
+
+- **Kategori**: Structural Gap / Known Risk (isolasi environment test vs dev).
+- **Deskripsi**: Seluruh suite backend (vitest) jalan di database lokal dev yang SAMA dengan BE live + uji manual Rozi. Tidak ada DB test terpisah.
+- **Bukti**:
+  1. `backend/vitest.config.js` TIDAK punya override `DATABASE_URL`/setupFiles env; `.env.test` tidak ada — tiap file test me-load `.env` dev ("injected env (3) from .env" = DATABASE_URL/ENCRYPTION_KEY/JWT_SECRET).
+  2. `chat.test.js:53-63` login pakai USER SEED PRODUKSI (`login('admin')/('aslap')/('akuntan')`) — bukan create user test.
+  3. Dampak nyata: `chat.test.js:71,80` `chatLog.deleteMany({ where: { userId: { in: [userAdmin.id, userAslap.id, userAkuntan.id] } } })` menghapus SEMUA ChatLog milik user seed — terverifikasi setelah suite terakhir (2026-08-10 21:14 WIB): **ChatLog count = 0** (13 row hari ini hilang: error audit + E2E sukses). Ini pola LAMA (sejak sesi 46/47), bukan baru dari Tahap 3 retensi.
+  4. `SystemConfig` id 'system' juga ditimpa tiap suite (`chat.test.js:337,430` deleteMany id 'system' untuk test 400) — pernah menyebabkan record hilang total (2026-08-10, sesi fullfix). DIMITIGASI: backup+restore di afterAll (`chat.test.js` + `chat-tools.test.js`) + deleteMany di-scope `where id 'system'`.
+- **Keputusan Rozi (2026-08-10)**: dicatat sebagai KNOWN RISK — JANGAN di-fix sekarang (pola sama dengan known risk bukti-lpd2m DELETE). Dokumentasi saja.
+- **Usulan backlog (non-blocker)**: isolasi DB test (DATABASE_URL test terpisah + seeder khusus test) ATAU setidaknya sandbox: test chat jangan delete ChatLog user seed (pakai user test ber-id unik).
+- **Status**: KNOWN RISK (tercatat 2026-08-10). Mitigasi parsial SystemConfig SUDAH diterapkan.
 
 ## Detail GF-012 — State files tertinggal dari git remote (2026-08-05)
 

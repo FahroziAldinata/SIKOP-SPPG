@@ -348,6 +348,20 @@ Model MasterTargetGizi + seed 9 kelompok (data Excel). CRUD endpoint + auto-popu
 
 ---
 
+## 2026-08-10 (sesi 49) — FASE 7 ITEM 3: RETENSI CHATLOG + FIX CHAT ERROR ✅ SELESAI + VERIFIED + APPROVED (Rozi)
+
+- **Root cause "Gagal menghubungi AI provider"** (audit gabungan): model `oc/deepseek-v4-flash-free(high)` latensi 37-40s vs timeout adapter BE 30s → AbortError → pesan seragam; error asli tidak tersimpan (ChatLog tanpa kolom error).
+- **Fix model**: SystemConfig → `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` (deepseek bare 39.9s saat eksekusi; nemotron 5.3s, tools:true) — deviasi beralasan dari plan, timeout TETAP 30s. E2E: AKUNTAN tool-call **948ms** sukses · AHLI_GIZI denial sopan · halo 482ms.
+- **Observability**: `openaiCompatible.js` non-2xx baca body provider + custom error `{status, providerBody, errName}`; timeout → 504 TimeoutError; `chat.js` log detail + `ChatLog.errorMessage` (tanpa apiKey). User-facing message tetap generik.
+- **ChatLog + `errorMessage String?`**: migration `20260810125842_add_chatlog_errormessage`.
+- **Validasi model**: POST /chat/api-key tolak `(`/`)` (400) + helper text FE `SettingPage.jsx`.
+- **Retensi 30 hari hard delete**: `lib/chat/retensiChatLog.js` (setInterval 24h jam 02:00, idempoten, log Pino, tanpa dependency baru) + `backend/index.js:4,14` + test `chat-retensi.test.js` (3).
+- **Verifikasi**: npm test **665/665 PASS (46 files)** · lint 0/0 · FE build exit 0 · E2E 3 skenario sukses.
+- **GF-013 KNOWN RISK**: suite test satu DB dengan dev (chat.test.js hapus ChatLog user seed; SystemConfig backup/restore dimitigasi).
+- **Proses**: build [AGY gemini-3.6-flash-medium] (claude-sonnet quota habis) + verify/lanjut [OpenCode deepseek-v4-flash-free] + [Hermes oc/deepseek-v4-flash-free].
+
+---
+
 ## Catatan Umum
 
 - **AGY**: Mode `-p` = text-only. Butuh `-i` + PTY untuk eksekusi tool. Settings di `C:\Users\Administrator\.gemini\antigravity-cli\settings.json`

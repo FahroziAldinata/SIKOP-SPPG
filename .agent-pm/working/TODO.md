@@ -1,4 +1,15 @@
-# TODO — SPPG (diperbarui 2026-08-08 malam)
+# TODO — SPPG (diperbarui 2026-08-10 malam)
+
+## FASE 7 item 3 — Retensi ChatLog + Fix Chat Error (2026-08-10, plan fullfix bertahap) ✅ SELESAI + VERIFIED + APPROVED Rozi
+- ✅ **Root cause "Gagal menghubungi AI provider"**: model `oc/deepseek-v4-flash-free(high)` latensi 37-40s vs timeout BE 30s → AbortError → pesan seragam. Error asli tidak tersimpan (ChatLog tanpa kolom error, log stdout saja).
+- ✅ **Fix model**: SystemConfig → `openrouter/nvidia/nemotron-3-ultra-550b-a55b:free` (deepseek bare juga lagi lambat 39.9s; nemotron 5.3s, tools:true). E2E AKUNTAN tool-call 948ms sukses · AHLI_GIZI denial sopan · halo 482ms. DEVIASI beralasan dari plan ("pakai model cepat default"), timeout TETAP 30s (keputusan Rozi — sempat diubah OpenCode ke 120s, DI-REVERT).
+- ✅ **Observability**: openaiCompatible.js non-2xx baca body + custom error `{status, providerBody, errName}`; timeout → 504 TimeoutError; chat.js log errName/status/providerBody + ChatLog.errorMessage (max 500 char, tanpa apiKey).
+- ✅ **ChatLog + `errorMessage String?`**: migration `20260810125842_add_chatlog_errormessage` (applied).
+- ✅ **Validasi model**: POST /chat/api-key tolak `(`/`)` → 400; helper text FE SettingPage.jsx.
+- ✅ **Regresi**: npm test **665/665 PASS (46 files)** verifikasi 4x · lint 0/0 · FE build exit 0.
+- ✅ **Retensi 30 hari hard delete**: `lib/chat/retensiChatLog.js` (setInterval 24h jam 02:00, idempoten isRunning, log Pino, TANPA dependency baru) + registrasi `backend/index.js:4,14` + `chat-retensi.test.js` (3 test).
+- ⚠️ **GF-013 KNOWN RISK (keputusan Rozi: dokumentasi, jangan fix)**: suite test jalan di DB dev yang SAMA — chat.test.js login user seed + deleteMany ChatLog by userId (ChatLog produksi-dev terhapus, count 0); SystemConfig sempat hilang → mitigasi backup/restore afterAll sudah ada.
+- 📌 Perubahan 8 modified + 4 baru UNCOMMITTED menunggu commit FINALIZE (approval Rozi 2026-08-10).
 
 ## FASE 7 LANJUTAN — Widget Chat FE + Migrasi API Key (2026-08-08, sesi 47 lanjutan) ✅ SELESAI + VERIFIED MANUAL (Rozi)
 - ✅ **Widget chat FE**: `ChatWidget.jsx` BARU + mount Layout (guard `hasPerm('chatbot','READ')`) — modal overlay pola Bug Report, POST /chat, loading, error API key not set → link /setting. tanpa SSE.
