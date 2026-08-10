@@ -1316,6 +1316,7 @@ model ChatLog {
   model        String
   toolCalls    Json?
   status       String   // 'success' | 'error'
+  errorMessage String?
   createdAt    DateTime @default(now())
 
   @@index([userId])

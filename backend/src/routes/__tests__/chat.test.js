@@ -43,6 +43,7 @@ describe('Chat API — /api/chat', () => {
   let tokenAdmin, userAdmin;
   let tokenAslap, userAslap;
   let tokenAkuntan, userAkuntan;
+  let systemConfigBackup = null;
 
   beforeAll(async () => {
     // Seed RBAC permissions agar chatbot-config:MANAGE ter-register
@@ -61,18 +62,26 @@ describe('Chat API — /api/chat', () => {
     tokenAkuntan = dataAkuntan.token;
     userAkuntan = dataAkuntan.user;
 
+    // Backup record SystemConfig produksi ('system') supaya bisa dipulihkan
+    // di afterAll — jangan pernah membiarkan suite test menghapus/merusak
+    // konfigurasi produksi secara permanen.
+    systemConfigBackup = await prismaDb.systemConfig.findUnique({ where: { id: 'system' } });
+
     // Bersihkan data chatbot test sebelumnya
     await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAdmin.id, userAslap.id, userAkuntan.id] } } });
-    await prismaDb.systemConfig.deleteMany({});
+    await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });
 
     // Reset mock sebelum semua test
     chatCompletion.mockReset();
   });
 
   afterAll(async () => {
-    // Cleanup
+    // Cleanup — JANGAN menghapus semua SystemConfig; pulihkan record produksi 'system'
     await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAdmin.id, userAslap.id, userAkuntan.id] } } });
-    await prismaDb.systemConfig.deleteMany({});
+    await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });
+    if (systemConfigBackup) {
+      await prismaDb.systemConfig.create({ data: systemConfigBackup });
+    }
     await prismaDb.$disconnect();
   });
 
@@ -166,6 +175,20 @@ describe('Chat API — /api/chat', () => {
           model: ''
         });
       expect(res.status).toBe(400);
+    });
+
+    test('400 — ADMIN: model mengandung kurung ( ( ) ) ditolak', async () => {
+      const res = await request(app)
+        .post('/api/chat/api-key')
+        .set('Authorization', `Bearer ${tokenAdmin}`)
+        .send({
+          provider: 'groq',
+          apiKey: 'test-api-key-12345',
+          baseUrl: 'https://api.groq.com/openai/v1',
+          model: 'llama-3.3-70b-versatile (high)'
+        });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('Model tidak valid');
     });
 
     test('200 — ADMIN: simpan API key sukses, response TIDAK mengandung apiKey mentah', async () => {
@@ -311,7 +334,7 @@ describe('Chat API — /api/chat', () => {
 
     test('404 — ADMIN GET api-key ketika belum diatur', async () => {
       // Hapus key system dulu
-      await prismaDb.systemConfig.deleteMany({});
+      await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });
 
       const res = await request(app)
         .get('/api/chat/api-key')
@@ -404,7 +427,7 @@ describe('Chat API — /api/chat', () => {
 
     test('400 — chat tanpa API key (key belum diset) error persis API key belum diatur, hubungi admin', async () => {
       // Hapus key system
-      await prismaDb.systemConfig.deleteMany({});
+      await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });
 
       const res = await request(app)
         .post('/api/chat')
@@ -459,8 +482,12 @@ describe('Chat API — /api/chat', () => {
       expect(log.provider).toBe('groq');
     });
 
-    test('500 — provider error: mock reject → 500 pesan seragam, ChatLog status error', async () => {
-      chatCompletion.mockRejectedValueOnce(new Error('Gagal menghubungi AI provider'));
+    test('500 — provider error: mock reject → 500 pesan seragam, ChatLog status error & errorMessage terisi', async () => {
+      const customErr = new Error('Gagal menghubungi AI provider');
+      customErr.status = 502;
+      customErr.providerBody = 'Bad Gateway from upstream proxy';
+      customErr.errName = 'ProviderResponseError';
+      chatCompletion.mockRejectedValueOnce(customErr);
 
       const res = await request(app)
         .post('/api/chat')
@@ -470,7 +497,7 @@ describe('Chat API — /api/chat', () => {
       expect(res.status).toBe(500);
       expect(res.body.error).toBe('Gagal menghubungi AI provider');
 
-      // Verifikasi ChatLog error tersimpan dengan userId ASLAP
+      // Verifikasi ChatLog error tersimpan dengan userId ASLAP dan errorMessage terisi
       const log = await prismaDb.chatLog.findFirst({
         where: { userId: userAslap.id, pertanyaan: 'Test provider error' },
         orderBy: { createdAt: 'desc' }
@@ -480,6 +507,7 @@ describe('Chat API — /api/chat', () => {
       expect(log.status).toBe('error');
       expect(log.userId).toBe(userAslap.id);
       expect(log.roleSnapshot).toBe(userAslap.role);
+      expect(log.errorMessage).toContain('[ProviderResponseError] Status: 502 | Body: Bad Gateway from upstream proxy');
     });
 
     test('ChatLog roleSnapshot sesuai role user AKUNTAN yang request', async () => {

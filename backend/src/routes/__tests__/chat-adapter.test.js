@@ -56,18 +56,39 @@ describe('chatCompletion (adapter OpenAI-compatible)', () => {
     expect(body.messages).toEqual(MESSAGES);
   });
 
-  test('normalisasi error: status non-2xx → pesan seragam, fetch tetap kirim stream:false', async () => {
+  test('normalisasi error: status non-2xx → pesan seragam, simpan detail status + body', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response('error body', { status: 500, headers: { 'content-type': 'text/plain' } })
+      new Response('error body 500 detail', { status: 500, headers: { 'content-type': 'text/plain' } })
     );
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(
-      chatCompletion({ baseUrl: BASE_URL, apiKey: API_KEY, model: MODEL, messages: MESSAGES })
-    ).rejects.toThrow('Gagal menghubungi AI provider');
+    try {
+      await chatCompletion({ baseUrl: BASE_URL, apiKey: API_KEY, model: MODEL, messages: MESSAGES });
+      expect.unreachable('Harus lempar error');
+    } catch (err) {
+      expect(err.message).toBe('Gagal menghubungi AI provider');
+      expect(err.status).toBe(500);
+      expect(err.providerBody).toBe('error body 500 detail');
+      expect(err.errName).toBe('ProviderResponseError');
+    }
 
     const [, options] = fetchMock.mock.calls[0];
     const body = JSON.parse(options.body);
     expect(body.stream).toBe(false);
+  });
+
+  test('normalisasi error: timeout → pesan seragam, simpan status 504 dan errName TimeoutError', async () => {
+    const abortErr = new Error('The operation was aborted');
+    abortErr.name = 'AbortError';
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(abortErr));
+
+    try {
+      await chatCompletion({ baseUrl: BASE_URL, apiKey: API_KEY, model: MODEL, messages: MESSAGES });
+      expect.unreachable('Harus lempar error');
+    } catch (err) {
+      expect(err.message).toBe('Gagal menghubungi AI provider');
+      expect(err.status).toBe(504);
+      expect(err.errName).toBe('TimeoutError');
+    }
   });
 });

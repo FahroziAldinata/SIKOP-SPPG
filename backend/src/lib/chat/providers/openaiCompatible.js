@@ -57,14 +57,26 @@ async function chatCompletion({ baseUrl, apiKey, model, messages, tools }) {
     const durationMs = Date.now() - startTime;
 
     if (!response.ok) {
-      // Log hanya status + model + duration, BUKAN apiKey atau body
+      let providerBody = '';
+      try {
+        providerBody = await response.text();
+      } catch {
+        providerBody = '';
+      }
+
+      // Log status + body + model + duration, BUKAN apiKey
       logger.warn({
         msg: 'Provider AI response non-2xx',
         status: response.status,
+        body: providerBody,
         model,
         durationMs
       });
-      throw new Error('Gagal menghubungi AI provider');
+      const err = new Error('Gagal menghubungi AI provider');
+      err.status = response.status;
+      err.providerBody = providerBody;
+      err.errName = 'ProviderResponseError';
+      throw err;
     }
 
     const data = await response.json();
@@ -86,10 +98,14 @@ async function chatCompletion({ baseUrl, apiKey, model, messages, tools }) {
         model,
         durationMs: TIMEOUT_MS
       });
-      throw new Error('Gagal menghubungi AI provider');
+      const timeoutErr = new Error('Gagal menghubungi AI provider');
+      timeoutErr.status = 504;
+      timeoutErr.providerBody = `Timeout ${TIMEOUT_MS}ms reached`;
+      timeoutErr.errName = 'TimeoutError';
+      throw timeoutErr;
     }
 
-    // Error jaringan atau error dari blok if (!response.ok) di atas
+    // Error yang sudah diformat di atas
     if (err.message === 'Gagal menghubungi AI provider') {
       throw err;
     }
@@ -102,7 +118,11 @@ async function chatCompletion({ baseUrl, apiKey, model, messages, tools }) {
       errMessage: err.message
       // JANGAN log apiKey, baseUrl, atau body
     });
-    throw new Error('Gagal menghubungi AI provider');
+    const unexpectedErr = new Error('Gagal menghubungi AI provider');
+    unexpectedErr.status = 500;
+    unexpectedErr.providerBody = err.message;
+    unexpectedErr.errName = err.name || 'UnexpectedError';
+    throw unexpectedErr;
 
   } finally {
     clearTimeout(timeoutId);

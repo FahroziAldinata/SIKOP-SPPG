@@ -130,6 +130,12 @@ router.post('/api-key', requireAuth, requirePermission('chatbot-config', 'MANAGE
 
   const { provider, apiKey, baseUrl, model } = parsed.data;
 
+  if (/[()]/.test(model)) {
+    return res.status(400).json({
+      error: 'Model tidak valid: gunakan ID model murni tanpa embel-embel seperti (high)'
+    });
+  }
+
   try {
     const apiKeyEncrypted = encrypt(apiKey);
 
@@ -360,14 +366,31 @@ router.post('/', requireAuth, requirePermission('chatbot', 'READ'), chatLimiter,
   } catch (err) {
     jawaban = '';
 
+    const errName = err.errName || err.name || 'Error';
+    const status = err.status || null;
+    const providerBody = err.providerBody || null;
+
     // Log error tanpa apiKey
     logger.error({
       msg: 'Provider AI error saat chat',
       userId,
       provider,
       model,
-      errMessage: err.message
+      errMessage: err.message,
+      errName,
+      status,
+      providerBody
     });
+
+    // Ringkasan error untuk ChatLog.errorMessage (max 500 karakter, tanpa apiKey)
+    let errorMessageSummary = `[${errName}]`;
+    if (status) errorMessageSummary += ` Status: ${status}`;
+    if (providerBody) {
+      const cleanBody = String(providerBody).replace(/\s+/g, ' ').substring(0, 300);
+      errorMessageSummary += ` | Body: ${cleanBody}`;
+    } else if (err.message) {
+      errorMessageSummary += ` | ${err.message}`;
+    }
 
     // Simpan ChatLog dengan status error
     chatLogData = {
@@ -378,7 +401,8 @@ router.post('/', requireAuth, requirePermission('chatbot', 'READ'), chatLimiter,
       provider,
       model,
       toolCalls: null,
-      status: 'error'
+      status: 'error',
+      errorMessage: errorMessageSummary
     };
 
     // Simpan log sebelum return error

@@ -1,6 +1,7 @@
 const { app, PORT } = require('./src/app');
 const { logger } = require('./src/lib/logger');
 const { loadPermissionCache } = require('./src/middleware/auth');
+const { initRetensiChatLogCron } = require('./src/lib/chat/retensiChatLog');
 
 loadPermissionCache()
   .then(() => {
@@ -10,4 +11,7 @@ loadPermissionCache()
     logger.error(err, 'Gagal memuat permission cache saat server boot');
   });
 
+initRetensiChatLogCron();
+
 app.listen(PORT, () => logger.info(`Server jalan di port ${PORT}`));
+

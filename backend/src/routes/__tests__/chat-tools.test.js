@@ -40,6 +40,7 @@ describe('Tool Registry Chatbot v1 — Integration & Security', () => {
   let tokenAhliGizi, userAhliGizi;
   let tokenAkuntan, userAkuntan;
   let tokenKepala, userKepala;
+  let systemConfigBackup = null;
 
   beforeAll(async () => {
     // Seed RBAC permissions
@@ -70,6 +71,10 @@ describe('Tool Registry Chatbot v1 — Integration & Security', () => {
     tokenKepala = dataKepala.token;
     userKepala = dataKepala.user;
 
+    // Backup record SystemConfig produksi ('system') supaya bisa dipulihkan
+    // di afterAll — jangan pernah menimpa konfigurasi produksi secara permanen
+    systemConfigBackup = await prismaDb.systemConfig.findUnique({ where: { id: 'system' } });
+
     // Set SystemConfig API Key untuk test
     await request(app)
       .post('/api/chat/api-key')
@@ -87,6 +92,13 @@ describe('Tool Registry Chatbot v1 — Integration & Security', () => {
   afterAll(async () => {
     const userIds = [userAdmin.id, userAslap.id, userMitra.id, userAhliGizi.id, userAkuntan.id, userKepala.id];
     await prismaDb.chatLog.deleteMany({ where: { userId: { in: userIds } } });
+
+    // Pulihkan record SystemConfig produksi — jangan biarkan key test menimpa
+    await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });
+    if (systemConfigBackup) {
+      await prismaDb.systemConfig.create({ data: systemConfigBackup });
+    }
+
     await prismaDb.$disconnect();
   });
 

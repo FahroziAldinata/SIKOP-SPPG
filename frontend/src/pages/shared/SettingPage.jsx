@@ -861,6 +861,9 @@ function AiApiKeySection() {
                                         placeholder="Contoh: gemini-2.0-flash"
                                         required
                                     />
+                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                        ID model murni tanpa embel-embel seperti &rsquo;(high)&rsquo; atau badge lain dari UI provider
+                                    </div>
                                 </div>
                             </div>
 
