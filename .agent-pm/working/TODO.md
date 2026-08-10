@@ -9,7 +9,7 @@
 - ✅ **Regresi**: npm test **665/665 PASS (46 files)** verifikasi 4x · lint 0/0 · FE build exit 0.
 - ✅ **Retensi 30 hari hard delete**: `lib/chat/retensiChatLog.js` (setInterval 24h jam 02:00, idempoten isRunning, log Pino, TANPA dependency baru) + registrasi `backend/index.js:4,14` + `chat-retensi.test.js` (3 test).
 - ⚠️ **GF-013 KNOWN RISK (keputusan Rozi: dokumentasi, jangan fix)**: suite test jalan di DB dev yang SAMA — chat.test.js login user seed + deleteMany ChatLog by userId (ChatLog produksi-dev terhapus, count 0); SystemConfig sempat hilang → mitigasi backup/restore afterAll sudah ada.
-- 📌 Perubahan 8 modified + 4 baru UNCOMMITTED menunggu commit FINALIZE (approval Rozi 2026-08-10).
+- 📌 Perubahan COMMITTED + PUSHED: `8ead008` (feat, 11 files) + `31b2163` (docs state, 6 files) — approval Rozi 2026-08-10.
 
 ## FASE 7 LANJUTAN — Widget Chat FE + Migrasi API Key (2026-08-08, sesi 47 lanjutan) ✅ SELESAI + VERIFIED MANUAL (Rozi)
 - ✅ **Widget chat FE**: `ChatWidget.jsx` BARU + mount Layout (guard `hasPerm('chatbot','READ')`) — modal overlay pola Bug Report, POST /chat, loading, error API key not set → link /setting. tanpa SSE.
