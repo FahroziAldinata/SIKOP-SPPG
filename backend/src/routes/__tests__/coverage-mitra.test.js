@@ -6,11 +6,25 @@ const TEST_PASSWORD = process.env.TEST_PASSWORD || 'ganti-password-ini';
 const prismaDb = new PrismaClient();
 
 async function login(username) {
-  const res = await request(app)
+  let res = await request(app)
     .post('/api/auth/login')
-    .send({ username, password: TEST_PASSWORD });
+    .send({ username, password: 'ganti-password-ini' });
+  if (res.status !== 200) {
+    res = await request(app)
+      .post('/api/auth/login')
+      .send({ username, password: process.env.TEST_PASSWORD || 'Test@123456' });
+  }
+  if (res.status !== 200) {
+    console.log('LOGIN ERROR:', username, res.status, res.body);
+  }
   expect(res.status).toBe(200);
   return res.body.token;
+}
+
+function binaryParser(res, callback) {
+  const data = [];
+  res.on('data', (chunk) => data.push(chunk));
+  res.on('end', () => callback(null, Buffer.concat(data)));
 }
 
 describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
@@ -23,6 +37,7 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
   let testPeriodeId;
   let testHargaBahanId;
   let testBahanPokokId;
+  let testPoId;
 
   beforeAll(async () => {
     tokenMitra = await login('mitra');
@@ -65,9 +80,52 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
       }
     });
     testHargaBahanId = hargaBahan.id;
+
+    let supplier = await prismaDb.supplier.findFirst();
+    if (!supplier) {
+      supplier = await prismaDb.supplier.create({
+        data: { nama: 'Supplier Test Mitra', telepon: '08123456789' }
+      });
+    }
+
+    const rabHarian = await prismaDb.rabHarian.create({
+      data: {
+        periodeId: testPeriodeId,
+        tanggal: new Date(Date.UTC(2036, 0, 15)),
+        status: 'DISETUJUI',
+        createdById: mitraUser.id
+      }
+    });
+
+    const po = await prismaDb.transaksiPembelian.create({
+      data: {
+        rabHarianId: rabHarian.id,
+        supplierId: supplier.id,
+        tanggal: new Date(Date.UTC(2036, 0, 15)),
+        catatan: 'Test PO Mitra PDF',
+        status: 'DIREALISASI',
+        createdById: mitraUser.id,
+        items: {
+          create: [
+            {
+              bahanPokokId: testBahanPokokId,
+              qty: 10,
+              hargaSatuan: 15000,
+              subtotal: 150000,
+            }
+          ]
+        }
+      }
+    });
+    testPoId = po.id;
   });
 
   afterAll(async () => {
+    if (testPoId) {
+      await prismaDb.transaksiPembelianItem.deleteMany({ where: { transaksiId: testPoId } });
+      await prismaDb.transaksiPembelian.delete({ where: { id: testPoId } });
+      await prismaDb.rabHarian.deleteMany({ where: { periodeId: testPeriodeId } });
+    }
     if (testHargaBahanId) {
       await prismaDb.hargaBahanPeriode.delete({ where: { id: testHargaBahanId } });
     }
@@ -229,6 +287,19 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
 
   // 7. GET /api/mitra/po/:id/pdf
   describe('GET /api/mitra/po/:id/pdf', () => {
+    test('happy 200 PDF', async () => {
+      const res = await request(app)
+        .get(`/api/mitra/po/${testPoId}/pdf`)
+        .set('Authorization', `Bearer ${tokenMitra}`)
+        .parse(binaryParser);
+
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
+    });
+
     test('404 id tak ada', async () => {
       const res = await request(app)
         .get('/api/mitra/po/non-existent-id/pdf')
@@ -274,9 +345,14 @@ describe('COVERAGE TEST — Mitra Domain Routes (9 endpoints)', () => {
     test('happy 200 PDF', async () => {
       const res = await request(app)
         .get(`/api/mitra/laporan/realisasi-po/pdf?periodeId=${testPeriodeId}`)
-        .set('Authorization', `Bearer ${tokenMitra}`);
+        .set('Authorization', `Bearer ${tokenMitra}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
-      expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('400 tanpa query periodeId', async () => {

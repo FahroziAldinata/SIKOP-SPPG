@@ -13,6 +13,12 @@ async function login(username) {
   return res.body.token;
 }
 
+function binaryParser(res, callback) {
+  const data = [];
+  res.on('data', (chunk) => data.push(chunk));
+  res.on('end', () => callback(null, Buffer.concat(data)));
+}
+
 describe('COVERAGE3 TEST — Aslap Laporan Routes', () => {
   let tokenAslap;
   let tokenMitra;
@@ -146,9 +152,14 @@ describe('COVERAGE3 TEST — Aslap Laporan Routes', () => {
       const res = await request(app)
         .get('/api/aslap/laporan/per-kelas/pdf')
         .query({ periodeId: testPeriodeId })
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/aslap/laporan/per-kelas/pdf — 403 role MITRA', async () => {
@@ -198,9 +209,14 @@ describe('COVERAGE3 TEST — Aslap Laporan Routes', () => {
       const res = await request(app)
         .get('/api/aslap/laporan/harian/pdf')
         .query({ periodeId: testPeriodeId })
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/aslap/laporan/harian/pdf — 403 role MITRA', async () => {
@@ -250,9 +266,14 @@ describe('COVERAGE3 TEST — Aslap Laporan Routes', () => {
       const res = await request(app)
         .get('/api/aslap/laporan/periode/pdf')
         .query({ periodeId: testPeriodeId })
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/aslap/laporan/periode/pdf — 403 role MITRA', async () => {
@@ -303,9 +324,14 @@ describe('COVERAGE3 TEST — Aslap Laporan Routes', () => {
       const res = await request(app)
         .get('/api/aslap/laporan/bulanan/pdf')
         .query({ bulan: 5, tahun: 2037, periodeId: testPeriodeId })
-        .set('Authorization', `Bearer ${tokenAslap}`);
+        .set('Authorization', `Bearer ${tokenAslap}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/aslap/laporan/bulanan/pdf — 403 role MITRA', async () => {

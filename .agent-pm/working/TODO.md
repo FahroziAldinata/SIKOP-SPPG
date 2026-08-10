@@ -17,7 +17,7 @@
 - ✅ **Migrasi API key BYOK → SystemConfig singleton** (keputusan Rozi): model SystemConfig (id 'system') + HAPUS ChatApiKey + relasi balik User; enum PermissionAksi +MANAGE; migration `20260808165619`; rbacSeeder `chatbot-config` (L30) + MANAGE hanya ADMIN (L176); chat.js guard `requirePermission('chatbot-config','MANAGE')` + POST /chat dapat key dari config + 400 'API key belum diatur, hubungi admin' persis + ChatLog tetap per-user; test chat.test.js update (admin 200 / non-admin 403 / chat sukses / no-key 400).
 - ✅ **Guard FE Task 3 poin 3**: `{hasPerm('chatbot-config','MANAGE') && <AiApiKeySection />}` — non-ADMIN: TIDAK render + TIDAK fetch GET /chat/api-key sama sekali (verified OpenCode).
 - ✅ **Verifikasi**: npm test 637/637 PASS (43 files), lint 0/0, FE build exit 0, grep chatApiKey 0 sisa, DB grant ADMIN MANAGE ada.
-- ⏳ **UJI MANUAL TASK 5 (4 skenario)** — menunggu user: (1) Admin perlu BE restart dulu (migration belum aktif); (2) skenario 1-4 per plan migrasi.
+- ✅ **UJI MANUAL TASK 5 (4 skenario)** — SELESAI, ditutup Rozi 2026-08-10 (konfirmasi sudah dikerjakan)
 - ✅ Lanjut Fase 7 item 2 (Tool registry) SELESAI → item 3 (Retensi ChatLog) → Fase 8 (Notifikasi eksternal)
 
 ### FASE 7 item 2 — Tool Registry Chatbot v1 (2026-08-09) ✅ SELESAI + VERIFIED + APPROVED (Rozi)
@@ -106,11 +106,18 @@
 - ✅ **F — smoke test semua modul**: smoke-modul.test.js 27 endpoint, 13/13 modul bersih, 0 bug baru. `231f8cc`. Total 89/89 2x. **SELESAI (representative coverage 27/225 + 62 integration test modul kritis)** — sisa ~198 endpoint → Backlog Perluasan Test Coverage (non-blocker).
 - ✅ **G — AGENTS.md ×3 + CHANGELOG [2.0.0]**: `e40044b`. Revisi `8fdbe8d` (cara tambah endpoint/halaman + daftar role lengkap). **Tag `v2.0.0` DIBUAT + pushed** (`e42e051`) — draft GitHub Release tidak dibuat (gh CLI tidak terpasang di device ini).
 
+## GF-014 — 3 temuan environment test (2026-08-10, dari verifikasi PDF E2E) — BACKLOG
+- ✅ Task PDF E2E di-commit tanpa menunggu env fix (bukti per-file PASS) — detail di GOVERNANCE_FINDINGS.md.
+- 🔵 **T1 (bug rapuh nyata)**: DATABASE_URL tidak ke-load di unit test yang tidak lewat `src/app.js` (dotenv.config() cuma di sana) → hasil tergantung urutan file (race). Fix: `setupFiles` di `backend/vitest.config.js` yang load `.env` sendiri. **Worth jadi task tersendiri.**
+- 🟡 **T2 (investigasi someday)**: password DB campur — aslap/mitra `Test@123456` vs 4 role lain `ganti-password-ini`, padahal seed.js 1 hash. Sesi lalu 665/665 PASS sekarang tidak → DB diubah antar sesi. Cek kenapa.
+- 🔴 **T3 (RBAC — kelas sensitif, JANGAN LUPA)**: drifseed grant — GIZI-TARGET grant KEPALA_SPPG hilang dari DB (= rbac-fix-review fail). Cek cepat: apakah cuma DB lokal drift atau `rbacSeeder.js` berubah? RBAC drift > sensitivitas password test.
+
 ## Backlog Perluasan Test Coverage (2026-08-04) — ✅ CYCLE 1-3 SELESAI + PUSHED (2026-08-05, verified via git log origin/main); sisa = endpoint minor non-blocker
 - **✅ CYCLE 1 SELESAI (2026-08-05)**: 30 endpoint baru (6 file) — commit `69d10e5` (pushed). Suite 123 → 210.
 - **✅ CYCLE 2 SELESAI (2026-08-05)**: 45 endpoint baru (11 file) — commit `682da6c` (pushed). Suite 210 → 342.
 - **✅ CYCLE 3 SELESAI (2026-08-05)**: 216 test baru (6 file: laporan/* data+pdf+excel, gizi sub-modul + laporan, aslap laporan, top-level notifikasi/laporanBug/dashboard/bukti/rab-harian) — commit `cb2803b` (pushed). Suite 342 → **558**.
 - **Sisa (BACKLOG NON-BLOCKER)**: endpoint yang belum ter-cover individu tersisa minor (beberapa matcher-longgar utk PDF body; beberapa conservative). PDF/Puppeteer E2E screenshot comparison belum — butuh keputusan pendekatan saat dikerjakan.
+- **Verifikasi 2026-08-10 (OpenCode)**: ~228 route definition vs ~653 test case (45 file test). Gap nyata — modul TANPA test pendamping langsung: `bukti-lpd2m.js` (3 route, 0 test file), `akuntan/rabP12.js` (3 route, hanya indirect endpoints-kritis), `laporanBug`/`dashboard`/`notifikasi`/`myPermissions` (hanya indirect smoke-modul/coverage3-toplevel). ⚠️ Folder `docs/user-guide/screenshots` (35 PNG) = hasil Fase 4 (script semi-manual `backend/scripts/screenshot-user-guide.js`), BUKAN E2E automated — PDF visual E2E tetap belum ada (tidak ada Playwright).
 - **Latar**: smoke test Bagian F = cakupan REPRESENTATIF, bukan penuh. Total endpoint backend ±225 (213 router.* + 12 sub-router).
 - **Cakupan saat ini**: 27 endpoint smoke (13/13 modul) + 62 integration test modul kritis = 89 test PASS stabil.
 - **Gap**:
@@ -123,14 +130,15 @@
 
 > Status: BACKLOG murni — seluruh isi di bawah ini DOKUMENTASI RENCANA, belum dikerjakan. Menunggu instruksi eksekusi Rozi. Jangan mulai sebelum TASK_SELECTION.
 
-### FASE 1 — Keamanan Dasar
-- Rate limiting pada endpoint login (anti brute-force)
-- HTTPS production (termination di reverse proxy / platform deploy)
-- Review mekanisme JWT: expiry, algoritma, dan kebutuhan refresh token
-- Audit implementasi AuditLog (kelengkapan, konsistensi pencatatan)
-- Audit bcrypt/password hashing: SEMUA jalur password (login, reset, ganti password, seed, dll) — evaluasi cost factor yang dipakai
-- Audit logging password: pastikan tidak ada password/log sensitif tercatat di log mana pun (Pino, error handler, pino-http)
-- Audit fitur reset password (ada/tidak, alur, keamanan)
+### FASE 1 — Keamanan Dasar ✅ SELESAI SEMUA (2026-08-10 — diverifikasi OpenCode + konfirmasi Rozi; TODO telat update)
+> Status: BACKLOG murni sebelumnya → ternyata SUDAH dikerjakan. Commit keamanan FASE 1 ada di history (bukan 30 commit terakhir — tertutup Fase 7/RBAC):
+- ✅ **Rate limiting endpoint login** (anti brute-force) — `49ccbb5` (express-rate-limit ^8.6.1 di package.json)
+- ✅ **HTTPS production** (termination di reverse proxy / platform deploy) — `efac375` docs panduan deployment (V3 Fase 1); didokumentasikan di DEPLOYMENT.md sebagai langkah saat produksi
+- ✅ **Review mekanisme JWT**: expiry, algoritma, kebutuhan refresh token — `581faed` feat tokenVersion pencabutan sesi JWT; expiry TETAP 8h (keputusan Rozi 2026-08-04, GF-010)
+- ✅ **Audit implementasi AuditLog** (kelengkapan, konsistensi pencatatan) — `1e3b08c` feat endpoint + halaman baca Audit Log (AKUNTAN/MITRA/ADMIN)
+- ✅ **Audit bcrypt/password hashing** SEMUA jalur + cost factor — `bd1c58b` cost factor 10 → 12 + rehash otomatis (bcryptjs ^3.0.3)
+- ✅ **Audit logging password** — `b1d57d0` redact Authorization/Cookie header dari log Pino (0 log sensitif)
+- ✅ **Audit fitur reset password** — `97d725e` invalidasi sesi saat admin reset password
 
 ### Backlog Audit Log (STEP 4 audit, sesi 2026-08-04 — lihat CURRENT_STATE.md sesi 38-39 untuk detail lengkap)
 - ✅ **[PRIORITAS TINGGI] SELESAI** — GET /api/audit-log (filter tanggal/user/aksi/resource + pagination, akses AKUNTAN/MITRA/ADMIN) + FE AuditLogPage + registrasi OpenAPI + 9 test — commit `1e3b08c`

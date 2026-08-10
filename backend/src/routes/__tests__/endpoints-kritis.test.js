@@ -68,6 +68,23 @@ describe('Endpoints Kritis Akuntan & Laporan Integration Tests', () => {
     expect([400, 404]).toContain(res.status);
   });
 
+  test('GET /api/laporan/bkk/pdf — valid periodeId returns 200 + %PDF', async () => {
+    const res = await request(app)
+      .get(`/api/laporan/bkk/pdf?periodeId=${periode.id}`)
+      .set(headers)
+      .parse((res, callback) => {
+        const data = [];
+        res.on('data', chunk => data.push(chunk));
+        res.on('end', () => callback(null, Buffer.concat(data)));
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/application\/pdf/);
+    expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+    expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+    expect(res.body.length).toBeGreaterThan(0);
+  });
+
   // --- MODUL AKUNTAN ---
   test('GET /api/akuntan/rab-p12/harian — RAB P12 Harian endpoint returns 200 or 400', async () => {
     const res = await request(app)

@@ -188,6 +188,8 @@ describe('Pemeriksaan Bahan Makanan (B.7) Integration Tests', () => {
     expect(t7.status).toBe(200);
     const ct = t7.headers['content-type'];
     expect(ct && ct.includes('application/pdf')).toBe(true);
+    expect(t7.headers['content-disposition']).toMatch(/inline; filename=/);
+    expect(t7.body.slice(0, 4).toString()).toBe('%PDF');
     expect(t7.body.length).toBeGreaterThan(1024);
   });
 

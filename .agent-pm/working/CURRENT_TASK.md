@@ -1,26 +1,21 @@
-# CURRENT TASK — 2026-08-10 — FASE 7 ITEM 3: RETENSI CHATLOG + FIX CHAT ERROR (PLAN FULLFIX BERTAHAP)
+# CURRENT TASK — 2026-08-10 — PDF E2E VALIDATION SUITE (32 endpoint)
 
-**Status: ✅ Tahap 1-6 SELESAI + VERIFIED (665/665 x4). BELUM COMMIT — menunggu review + approval Rozi (sesuai instruksi plan).**
-- Detail lengkap: `.agent-pm/plans/2026-08-09-fix-model-timeout-dan-retensi-chatlog.md`
-- 8 file modified + 3 file baru (migration errorMessage, retensiChatLog.js, chat-retensi.test.js)
+**Status: APPROVED Rozi (pendekatan a — struktur PDF, tanpa dep baru). BUILD dimulai.**
 
-## Yang sudah selesai (verified)
-1. **4 tool P0, 7 fungsi, READ-only, TANPA SQL mentah**: `gizi-menu-status` (cek_status_menu_harian, hitung_menu_pending) · `akuntan-rab-status` (cek_status_rab_harian, hitung_rab_pending) · `mitra-po-status` (hitung_po_pending, cek_status_po_supplier) · `aslap-input-status` (cek_status_input_pm)
-2. **Grant 11 row READ** (matriks final Rozi): gizi-menu-status (AHLI_GIZI/ASLAP/KEPALA_SPPG/AKUNTAN) · akuntan-rab-status (AKUNTAN/KEPALA_SPPG — AHLI_GIZI eksplisit TIDAK) · mitra-po-status (MITRA/KEPALA_SPPG/AKUNTAN) · aslap-input-status (ASLAP/KEPALA_SPPG)
-3. **Integrasi**: `lib/chat/tools/` (registry index + 4 modul) · `chat.js` (filter tool per role, eksekusi + re-call LLM, denial sopan, ChatLog.toolCalls diisi) · `auth.js` +`hasUserPermission` · `openaiCompatible.js` param adapter `tools`
-4. **Keamanan**: negatif test per tool (ditolak di level KODE/server, tool TIDAK dieksekusi) + prompt injection → tetap ditolak
+## Scope
+1. Validasi struktur PDF (magic bytes `%PDF` + buffer > 0) di 5 file test existing (21+4+3+1+1 endpoint)
+2. Test BARU `GET /api/akuntan/rab-p12/pdf` — happy-path (AKUNTAN) + negatif RBAC 403 (role tanpa grant; cek actual resource/aksi di rabP12.js:151)
+3. Test happy-path `GET /api/mitra/po/:id/pdf` (MITRA, PO valid) — pertahankan negatif existing
+4. Regression penuh + lint 0/0; temuan PDF gagal → lapor + fix
 
-### Verifikasi yang sudah jalan (semua PASS)
-- `npm test` backend: **660/660 PASS (45 files)** — 23 test baru (`chat-tools.test.js` 10 = 5 positip + 4 negatif + 1 prompt injection; `tools.test.js` 13 unit)
-- `npm run lint` backend (oxlint): 0/0
-- Grant DB: 11/11 ter-seed
-- State files di-update + commit + push (2026-08-09)
+## Investigasi kunci
+- 32 endpoint PDF total (akuntan 1, aslap 4, gizi 3, mitra 2, pemeriksaan 1, laporan 21)
+- 0 test cek body/struktur PDF — semua cuma status+header
+- 0% test: rab-p12/pdf · mitra po/:id/pdf cuma negatif
+- Fasilitas lengkap: puppeteer-core + CHROME_PATH ada, tanpa dep baru (keputusan Rozi)
 
-## Langkah berikutnya (task aktif selanjutnya)
-1. **Fase 7 item 3 — Retensi ChatLog** (TTL/anonymization — butuh keputusan Rozi, relevan Fase 6 legal)
-2. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — setelah Fase 7 tuntas
-3. **UJI MANUAL opsional (item 2)**: Rozi bisa tes chat tanya status via widget (butuh BE restart)
+## Verifikasi target
+- npm test full PASS (run 2x, pola GF-009) · lint 0/0 · diff scope test-only (kecuali bug nyata)
 
-## Catatan runtime
-- Build: AGY gemini-3.6-flash-medium (claude quota habis sesi lalu) · Verify/finalize: OpenCode deepseek-v4-flash-free · Hermes oc/deepseek-v4-flash-free
-- ⚠️ Deploy: role yang permission-nya ter-cache sebelum seed grant baru perlu **BE restart** agar grant aktif
+## Model
+[AGY build] + [OpenCode verify/finalize] + [Hermes oc/deepseek-v4-flash-free]

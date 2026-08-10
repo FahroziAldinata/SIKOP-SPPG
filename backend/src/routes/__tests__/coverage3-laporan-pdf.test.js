@@ -6,9 +6,17 @@ const TEST_PASSWORD = process.env.TEST_PASSWORD || 'ganti-password-ini';
 const prismaDb = new PrismaClient();
 
 async function login(username) {
-  const res = await request(app)
+  let res = await request(app)
     .post('/api/auth/login')
-    .send({ username, password: TEST_PASSWORD });
+    .send({ username, password: 'ganti-password-ini' });
+  if (res.status !== 200) {
+    res = await request(app)
+      .post('/api/auth/login')
+      .send({ username, password: process.env.TEST_PASSWORD || 'Test@123456' });
+  }
+  if (res.status !== 200) {
+    console.log('LOGIN ERROR:', username, res.status, res.body);
+  }
   expect(res.status).toBe(200);
   return res.body.token;
 }
@@ -81,6 +89,17 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
       data: { periodeId: testPeriodeId, akunId: akunKas.id, saldoAwal: 5000000 },
     });
 
+    await prismaDb.batasHargaPorsi.upsert({
+      where: { jenisPorsi: 'KECIL' },
+      update: {},
+      create: { jenisPorsi: 'KECIL', batasMaksimal: 15000 },
+    });
+    await prismaDb.batasHargaPorsi.upsert({
+      where: { jenisPorsi: 'BESAR' },
+      update: {},
+      create: { jenisPorsi: 'BESAR', batasMaksimal: 20000 },
+    });
+
     await prismaDb.jurnalTransaksi.create({
       data: {
         periodeId: testPeriodeId,
@@ -118,6 +137,8 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
       expect(res.headers['content-disposition']).toMatch(/inline; filename="BKU-/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/laporan/bku/pdf — 403 role tidak diizinkan', async () => {
@@ -160,6 +181,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('403 role tidak diizinkan', async () => {
@@ -192,6 +216,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/laporan/bp/bahan-baku/pdf — happy 200', async () => {
@@ -203,6 +230,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/laporan/bp/operasional/pdf — happy 200', async () => {
@@ -214,6 +244,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/laporan/bp/fasilitas/pdf — happy 200', async () => {
@@ -225,6 +258,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/laporan/bp/kas/pdf — 403 role tidak diizinkan', async () => {
@@ -248,6 +284,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('403 role tidak diizinkan', async () => {
@@ -271,6 +310,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('403 role tidak diizinkan', async () => {
@@ -294,6 +336,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('403 role tidak diizinkan', async () => {
@@ -317,6 +362,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('400 tanpa nomorDokumen', async () => {
@@ -349,6 +397,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('400 tanpa tanggalMulai', async () => {
@@ -381,6 +432,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('per-bulan/pdf — happy 200', async () => {
@@ -392,6 +446,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('per-periode/pdf — 403 role tidak diizinkan', async () => {
@@ -415,6 +472,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('stock-barang/export-excel — happy 200', async () => {
@@ -449,6 +509,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('lra/pdf — happy 200', async () => {
@@ -460,6 +523,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('lra/export-excel — happy 200', async () => {
@@ -482,6 +548,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('btt/pdf — happy 200', async () => {
@@ -493,6 +562,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('btt/pdf — 400 jika kategori invalid', async () => {
@@ -513,6 +585,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('bkk/pdf — happy 200', async () => {
@@ -524,6 +599,9 @@ describe('COVERAGE3 TEST — Laporan PDF & Excel Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toMatch(/application\/pdf/);
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('harian/pdf — 403 role tidak diizinkan', async () => {

@@ -1,6 +1,6 @@
 # CURRENT STATE — SPPG
 
-**Status aktif: Fase 7 item 3 (Retensi ChatLog) + Fix Chat Error ✅ SELESAI TAHP 1-6 (2026-08-10) — BELUM COMMIT, menunggu review + approval Rozi.**
+**Status aktif: Fase 7 item 3 (Retensi ChatLog) + Fix Chat Error ✅ SELESAI + COMMITTED + PUSHED (8ead008 + 31b2163, 2026-08-10). FASE 7 TUNTAS. Next: Fase 8 Notifikasi eksternal (butuh TASK_SELECTION).**
 
 ## Sesi 2026-08-09 — FASE 7 ITEM 2: TOOL REGISTRY CHATBOT v1 ✅ SELESAI + VERIFIED (660/660) + APPROVED (Rozi)
 - **4 tool P0, 7 fungsi, READ-only, TANPA SQL mentah** (keputusan final Rozi, P1 ditunda): `gizi-menu-status` (cek_status_menu_harian, hitung_menu_pending) · `akuntan-rab-status` (cek_status_rab_harian, hitung_rab_pending) · `mitra-po-status` (hitung_po_pending, cek_status_po_supplier) · `aslap-input-status` (cek_status_input_pm).
@@ -12,9 +12,9 @@
 - Model: [AGY gemini-3.6-flash-medium build] + [OpenCode deepseek-v4-flash-free verify/finalize] + [Hermes oc/deepseek-v4-flash-free].
 
 ## TODO PRIORITAS (next)
-1. **Fase 7 item 3 — Retensi ChatLog** (TTL/anonymization — butuh keputusan Rozi, relevan Fase 6 legal)
-2. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — setelah Fase 7 tuntas
-3. **UJI MANUAL opsional (item 2)**: Rozi bisa tes chat tanya status via widget (butuh BE restart)
+1. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — TASK_SELECTION menunggu Rozi; Fase 1-7 SUDAH TUNTAS (Fase 1 keamanan ternyata sudah dikerjakan, diverifikasi 2026-08-10 — lihat TODO.md FASE 1)
+2. **Backlog test coverage non-blocker**: gap endpoint minor (bukti-lpd2m 0 test, rabP12/laporanBug/dashboard/notifikasi/myPermissions indirect) + PDF/Puppeteer E2E (butuh keputusan pendekatan)
+3. **Tag v2.0.0** — ✅ SUDAH DIBUAT Rozi (verified remote, annotated e42e051f → 8fdbe8d)
 
 ## Sesi 47 lanjutan (2026-08-08 malam) — FASE 7 LANJUTAN: WIDGET CHAT FE + MIGRASI API KEY → SYSTEMCONFIG ✅ APPROVED + VERIFIED MANUAL (Rozi)
 - **UJI MANUAL Task 5 (4 skenario) LULUS** — Rozi konfirmasi: (1) ADMIN section AI muncul + set key OK; (2) AKUNTAN section AI tidak muncul OK; (3) AKUNTAN chat OK pakai key config; (4) hapus key → error 'API key belum diatur, hubungi admin' OK. BE sudah restart (migration aktif).

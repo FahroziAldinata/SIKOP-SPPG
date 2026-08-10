@@ -18,8 +18,23 @@
 | GF-011 | 2026-08-05 | Process Violation | Perubahan uncommitted TASK A (errorHandler.js) HILANG dari working copy saat session OpenCode leak fix — tidak di reflog/stash/commit; kemungkinan `git reset`/`restore` tak sengaja oleh agent. Terdeteksi saat FINALIZE (OpenCode lapor "identik HEAD"). Recovery: re-apply diff verbatim (index hash identik), verifikasi 123/123 + lint 0/0, commit `92fcba5`. Plus file stray `"how 9dc3c7f --stat"` di root (untracked sampah) | RESOLVED (aturan diadopsi) |
 | GF-012 | 2026-08-05 | Source of Truth | State files (CURRENT_STATE/TODO/HANDOFF) klaim "commit BELUM push" padahal `git log origin/main` menunjukkan SUDAH pushed — state files tertinggal dari kondisi git remote. Aturan: setiap awal sesi, `git log origin/main` = sumber kebenaran PRIMARY; state files = referensi SEKUNDER | RESOLVED (aturan diadopsi) |
 | GF-013 | 2026-08-10 | Structural Gap | Test suite backend jalan di DB YANG SAMA dengan dev/uji manual (tanpa DB test terpisah) — chat.test.js login user seed produksi + deleteMany ChatLog by userId seed (ChatLog produksi-dev ikut terhapus, count 0); SystemConfig pernah hilang total oleh test. DIMITIGASI: backup/restore SystemConfig di afterAll. Keputusan Rozi: KNOWN RISK, jangan fix sekarang (pola bukti-lpd2m) | KNOWN RISK (tercatat) |
+| GF-014 | 2026-08-10 | Environment/Structural (3 temuan) | 3 temuan env dari verifikasi PDF E2E: (1) DATABASE_URL tidak ke-load di unit test yang TIDAK lewat src/app.js (dotenv.config() hanya di app.js) → hasil test tergantung URUTAN file (race — kadang PASS kadang FAIL); (2) Password DB campur: aslap/mitra = Test@123456 vs 4 role lain ganti-password-ini, padahal seed.js hanya punya 1 hash default; (3) Drift seed grant RBAC: GIZI-TARGET grant KEPALA_SPPG hilang dari DB (= rbac-fix-review fail). Semua backlog — lihat detail di bawah | BACKLOG (tercatat) |
 
-## Detail GF-013 — Test suite backend berjalan di DATABASE YANG SAMA dengan dev/uji manual (2026-08-10)
+## Detail GF-014 — 3 temuan environment dari verifikasi PDF E2E (2026-08-10)
+
+- **Konteks**: verifikasi suite penuh untuk task PDF E2E Validation Suite menemukan 8 FAIL + 19 skipped — SEMUA pre-existing env, 0 dari perubahan task. Verifikasi per-file task 100% PASS.
+- **Temuan 1 — DATABASE_URL tidak ke-load di unit test yang tidak lewat app.js** (kategori: bug rapuh NYATA, bukan cuma env lokal):
+  - `dotenv.config()` HANYA di `src/app.js`. Unit test yang instantiate `new PrismaClient()` langsung (mis. `src/lib/chat/tools/__tests__/tools.test.js`, `chat-retensi.test.js`) tanpa `require` app → `process.env.DATABASE_URL` kosong → `PrismaClientInitializationError`.
+  - Karena vitest `fileParallelism: false` (1 proses), begitu ada file test yang require app.js, env global terisi → file berikutnya kebetulan dapat env. **Hasil test tergantung URUTAN eksekusi file** — kadang PASS kadang FAIL (race, nondeterministik). Ini benar-benar bug infra test, bukan masalah lokal Rozi.
+  - **Backlog task (worth dikerjakan)**: tambah `setupFiles` di `backend/vitest.config.js` (mis. setup file yang `dotenv.config()`) supaya TIAP file test load `.env` sendiri, independen urutan.
+- **Temuan 2 — Password DB campur** (non-blocker, worth investigasi someday):
+  - DB lokal: `admin/akuntan/ahligizi/kepalasppg` = `ganti-password-ini`, `aslap/mitra` = `Test@123456`. Padahal `seed.js:181` hanya punya 1 hash default `ganti-password-ini` (literal tak pernah berubah sejak `c017282`, cost 12 sejak `bd1c58b`).
+  - Akibat: `TEST_PASSWORD=Test@123456` di .env → 401 massal untuk 4 role; override `ganti-password-ini` → 401 untuk aslap/mitra. Tidak ada 1 nilai env yang cocok dua-duanya.
+  - Sesi lalu 665/665 PASS tapi sekarang tidak — indikasi DB diubah antar sesi (kemungkinan re-seed parsial / ganti password via UI). Investigasi someday: kenapa bisa beda, apakah re-seed parsial.
+- **Temuan 3 — Drift seed grant RBAC: GIZI-TARGET KEPALA_SPPG hilang dari DB** (kelas lebih sensitif — RBAC):
+  - `rbac-fix-review.test.js` fail: grant GIZI-TARGET untuk KEPALA_SPPG tidak ada di DB, padahal `rbacSeeder.js` mendefinisikannya (keputusan 2026-08-06, `c20a864`).
+  - Pertanyaan kunci: cuma DB lokal yang drift, atau seed script berubah? Perlu cek cepat (bukan sekarang, tapi JANGAN lupa) — RBAC drift kelasnya lebih sensitif dari password test. Verify: `git diff rbacSeeder.js` vs DB grant actual.
+- **Status**: BACKLOG (tercatat 2026-08-10, keputusan Rozi). Task PDF E2E di-commit tanpa menunggu fix env (bukti per-file PASS).
 
 - **Kategori**: Structural Gap / Known Risk (isolasi environment test vs dev).
 - **Deskripsi**: Seluruh suite backend (vitest) jalan di database lokal dev yang SAMA dengan BE live + uji manual Rozi. Tidak ada DB test terpisah.

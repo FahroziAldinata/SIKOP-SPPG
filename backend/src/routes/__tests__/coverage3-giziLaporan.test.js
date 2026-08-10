@@ -6,11 +6,25 @@ const TEST_PASSWORD = process.env.TEST_PASSWORD || 'ganti-password-ini';
 const prismaDb = new PrismaClient();
 
 async function login(username) {
-  const res = await request(app)
+  let res = await request(app)
     .post('/api/auth/login')
-    .send({ username, password: TEST_PASSWORD });
+    .send({ username, password: 'ganti-password-ini' });
+  if (res.status !== 200) {
+    res = await request(app)
+      .post('/api/auth/login')
+      .send({ username, password: process.env.TEST_PASSWORD || 'Test@123456' });
+  }
+  if (res.status !== 200) {
+    console.log('LOGIN ERROR:', username, res.status, res.body);
+  }
   expect(res.status).toBe(200);
   return res.body.token;
+}
+
+function binaryParser(res, callback) {
+  const data = [];
+  res.on('data', (chunk) => data.push(chunk));
+  res.on('end', () => callback(null, Buffer.concat(data)));
 }
 
 describe('COVERAGE3 TEST — Gizi Laporan Routes', () => {
@@ -184,9 +198,14 @@ describe('COVERAGE3 TEST — Gizi Laporan Routes', () => {
       const res = await request(app)
         .get('/api/gizi/laporan/pemenuhan-gizi/pdf')
         .query({ tanggalMulai: '2036-06-01', tanggalSelesai: '2036-06-30' })
-        .set('Authorization', `Bearer ${tokenAhliGizi}`);
+        .set('Authorization', `Bearer ${tokenAhliGizi}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/gizi/laporan/pemenuhan-gizi/pdf — 403 role AKUNTAN', async () => {
@@ -245,9 +264,14 @@ describe('COVERAGE3 TEST — Gizi Laporan Routes', () => {
       const res = await request(app)
         .get('/api/gizi/laporan/rekap-menu/pdf')
         .query({ tanggalMulai: '2036-06-01', tanggalSelesai: '2036-06-30' })
-        .set('Authorization', `Bearer ${tokenAhliGizi}`);
+        .set('Authorization', `Bearer ${tokenAhliGizi}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/gizi/laporan/rekap-menu/pdf — 403 role AKUNTAN', async () => {
@@ -306,9 +330,14 @@ describe('COVERAGE3 TEST — Gizi Laporan Routes', () => {
       const res = await request(app)
         .get('/api/gizi/laporan/organoleptik/pdf')
         .query({ tanggalMulai: '2036-06-01', tanggalSelesai: '2036-06-30' })
-        .set('Authorization', `Bearer ${tokenAhliGizi}`);
+        .set('Authorization', `Bearer ${tokenAhliGizi}`)
+        .parse(binaryParser);
+
       expect(res.status).toBe(200);
       expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toMatch(/inline; filename=/);
+      expect(res.body.slice(0, 4).toString()).toBe('%PDF');
+      expect(res.body.length).toBeGreaterThan(0);
     });
 
     test('GET /api/gizi/laporan/organoleptik/pdf — 403 role AKUNTAN', async () => {
