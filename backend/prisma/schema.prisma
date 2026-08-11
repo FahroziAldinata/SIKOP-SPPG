@@ -302,6 +302,11 @@ enum PermissionAksi {
   MANAGE
 }
 
+enum GrantSource {
+  SEED
+  MANUAL
+}
+
 
 // -----------------------------------------------------------------------------
 // USER & AUTH
@@ -1284,6 +1289,7 @@ model RolePermission {
   resourceId String
   resource   Resource       @relation(fields: [resourceId], references: [id], onDelete: Cascade)
   aksi       PermissionAksi
+  source     GrantSource    @default(SEED)
   createdAt  DateTime       @default(now())
 
   @@unique([role, resourceId, aksi])

@@ -424,7 +424,8 @@ router.post("/permissions", requirePermission("admin-permission", "CREATE"), asy
         data: {
           role,
           resourceId: targetResourceId,
-          aksi
+          aksi,
+          source: 'MANUAL'
         },
         include: { resource: true }
       });
@@ -463,7 +464,7 @@ router.put("/permissions/:id", requirePermission("admin-permission", "UPDATE"), 
     const { id } = req.params;
     const { role, resourceId, resourceKode, aksi } = req.body || {};
 
-    const data = {};
+    const data = { source: 'MANUAL' };
     if (role !== undefined) {
       if (!VALID_ROLES.includes(role)) {
         return res.status(400).json({ error: "Role tidak valid" });

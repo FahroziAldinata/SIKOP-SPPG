@@ -1,25 +1,21 @@
-# CURRENT TASK — 2026-08-11 — T1: GF-014 T1 setupFiles Vitest (race DATABASE_URL)
+# CURRENT TASK — 2026-08-11 — RBAC v2: kolom source (SEED/MANUAL) — pruning aman grant manual
 
-**Status: ✅ APPROVED Rozi (2026-08-11) — FINALIZE commit berjalan.**
+**Status: IN PROGRESS — PLANNING selesai (opsi A), masuk BUILD (AGY).**
 
-## Ringkas
-- Fix race DATABASE_URL: `backend/src/test/setup.js` BARU (dotenv.config path eksplisit relatif file) + `backend/vitest.config.js` + `setupFiles: ['./src/test/setup.js']`.
-- Tanpa dependency baru (dotenv ^17.4.2 sudah ada), tanpa .env.test, app.js tidak disentuh.
-- Plan: `.agent-pm/plans/2026-08-11-t1-vitest-setupfiles.md`.
+## Kronologi
+- v1 (pruning general): audit 11 stale KEPALA_SPPG → build → seed (pruned 11) → suite 671/671 PASS. **HALT oleh Rozi sebelum FINALIZE** — pruning general berisiko hapus grant manual admin di resource seeder.
+- Arahan Rozi (`.agent-pm/plans/2026-08-11-prompt-fix-pruning-preserve-manual-grant.md`): pruning harus bedakan stale (sisa definisi lama) vs manual admin (keputusan sah via UI). 3 tugas: pilih opsi + implementasi + test 2 skenario + dokumentasi admin.
+- Investigasi v2 (OpenCode): penulis grant cuma 2 (seeder + admin.js POST/PUT/DELETE /permissions); UI matrix POST+DELETE saja; RolePermission minim (id/role/resourceId/aksi/createdAt); tak ada preseden kolom source.
 
-## Verifikasi (bukti lengkap)
-- Run 1: 671 tests = 670 PASS + 1 FAIL (rbac-fix-review pre-existing), 0 PrismaError.
-- Run 2: IDENTIK 671, FAIL sama, 0 PrismaError.
-- Run 3 `--sequence.shuffle.files` (urutan file DIACAK, vitest 4.1.10): IDENTIK 670 PASS + 1 FAIL sama → race MATI, robust urutan file.
-- Standalone: tools.test.js 13/13 + chat-retensi.test.js 3/3 PASS (sebelumnya race saat berdiri sendiri).
-- Lint 0/0 (verifikasi-1).
-- 1 FAIL konsisten = RBAC DB drift (bukan regresi T1 — T1 tidak sentuh RBAC/DB/seed).
+## Keputusan: Opsi A — kolom `source` enum GrantSource {SEED, MANUAL} @default(SEED)
+- Seeder: create source SEED, update {}; pruning filter source=SEED.
+- admin.js: POST + PUT set source MANUAL (hardcoded).
+- Test baru rbac-pruning.test.js: skenario 1 (manual via endpoint dipertahankan setelah seed) + skenario 2 (stale SEED terhapus).
+- Dokumentasi admin di README/docs.
+- Plan: `.agent-pm/plans/2026-08-11-rbac-v2-source-column.md`.
 
-## ⚠️ TEMUAN BARU (dari klarifikasi Rozi, 2026-08-11) — RBAC STALE GRANT, PRIORITAS TINGGI
-- Investigasi OpenCode (query DB verbatim): grant `KEPALA_SPPG gizi-target READ` MASIH ADA di RolePermission (id cmsh9ss76003ot318ryv8y2nu, createdAt 2026-08-06T08:44:59.971Z).
-- Assertion test rbac-fix-review.test.js:214 = 403 (benar, fix T3), tapi DB masih kasih 200 → FAIL.
-- Akar masalah: **seeder upsert-only, TIDAK PERNAH delete grant** → semua pencabutan grant Task B sesi 47 (10 resource KEPALA_SPPG) berpotensi masih stale di DB. Klaim T3 "DB sudah benar sejak 4f8ec31" SALAH (4f8ec31 hanya ubah file seeder, DB tidak di-reseed).
-- **Task baru PRIORITAS TINGGI (sebelum T2)**: audit KEPALA_SPPG vs daftar 10 resource Task B + fix sistemik seeder (hapus grant yang tidak lagi di definisi) + reseed/delete eksplisit. Detail di TODO.md section "RBAC STALE GRANT".
+## Hasil v1 yang dipertahankan
+- 11 grant stale SUDAH terhapus dari DB lokal (pruned 11, KEPALA_SPPG 33→22) — jangan balik.
 
 ## Model
-[AGY gemini-3.6-flash-medium build] + [OpenCode deepseek-v4-flash-free investigate/verify/finalize] + [Hermes oc/deepseek-v4-flash-free].
+[Hermes oc/deepseek-v4-flash-free] + [OpenCode deepseek-v4-flash-free investigate] — BUILD: AGY gemini-3.6-flash-medium.

@@ -244,9 +244,52 @@ async function seedRbacPermissions(prisma) {
       create: {
         role: rp.role,
         resourceId,
-        aksi: rp.aksi
+        aksi: rp.aksi,
+        source: 'SEED'
       }
     });
+  }
+
+  // --- Fase PRUNING: Hapus grant stale (yang tidak ada lagi di RBAC_ROLE_PERMISSIONS) ---
+  const definedKeys = new Set();
+  const rolesDefined = Array.from(new Set(RBAC_ROLE_PERMISSIONS.map((rp) => rp.role)));
+
+  for (const rp of RBAC_ROLE_PERMISSIONS) {
+    const resId = resourceMap[rp.resource];
+    if (resId) {
+      definedKeys.add(`${rp.role}|${resId}|${rp.aksi}`);
+    }
+  }
+
+  const existingGrants = await prisma.rolePermission.findMany({
+    where: {
+      role: { in: rolesDefined },
+      resourceId: { in: Object.values(resourceMap) },
+      source: 'SEED'
+    }
+  });
+
+  const staleGrants = existingGrants.filter((g) => {
+    const key = `${g.role}|${g.resourceId}|${g.aksi}`;
+    return !definedKeys.has(key);
+  });
+
+  if (staleGrants.length > 0) {
+    const idsStale = staleGrants.map((g) => g.id);
+    await prisma.rolePermission.deleteMany({
+      where: { id: { in: idsStale } }
+    });
+
+    const resourceIdToKode = {};
+    for (const [kode, id] of Object.entries(resourceMap)) {
+      resourceIdToKode[id] = kode;
+    }
+
+    console.log(`RBAC seeder: pruned ${staleGrants.length} stale grant(s):`);
+    for (const g of staleGrants) {
+      const resKode = resourceIdToKode[g.resourceId] || g.resourceId;
+      console.log(`  ${g.role}:${resKode}:${g.aksi}`);
+    }
   }
 
   const { invalidatePermissionCache } = require('../middleware/auth');

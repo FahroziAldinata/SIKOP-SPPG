@@ -22,6 +22,12 @@ Pengelolaan harga bahan per periode, pembuatan PO + realisasi + PDF, dan laporan
 ### Auth & RBAC
 Login JWT, profil, dan kontrol akses berbasis peran: Admin, Akuntan, Aslap, Gizi, Kepala, dan Mitra.
 
+#### Manajemen Grant RBAC
+Sistem membedakan asal-usul permission grant (`RolePermission`) menggunakan kolom `source` (`SEED` vs `MANUAL`):
+- **Grant SEED**: Berasal dari definisi bawaan di `src/lib/rbacSeeder.js`. Saat `seedRbacPermissions` dijalankan, grant `SEED` yang tidak ada lagi di definisi kode akan di-prune (dihapus dari database).
+- **Grant MANUAL**: Dibuat atau diperbarui via UI/API Admin (`POST` & `PUT` `/api/admin/permissions`). Grant `MANUAL` terlindungi dan **tidak akan dihapus** oleh pruning seeder di resource apa pun.
+- **Pengembangan**: Untuk menambahkan grant permanen baru pada resource existing, tambahkan definisi ke `rbacSeeder.js`. Penambahan resource custom atau grant manual via UI akan otomatis bernilai `MANUAL` dan aman dari overwrite.
+
 ### Dashboard & Kepala
 Dashboard dengan ringkasan 6 tahap alur kerja + notifikasi, serta modul approval untuk Kepala.
 
