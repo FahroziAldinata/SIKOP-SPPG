@@ -1,4 +1,15 @@
-# TODO — SPPG (diperbarui 2026-08-10 malam)
+# TODO — SPPG (diperbarui 2026-08-11)
+
+## 🔴 RBAC STALE GRANT — task baru PRIORITAS TINGGI (sebelum T2/Fase 8) — TASK_SELECTION APPROVED Rozi 2026-08-11
+- **Temuan**: investigasi 2026-08-11 — grant `KEPALA_SPPG gizi-target READ` MASIH di DB (RolePermission id cmsh9ss76003ot318ryv8y2nu, createdAt 2026-08-06) padahal keputusan B (d9d6a44): KEPALA_SPPG TIDAK dapat gizi-target. Test rbac-fix-review:214 (assert 403) FAIL karena DB kasih 200.
+- **Akar**: seeder upsert-only, tidak pernah delete → SEMUA pencabutan Task B sesi 47 berpotensi stale di DB: aslap-input, gizi-menu, mitra-po, mitra-pemeriksaan, akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, laporan-resmi CREATE/DELETE (10 resource KEPALA_SPPG). Klaim T3 "DB sudah benar" SALAH.
+- **Rencana (3 langkah, arahan Rozi)**: (1) audit cepat — query RolePermission KEPALA_SPPG vs daftar 10 Task B, cek satu-satu mana nyangkut; (2) fix SISTEMIK di seeder — mekanisme eksplisit hapus grant yang tidak lagi ada di daftar definisi terbaru (bukan cuma upsert); (3) reseed ulang / delete eksplisit bersihkan semua stale grant.
+- **Status**: BARU — menunggu eksekusi setelah T1 FINALIZE.
+
+## FASE T1 — GF-014 T1 setupFiles Vitest (2026-08-11) ✅ APPROVED Rozi — FINALIZE
+- ✅ Fix: `backend/src/test/setup.js` BARU (dotenv.config path eksplisit) + `vitest.config.js` setupFiles.
+- ✅ Verifikasi 3 run stabil (2 normal + 1 shuffle files) 671 tests, 0 PrismaError, standalone tools 13/13 + chat-retensi 3/3, lint 0/0.
+- ✅ Commit: menunggu FINALIZE.
 
 ## FASE 7 item 3 — Retensi ChatLog + Fix Chat Error (2026-08-10, plan fullfix bertahap) ✅ SELESAI + VERIFIED + APPROVED Rozi
 - ✅ **Root cause "Gagal menghubungi AI provider"**: model `oc/deepseek-v4-flash-free(high)` latensi 37-40s vs timeout BE 30s → AbortError → pesan seragam. Error asli tidak tersimpan (ChatLog tanpa kolom error, log stdout saja).
