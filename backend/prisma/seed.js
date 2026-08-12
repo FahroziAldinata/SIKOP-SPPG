@@ -187,6 +187,20 @@ async function main() {
     });
   }
 
+  // ---------------------------------------------------------------------
+  // 7. SYSTEM CONFIG — default record 'system' untuk chatbot
+  // ---------------------------------------------------------------------
+  await prisma.systemConfig.upsert({
+    where: { id: "system" },
+    update: {},
+    create: {
+      id: "system",
+      provider: "google",
+      apiKeyEncrypted: "default_seed_key",
+      model: "gemini-2.5-flash",
+    },
+  });
+
   console.log("Seed selesai (hanya referensi + user).");
 }
 

@@ -10,17 +10,14 @@ describe('ChatLog Retention Policy & Cron Job', () => {
   const logIds = [];
 
   beforeAll(async () => {
-    testUser = await prisma.user.findFirst();
-    if (!testUser) {
-      testUser = await prisma.user.create({
-        data: {
-          username: 'retensi_test_user',
-          passwordHash: 'dummyhash',
-          namaLengkap: 'Retensi Test User',
-          role: 'ADMIN'
-        }
-      });
-    }
+    testUser = await prisma.user.create({
+      data: {
+        username: `test-retensi-${Date.now()}`,
+        passwordHash: 'dummyhash',
+        nama: 'Retensi Test User',
+        role: 'ADMIN'
+      }
+    });
   });
 
   afterEach(() => {
@@ -32,6 +29,13 @@ describe('ChatLog Retention Policy & Cron Job', () => {
       await prisma.chatLog.deleteMany({
         where: { id: { in: logIds } }
       });
+    }
+    if (testUser && testUser.id) {
+      try {
+        await prisma.user.delete({ where: { id: testUser.id } });
+      } catch {
+        // ignore
+      }
     }
     await prisma.$disconnect();
   });

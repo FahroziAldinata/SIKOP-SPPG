@@ -8,18 +8,31 @@ const NEW_PASSWORD = 'new-password-123';
 const prismaDb = new PrismaClient();
 
 describe('Admin Reset Password -> Invalidasi Sesi User Target', () => {
-  const TARGET_USERNAME = 'mitra';
+  let targetUser;
+  const TARGET_USERNAME = `test-adminreset-${Date.now()}`;
+
+  beforeAll(async () => {
+    const passwordHash = await bcrypt.hash(TEST_PASSWORD, 12);
+    targetUser = await prismaDb.user.create({
+      data: {
+        username: TARGET_USERNAME,
+        passwordHash,
+        nama: 'Test Admin Reset Target User',
+        role: 'MITRA',
+        tokenVersion: 0,
+      },
+    });
+  });
 
   afterAll(async () => {
     try {
-      const passwordHash = await bcrypt.hash(TEST_PASSWORD, 10);
-      await prismaDb.user.update({
-        where: { username: TARGET_USERNAME },
-        data: {
-          tokenVersion: 0,
-          passwordHash,
-        },
-      });
+      if (targetUser && targetUser.id) {
+        await prismaDb.auditLog.deleteMany({ where: { userId: targetUser.id } });
+        await prismaDb.chatLog.deleteMany({ where: { userId: targetUser.id } });
+        await prismaDb.user.delete({ where: { id: targetUser.id } });
+      }
+    } catch {
+      // ignore
     } finally {
       await prismaDb.$disconnect();
     }
@@ -34,19 +47,16 @@ describe('Admin Reset Password -> Invalidasi Sesi User Target', () => {
     const tokenLama = loginTarget.body.token;
     expect(tokenLama).toBeTruthy();
 
-    // 2. Login admin, ambil id user target dari DB
+    // 2. Login admin, ambil token admin
     const loginAdmin = await request(app)
       .post('/api/auth/login')
       .send({ username: 'admin', password: TEST_PASSWORD });
     expect(loginAdmin.status).toBe(200);
     const adminToken = loginAdmin.body.token;
 
-    const target = await prismaDb.user.findUnique({ where: { username: TARGET_USERNAME } });
-    expect(target).toBeTruthy();
-
-    // 3. Admin reset password user target
+    // 3. Admin reset password user target buatan sendiri
     const resetRes = await request(app)
-      .put(`/api/admin/users/${target.id}`)
+      .put(`/api/admin/users/${targetUser.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({ password: NEW_PASSWORD });
     expect(resetRes.status).toBe(200);

@@ -227,6 +227,13 @@ router.post('/', requireAuth, requirePermission('chatbot', 'READ'), chatLimiter,
     });
   }
 
+  // Cek apakah API key adalah placeholder (belum dienkripsi dengan benar)
+  if (keyRecord.apiKeyEncrypted === 'default_seed_key') {
+    return res.status(400).json({
+      error: 'API key belum diatur dengan benar — silakan konfigurasi API key valid di pengaturan sistem'
+    });
+  }
+
   const provider = keyRecord.provider;
   const model = keyRecord.model;
   const baseUrl = keyRecord.baseUrl;

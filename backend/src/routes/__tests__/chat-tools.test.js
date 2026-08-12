@@ -5,6 +5,7 @@
 // =============================================================================
 
 const request = require('supertest');
+const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const { seedRbacPermissions } = require('../../lib/rbacSeeder');
 
@@ -41,35 +42,55 @@ describe('Tool Registry Chatbot v1 — Integration & Security', () => {
   let tokenAkuntan, userAkuntan;
   let tokenKepala, userKepala;
   let systemConfigBackup = null;
+  let createdUserIds = [];
 
   beforeAll(async () => {
     // Seed RBAC permissions
     await seedRbacPermissions(prismaDb);
 
+    const ts = Date.now();
+    const hash = await bcrypt.hash(TEST_PASSWORD, 12);
+
+    // Buat 6 user test terisolasi agar tidak merusak data seed / ChatLog user asli
+    userAdmin = await prismaDb.user.create({
+      data: { username: `test-tool-admin-${ts}`, passwordHash: hash, nama: 'Test Tool Admin', role: 'ADMIN' }
+    });
+    userAslap = await prismaDb.user.create({
+      data: { username: `test-tool-aslap-${ts}`, passwordHash: hash, nama: 'Test Tool Aslap', role: 'ASLAP' }
+    });
+    userMitra = await prismaDb.user.create({
+      data: { username: `test-tool-mitra-${ts}`, passwordHash: hash, nama: 'Test Tool Mitra', role: 'MITRA' }
+    });
+    userAhliGizi = await prismaDb.user.create({
+      data: { username: `test-tool-gizi-${ts}`, passwordHash: hash, nama: 'Test Tool Gizi', role: 'AHLI_GIZI' }
+    });
+    userAkuntan = await prismaDb.user.create({
+      data: { username: `test-tool-akuntan-${ts}`, passwordHash: hash, nama: 'Test Tool Akuntan', role: 'AKUNTAN' }
+    });
+    userKepala = await prismaDb.user.create({
+      data: { username: `test-tool-kepala-${ts}`, passwordHash: hash, nama: 'Test Tool Kepala', role: 'KEPALA_SPPG' }
+    });
+
+    createdUserIds = [userAdmin.id, userAslap.id, userMitra.id, userAhliGizi.id, userAkuntan.id, userKepala.id];
+
     // Login 6 role
-    const dataAdmin = await login('admin');
+    const dataAdmin = await login(userAdmin.username);
     tokenAdmin = dataAdmin.token;
-    userAdmin = dataAdmin.user;
 
-    const dataAslap = await login('aslap');
+    const dataAslap = await login(userAslap.username);
     tokenAslap = dataAslap.token;
-    userAslap = dataAslap.user;
 
-    const dataMitra = await login('mitra');
+    const dataMitra = await login(userMitra.username);
     tokenMitra = dataMitra.token;
-    userMitra = dataMitra.user;
 
-    const dataGizi = await login('ahligizi');
+    const dataGizi = await login(userAhliGizi.username);
     tokenAhliGizi = dataGizi.token;
-    userAhliGizi = dataGizi.user;
 
-    const dataAkuntan = await login('akuntan');
+    const dataAkuntan = await login(userAkuntan.username);
     tokenAkuntan = dataAkuntan.token;
-    userAkuntan = dataAkuntan.user;
 
-    const dataKepala = await login('kepalasppg');
+    const dataKepala = await login(userKepala.username);
     tokenKepala = dataKepala.token;
-    userKepala = dataKepala.user;
 
     // Backup record SystemConfig produksi ('system') supaya bisa dipulihkan
     // di afterAll — jangan pernah menimpa konfigurasi produksi secara permanen
@@ -90,8 +111,11 @@ describe('Tool Registry Chatbot v1 — Integration & Security', () => {
   });
 
   afterAll(async () => {
-    const userIds = [userAdmin.id, userAslap.id, userMitra.id, userAhliGizi.id, userAkuntan.id, userKepala.id];
-    await prismaDb.chatLog.deleteMany({ where: { userId: { in: userIds } } });
+    if (createdUserIds.length > 0) {
+      await prismaDb.chatLog.deleteMany({ where: { userId: { in: createdUserIds } } });
+      await prismaDb.auditLog.deleteMany({ where: { userId: { in: createdUserIds } } });
+      await prismaDb.user.deleteMany({ where: { id: { in: createdUserIds } } });
+    }
 
     // Pulihkan record SystemConfig produksi — jangan biarkan key test menimpa
     await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });

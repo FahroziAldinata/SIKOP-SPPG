@@ -5,6 +5,7 @@
 // =============================================================================
 
 const request = require('supertest');
+const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const { seedRbacPermissions } = require('../../lib/rbacSeeder');
 
@@ -44,31 +45,45 @@ describe('Chat API — /api/chat', () => {
   let tokenAslap, userAslap;
   let tokenAkuntan, userAkuntan;
   let systemConfigBackup = null;
+  let createdUserIds = [];
 
   beforeAll(async () => {
     // Seed RBAC permissions agar chatbot-config:MANAGE ter-register
     await seedRbacPermissions(prismaDb);
 
-    // Login dengan 3 role berbeda
-    const dataAdmin = await login('admin');
+    const ts = Date.now();
+    const hash = await bcrypt.hash(TEST_PASSWORD, 12);
+
+    // Buat user test terisolasi agar tidak merusak data seed / ChatLog user asli
+    userAdmin = await prismaDb.user.create({
+      data: { username: `test-chat-admin-${ts}`, passwordHash: hash, nama: 'Test Chat Admin', role: 'ADMIN' }
+    });
+    userAslap = await prismaDb.user.create({
+      data: { username: `test-chat-aslap-${ts}`, passwordHash: hash, nama: 'Test Chat Aslap', role: 'ASLAP' }
+    });
+    userAkuntan = await prismaDb.user.create({
+      data: { username: `test-chat-akuntan-${ts}`, passwordHash: hash, nama: 'Test Chat Akuntan', role: 'AKUNTAN' }
+    });
+
+    createdUserIds = [userAdmin.id, userAslap.id, userAkuntan.id];
+
+    // Login dengan 3 user test terisolasi
+    const dataAdmin = await login(userAdmin.username);
     tokenAdmin = dataAdmin.token;
-    userAdmin = dataAdmin.user;
 
-    const dataAslap = await login('aslap');
+    const dataAslap = await login(userAslap.username);
     tokenAslap = dataAslap.token;
-    userAslap = dataAslap.user;
 
-    const dataAkuntan = await login('akuntan');
+    const dataAkuntan = await login(userAkuntan.username);
     tokenAkuntan = dataAkuntan.token;
-    userAkuntan = dataAkuntan.user;
 
     // Backup record SystemConfig produksi ('system') supaya bisa dipulihkan
     // di afterAll — jangan pernah membiarkan suite test menghapus/merusak
     // konfigurasi produksi secara permanen.
     systemConfigBackup = await prismaDb.systemConfig.findUnique({ where: { id: 'system' } });
 
-    // Bersihkan data chatbot test sebelumnya
-    await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAdmin.id, userAslap.id, userAkuntan.id] } } });
+    // Bersihkan data chatbot test sebelumnya untuk user test ini saja
+    await prismaDb.chatLog.deleteMany({ where: { userId: { in: createdUserIds } } });
     await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });
 
     // Reset mock sebelum semua test
@@ -76,8 +91,14 @@ describe('Chat API — /api/chat', () => {
   });
 
   afterAll(async () => {
+    // Cleanup ChatLog, AuditLog & User buatan test
+    if (createdUserIds.length > 0) {
+      await prismaDb.chatLog.deleteMany({ where: { userId: { in: createdUserIds } } });
+      await prismaDb.auditLog.deleteMany({ where: { userId: { in: createdUserIds } } });
+      await prismaDb.user.deleteMany({ where: { id: { in: createdUserIds } } });
+    }
+
     // Cleanup — JANGAN menghapus semua SystemConfig; pulihkan record produksi 'system'
-    await prismaDb.chatLog.deleteMany({ where: { userId: { in: [userAdmin.id, userAslap.id, userAkuntan.id] } } });
     await prismaDb.systemConfig.deleteMany({ where: { id: 'system' } });
     if (systemConfigBackup) {
       await prismaDb.systemConfig.create({ data: systemConfigBackup });

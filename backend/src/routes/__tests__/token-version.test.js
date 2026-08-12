@@ -7,18 +7,31 @@ const TEST_PASSWORD = process.env.TEST_PASSWORD || 'ganti-password-ini';
 const prismaDb = new PrismaClient();
 
 describe('Token Version & Invalidasi Sesi (logout & ganti password)', () => {
-  const TEST_USERNAME = 'aslap';
+  let testUser;
+  const TEST_USERNAME = `test-tokenver-${Date.now()}`;
+
+  beforeAll(async () => {
+    const passwordHash = await bcrypt.hash(TEST_PASSWORD, 12);
+    testUser = await prismaDb.user.create({
+      data: {
+        username: TEST_USERNAME,
+        passwordHash,
+        nama: 'Test Token Version User',
+        role: 'ASLAP',
+        tokenVersion: 0,
+      },
+    });
+  });
 
   afterAll(async () => {
     try {
-      const passwordHash = await bcrypt.hash(TEST_PASSWORD, 10);
-      await prismaDb.user.update({
-        where: { username: TEST_USERNAME },
-        data: {
-          tokenVersion: 0,
-          passwordHash,
-        },
-      });
+      if (testUser && testUser.id) {
+        await prismaDb.auditLog.deleteMany({ where: { userId: testUser.id } });
+        await prismaDb.chatLog.deleteMany({ where: { userId: testUser.id } });
+        await prismaDb.user.delete({ where: { id: testUser.id } });
+      }
+    } catch {
+      // ignore
     } finally {
       await prismaDb.$disconnect();
     }
