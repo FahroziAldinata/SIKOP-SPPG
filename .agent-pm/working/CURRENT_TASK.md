@@ -1,21 +1,23 @@
-# CURRENT TASK — 2026-08-11 — RBAC v2: kolom source (SEED/MANUAL) — pruning aman grant manual
+# CURRENT TASK — 2026-08-12 — Penutup GF-014: T2 investigasi password campur + state sync
 
-**Status: IN PROGRESS — PLANNING selesai (opsi A), masuk BUILD (AGY).**
+**Status: TASK CLOSED — T2 selesai + approved Rozi, commit penutup (docs) dalam FINALIZE.**
 
-## Kronologi
-- v1 (pruning general): audit 11 stale KEPALA_SPPG → build → seed (pruned 11) → suite 671/671 PASS. **HALT oleh Rozi sebelum FINALIZE** — pruning general berisiko hapus grant manual admin di resource seeder.
-- Arahan Rozi (`.agent-pm/plans/2026-08-11-prompt-fix-pruning-preserve-manual-grant.md`): pruning harus bedakan stale (sisa definisi lama) vs manual admin (keputusan sah via UI). 3 tugas: pilih opsi + implementasi + test 2 skenario + dokumentasi admin.
-- Investigasi v2 (OpenCode): penulis grant cuma 2 (seeder + admin.js POST/PUT/DELETE /permissions); UI matrix POST+DELETE saja; RolePermission minim (id/role/resourceId/aksi/createdAt); tak ada preseden kolom source.
+## Kronologi sesi
+- Start sesi: HEAD = origin/main = `31cb8fc` — T1 GF-014 (setupFiles, `1fbad1b`) + RBAC stale grant fix (source column SEED/MANUAL, `31cb8fc`) SUDAH di main. State files tertinggal (GF-012).
+- **T2 GF-014 (investigasi password DB campur)** — 2 siklus OpenCode:
+  1. Sesi #1: temuan kunci — DB SEKARANG BERSIH (6/6 ganti-password-ini, cost 12, verify-pw.js bcrypt.compare). Gagal tulis laporan (temp auto-reject + berhenti prematur).
+  2. Sesi #2 (retry, prompt larang Temp): selesai penuh — laporan 170 baris tertulis + diverifikasi Hermes baca ulang.
+- **Hasil**: akar mekanisme JELAS = test suite mutasi user seed (`token-version.test.js` → aslap, `admin-reset-password.test.js` → mitra; afterAll `hash(TEST_PASSWORD,10)`). Kondisi campur sudah hilang (non-issue). 1 risiko kecil: test mutasi user seed nyata + restore cost 10.
+- **Keputusan Rozi**: (1) T2 ditutup + catat resmi di GOVERNANCE_FINDINGS.md ✅; (2) risiko + GF-013 → task gabungan isolasi test (jadwalkan TASK_SELECTION, jangan ditunda lama); (3) state files sync gabung commit penutup T2.
 
-## Keputusan: Opsi A — kolom `source` enum GrantSource {SEED, MANUAL} @default(SEED)
-- Seeder: create source SEED, update {}; pruning filter source=SEED.
-- admin.js: POST + PUT set source MANUAL (hardcoded).
-- Test baru rbac-pruning.test.js: skenario 1 (manual via endpoint dipertahankan setelah seed) + skenario 2 (stale SEED terhapus).
-- Dokumentasi admin di README/docs.
-- Plan: `.agent-pm/plans/2026-08-11-rbac-v2-source-column.md`.
+## File diubah sesi ini (state/docs — commit penutup)
+- `.agent-pm/working/GOVERNANCE_FINDINGS.md` — GF-014 T2 resolved + penjelasan resmi
+- `.agent-pm/working/CURRENT_STATE.md` — status + sesi 2026-08-12 + TODO prioritas baru
+- `.agent-pm/working/CURRENT_TASK.md` — ini
+- `.agent-pm/working/TODO.md` — status T1/T2/RBAC + task gabungan isolasi test (pending)
 
-## Hasil v1 yang dipertahankan
-- 11 grant stale SUDAH terhapus dari DB lokal (pruned 11, KEPALA_SPPG 33→22) — jangan balik.
+## Laporan
+- `.agent-pm/plans/2026-08-12-t2-investigasi-password-campur.md` (170 baris, bukti verbatim)
 
 ## Model
-[Hermes oc/deepseek-v4-flash-free] + [OpenCode deepseek-v4-flash-free investigate] — BUILD: AGY gemini-3.6-flash-medium.
+[Hermes oc/deepseek-v4-flash-free] + [OpenCode deepseek-v4-flash-free investigate ×2].

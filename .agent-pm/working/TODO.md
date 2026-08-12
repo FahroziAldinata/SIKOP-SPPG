@@ -1,15 +1,14 @@
 # TODO — SPPG (diperbarui 2026-08-11)
 
-## 🔴 RBAC STALE GRANT — task baru PRIORITAS TINGGI (sebelum T2/Fase 8) — TASK_SELECTION APPROVED Rozi 2026-08-11
-- **Temuan**: investigasi 2026-08-11 — grant `KEPALA_SPPG gizi-target READ` MASIH di DB (RolePermission id cmsh9ss76003ot318ryv8y2nu, createdAt 2026-08-06) padahal keputusan B (d9d6a44): KEPALA_SPPG TIDAK dapat gizi-target. Test rbac-fix-review:214 (assert 403) FAIL karena DB kasih 200.
-- **Akar**: seeder upsert-only, tidak pernah delete → SEMUA pencabutan Task B sesi 47 berpotensi stale di DB: aslap-input, gizi-menu, mitra-po, mitra-pemeriksaan, akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, laporan-resmi CREATE/DELETE (10 resource KEPALA_SPPG). Klaim T3 "DB sudah benar" SALAH.
-- **Rencana (3 langkah, arahan Rozi)**: (1) audit cepat — query RolePermission KEPALA_SPPG vs daftar 10 Task B, cek satu-satu mana nyangkut; (2) fix SISTEMIK di seeder — mekanisme eksplisit hapus grant yang tidak lagi ada di daftar definisi terbaru (bukan cuma upsert); (3) reseed ulang / delete eksplisit bersihkan semua stale grant.
-- **Status**: BARU — menunggu eksekusi setelah T1 FINALIZE.
+## RBAC STALE GRANT — fix SISTEMIK + pruning aman ✅ SELESAI + COMMITTED (2026-08-11, 31cb8fc)
+- **Temuan (2026-08-11)**: grant `KEPALA_SPPG gizi-target READ` MASIH di DB (RolePermission id cmsh9ss76003ot318ryv8y2nu, createdAt 2026-08-06) padahal keputusan B (d9d6a44): KEPALA_SPPG TIDAK dapat gizi-target. Test rbac-fix-review:214 (assert 403) FAIL karena DB kasih 200. Akar: seeder upsert-only tak pernah delete → SEMUA pencabutan Task B sesi 47 berpotensi stale.
+- ✅ **Fix v2 (opsi A)**: kolom `source` enum GrantSource {SEED, MANUAL} @default(SEED) — seeder create source SEED + update {} (tak timpa), admin.js POST/PUT set MANUAL, pruning hapus HANYA grant SEED (MANUAL dipertahankan), DELETE admin tetap bebas. Test rbac-pruning.test.js (2 skenario: manual dipertahankan + stale SEED terhapus).
+- ✅ **Status**: COMMITTED + PUSHED `31cb8fc` — verify OpenCode + test 671/671 PASS (sesi 08-11). Plan: `.agent-pm/plans/2026-08-11-rbac-v2-source-column.md`.
 
-## FASE T1 — GF-014 T1 setupFiles Vitest (2026-08-11) ✅ APPROVED Rozi — FINALIZE
+## FASE T1 — GF-014 T1 setupFiles Vitest (2026-08-11) ✅ SELESAI + COMMITTED (1fbad1b)
 - ✅ Fix: `backend/src/test/setup.js` BARU (dotenv.config path eksplisit) + `vitest.config.js` setupFiles.
 - ✅ Verifikasi 3 run stabil (2 normal + 1 shuffle files) 671 tests, 0 PrismaError, standalone tools 13/13 + chat-retensi 3/3, lint 0/0.
-- ✅ Commit: menunggu FINALIZE.
+- ✅ Committed + pushed `1fbad1b`.
 
 ## FASE 7 item 3 — Retensi ChatLog + Fix Chat Error (2026-08-10, plan fullfix bertahap) ✅ SELESAI + VERIFIED + APPROVED Rozi
 - ✅ **Root cause "Gagal menghubungi AI provider"**: model `oc/deepseek-v4-flash-free(high)` latensi 37-40s vs timeout BE 30s → AbortError → pesan seragam. Error asli tidak tersimpan (ChatLog tanpa kolom error, log stdout saja).
@@ -117,11 +116,11 @@
 - ✅ **F — smoke test semua modul**: smoke-modul.test.js 27 endpoint, 13/13 modul bersih, 0 bug baru. `231f8cc`. Total 89/89 2x. **SELESAI (representative coverage 27/225 + 62 integration test modul kritis)** — sisa ~198 endpoint → Backlog Perluasan Test Coverage (non-blocker).
 - ✅ **G — AGENTS.md ×3 + CHANGELOG [2.0.0]**: `e40044b`. Revisi `8fdbe8d` (cara tambah endpoint/halaman + daftar role lengkap). **Tag `v2.0.0` DIBUAT + pushed** (`e42e051`) — draft GitHub Release tidak dibuat (gh CLI tidak terpasang di device ini).
 
-## GF-014 — 3 temuan environment test (2026-08-10, dari verifikasi PDF E2E) — BACKLOG
-- ✅ Task PDF E2E di-commit tanpa menunggu env fix (bukti per-file PASS) — detail di GOVERNANCE_FINDINGS.md.
-- 🔵 **T1 (bug rapuh nyata)**: DATABASE_URL tidak ke-load di unit test yang tidak lewat `src/app.js` (dotenv.config() cuma di sana) → hasil tergantung urutan file (race). Fix: `setupFiles` di `backend/vitest.config.js` yang load `.env` sendiri. **Worth jadi task tersendiri.**
-- 🟡 **T2 (investigasi someday)**: password DB campur — aslap/mitra `Test@123456` vs 4 role lain `ganti-password-ini`, padahal seed.js 1 hash. Sesi lalu 665/665 PASS sekarang tidak → DB diubah antar sesi. Cek kenapa.
-- 🔴 **T3 (RBAC — kelas sensitif, JANGAN LUPA)**: drifseed grant — GIZI-TARGET grant KEPALA_SPPG hilang dari DB (= rbac-fix-review fail). Cek cepat: apakah cuma DB lokal drift atau `rbacSeeder.js` berubah? RBAC drift > sensitivitas password test.
+## GF-014 — 3 temuan environment test (2026-08-10) — SEMUA RESOLVED (2026-08-12)
+- ✅ T1 (bug rapuh): DATABASE_URL race — fixed via `setupFiles` (`backend/src/test/setup.js` + vitest.config.js), commit `1fbad1b`. Race MATI (3 run stabil).
+- ✅ T2 (password DB campur): investigasi SELESAI 2026-08-12 — akar mekanisme = test suite mutasi user seed (`token-version.test.js` → aslap, `admin-reset-password.test.js` → mitra, afterAll `hash(TEST_PASSWORD,10)`); kondisi campur SUDAH HILANG dari DB (6/6 ganti-password-ini cost 12, verifikasi bcrypt 2x). Non-issue. Penjelasan resmi di GOVERNANCE_FINDINGS.md. Laporan: `.agent-pm/plans/2026-08-12-t2-investigasi-password-campur.md`.
+- ✅ T3 (drift grant RBAC gizi-target): resolved via `d9d6a44` + kelas masalah ditutup permanen oleh RBAC v2 source column (`31cb8fc` — pruning hapus HANYA grant SEED).
+- 🔵 **Task gabungan BARU (keputusan Rozi 2026-08-12 — jangan ditunda lama, TASK_SELECTION)**: **isolasi test dari data kerja nyata** — gabungan GF-013 (suite jalan di DB dev sama) + GF-014 T2 risiko (test mutasi user seed nyata + restore cost 10). Akar sama persis: test tidak terisolasi. Scope: test pakai test-user sendiri (create beforeAll, delete afterAll), cost restore 12, evaluasi DB test terpisah / sandbox ChatLog user seed.
 
 ## Backlog Perluasan Test Coverage (2026-08-04) — ✅ CYCLE 1-3 SELESAI + PUSHED (2026-08-05, verified via git log origin/main); sisa = endpoint minor non-blocker
 - **✅ CYCLE 1 SELESAI (2026-08-05)**: 30 endpoint baru (6 file) — commit `69d10e5` (pushed). Suite 123 → 210.

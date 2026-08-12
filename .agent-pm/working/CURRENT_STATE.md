@@ -1,8 +1,13 @@
 # CURRENT STATE — SPPG
 
-**Status aktif: T1 GF-014 (setupFiles vitest) ✅ APPROVED — FINALIZE commit. Temuan BARU: RBAC stale grant (KEPALA_SPPG gizi-target masih di DB) → task prioritas tinggi sebelum T2.**
+**Status aktif: SEMUA task GF-014 closed — T1 setupFiles ✅ (1fbad1b), RBAC stale grant fix ✅ (31cb8fc), T2 investigasi password campur ✅ (2026-08-12, kondisi campur sudah hilang — non-issue). Next: TASK_SELECTION — task gabungan isolasi test (GF-013 + T2-refactor) ATAU Fase 8 (Notifikasi eksternal).**
 
-## 2026-08-11 — Sesi baru: Pull d148df1 + T1 GF-014 setupFiles Vitest ✅ + Temuan RBAC stale grant 🔴
+## 2026-08-12 — Sesi baru: T2 GF-014 investigasi password campur ✅ + state sync + commit penutup
+- **Pull**: HEAD = origin/main = `31cb8fc` (RBAC source column), tree bersih. T1 + RBAC fix SUDAH committed di main — state files lama tertinggal (pola GF-012).
+- **T2 GF-014 (investigasi password DB campur)**: SELESAI + laporan `.agent-pm/plans/2026-08-12-t2-investigasi-password-campur.md` (170 baris). Akar mekanisme JELAS: test suite mutasi user seed nyata (`token-version.test.js` → aslap, `admin-reset-password.test.js` → mitra; afterAll tulis `hash(TEST_PASSWORD,10)`). Saat `.env` punya `TEST_PASSWORD=Test@123456` (08-10) → aslap/mitra terkunci jadi Test@123456. **Kondisi campur SUDAH HILANG**: DB kini 6/6 = ganti-password-ini cost 12 (verifikasi bcrypt.compare 2x + updatedAt 08-11 batch reseed). Asal literal awal tak bisa dipastikan (purge history 08-02) — moot. Dampak: 0 produksi, hanya transient test lokal.
+- **Keputusan Rozi**: (1) T2 ditutup, penjelasan resmi dicatat di GOVERNANCE_FINDINGS.md; (2) risiko kecil (test mutasi user seed + restore cost 10) + GF-013 → **1 task gabungan "isolasi test dari data kerja nyata"** — jangan ditunda lama, dijadwalkan via TASK_SELECTION (belum eksekusi); (3) sinkronisasi state files + commit penutup T2 jadi 1 commit.
+- **Verifikasi**: laporan dibaca ulang Hermes (bukti verbatim git log, query DB, AuditLog mitra 66x reset, grep plans/working) — self-report OpenAI tidak dipercaya mentah (GF-009).
+- Model: [OpenCode deepseek-v4-flash-free investigate ×2] + [Hermes oc/deepseek-v4-flash-free].
 - **Pull**: `d148df1` (docs handoff penutup sesi + state sync) — HEAD = origin/main d148df1, tree bersih.
 - **T1 GF-014 (race DATABASE_URL)**: `backend/src/test/setup.js` BARU (dotenv.config path eksplisit) + `backend/vitest.config.js` + `setupFiles`. Verifikasi: 3 run stabil (2 normal + 1 `--sequence.shuffle.files` acak urutan file) = 671 tests, 0 PrismaError; standalone tools.test.js 13/13 + chat-retensi 3/3; lint 0/0. Race MATI — robust urutan file. APPROVED Rozi 2026-08-11.
 - **🔴 TEMUAN RBAC STALE GRANT (investigasi Rozi request)**: grant `KEPALA_SPPG gizi-target READ` MASIH di DB (RolePermission cmsh9ss76003ot318ryv8y2nu, createdAt 2026-08-06). Akar: seeder upsert-only tak pernah delete → SEMUA cabut grant Task B sesi 47 (10 resource KEPALA_SPPG: aslap-input, gizi-menu, mitra-po, mitra-pemeriksaan, akuntan-jurnal, akuntan-upah, akuntan-akun, akuntan-jenis-pekerjaan, gizi-target, laporan-resmi CREATE/DELETE) berpotensi stale di DB. Klaim T3 "DB sudah benar" SALAH. **Task BARU prioritas tinggi sebelum T2/Fase 8**: audit 10 resource + fix sistemik seeder (hapus grant tak ada di definisi) + reseed/delete eksplisit.
@@ -10,10 +15,9 @@
 - Model: [AGY gemini-3.6-flash-medium build] + [OpenCode deepseek-v4-flash-free investigate/verify/finalize] + [Hermes oc/deepseek-v4-flash-free].
 
 ## TODO PRIORITAS (next)
-1. 🔴 **RBAC stale grant fix** (task baru, approve Rozi 2026-08-11) — audit + fix sistemik seeder + reseed
-2. **T2 GF-014** — investigasi password DB campur (aslap/mitra Test@123456 vs 4 role ganti-password-ini)
-3. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — TASK_SELECTION
-4. Tag v2.0.0 — ✅ SUDAH DIBUAT Rozi (verified remote, annotated e42e051f → 8fdbe8d)
+1. **Task gabungan isolasi test** (GF-013 + T2-refactor — test pakai test-user sendiri, tidak mutasi user seed; akar sama: test tidak terisolasi dari data kerja nyata) — keputusan Rozi 2026-08-12: JANGAN ditunda lama → TASK_SELECTION
+2. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — TASK_SELECTION
+3. Tag v2.0.0 — ✅ SUDAH DIBUAT Rozi (verified remote, annotated e42e051f → 8fdbe8d)
 
 ## Sesi 2026-08-09 — FASE 7 ITEM 2: TOOL REGISTRY CHATBOT v1 ✅ SELESAI + VERIFIED (660/660) + APPROVED (Rozi)
 - **4 tool P0, 7 fungsi, READ-only, TANPA SQL mentah** (keputusan final Rozi, P1 ditunda): `gizi-menu-status` (cek_status_menu_harian, hitung_menu_pending) · `akuntan-rab-status` (cek_status_rab_harian, hitung_rab_pending) · `mitra-po-status` (hitung_po_pending, cek_status_po_supplier) · `aslap-input-status` (cek_status_input_pm).
