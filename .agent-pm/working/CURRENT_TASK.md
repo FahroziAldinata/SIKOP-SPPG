@@ -6,7 +6,7 @@
 - ✅ **GF-014 T1 setupFiles Vitest** — SELESAI + COMMITTED (1fbad1b)
 - ✅ **GF-014 RBAC stale grant fix** — SELESAI + COMMITTED (31cb8fc)
 - ✅ **GF-014 T2 investigasi password campur** — SELESAI + COMMITTED (13b1fc1)
-- ✅ **GF-013 + T2-refactor isolasi test** — SELESAI + APPROVED (2026-08-12) — Laporan: `.agent-pm/plans/2026-08-12-isolasi-test-dari-data-seed.md` (232 baris). 673 test PASS, user seed utuh, SystemConfig utuh, lint 0 error.
+- ✅ **GF-013 + T2-refactor isolasi test** — SELESAI + COMMITTED (914f066) — Laporan: `.agent-pm/plans/2026-08-12-isolasi-test-dari-data-seed.md` (232 baris). 673 test PASS, user seed utuh, SystemConfig utuh, lint 0 error.
 
 ## Task Berikutnya (TASK_SELECTION)
 1. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — fitur baru, butuh keputusan evaluasi WhatsApp API resmi vs Baileys.
