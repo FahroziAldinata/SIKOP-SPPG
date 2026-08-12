@@ -15,7 +15,7 @@
 - Model: [AGY gemini-3.6-flash-medium build] + [OpenCode deepseek-v4-flash-free investigate/verify/finalize] + [Hermes oc/deepseek-v4-flash-free].
 
 ## TODO PRIORITAS (next)
-1. **Task gabungan isolasi test** (GF-013 + T2-refactor — test pakai test-user sendiri, tidak mutasi user seed; akar sama: test tidak terisolasi dari data kerja nyata) — keputusan Rozi 2026-08-12: JANGAN ditunda lama → TASK_SELECTION
+1. ✅ **Task gabungan isolasi test** (GF-013 + T2-refactor — test pakai test-user sendiri, tidak mutasi user seed; akar sama: test tidak terisolasi dari data kerja nyata) — SELESAI + APPROVED 2026-08-12. Laporan: `.agent-pm/plans/2026-08-12-isolasi-test-dari-data-seed.md` (232 baris). Verifikasi: 673 test PASS, user seed utuh, SystemConfig utuh, lint 0 error. Temuan: `backend/prisma/seed.js` di-upsert SystemConfig palsu (DI LUAR scope plan, TIDAK di-revert — keputusan Rozi).
 2. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — TASK_SELECTION
 3. Tag v2.0.0 — ✅ SUDAH DIBUAT Rozi (verified remote, annotated e42e051f → 8fdbe8d)
 
