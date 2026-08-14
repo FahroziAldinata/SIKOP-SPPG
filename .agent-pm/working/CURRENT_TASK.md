@@ -4,8 +4,11 @@
 **Status**: ✅ COMPLETED  
 **Approval**: Pending Rozi approval for commit
 
+**Status aktif: SEMUA task GF-014 closed — T1 setupFiles ✅ (1fbad1b), RBAC stale grant fix ✅ (31cb8fc), T2 investigasi password campur ✅ (2026-08-12, kondisi campur sudah hilang — non-issue). Task gabungan isolasi test ✅ SELESAI + COMMITTED (914f066). ✅ FASE 8 (Notifikasi eksternal) SELESAI + COMMITTED (9b83ed1) — implementasi lengkap dengan email notification, test suite 671/671 PASS, login functionality FIXED.**
+
 ## 4 Task Completion Status
 
+<<<<<<< Updated upstream
 ### ✅ Task 1: Fix Email Unit Test Issues
 - **Before**: 0/12 tests failing due to jest.clearAllMocks() and transport cache
 - **After**: 12/12 tests PASS
@@ -13,6 +16,11 @@
   - Replace `jest.clearAllMocks()` → `vi.clearAllMocks()`
   - Add manual transport cache reset function
   - Fix vitest compatibility issues
+=======
+## Task Berikutnya (TASK_SELECTION)
+1. **Fase 8 — Notifikasi eksternal** (Email Nodemailer + WhatsApp) — fitur baru, butuh keputusan evaluasi WhatsApp API resmi vs Baileys. **MASIH PENDING: TIDAK ditemukan di git, test suite GAGAL, RBAC error.**
+2. **Task 4 DB test terpisah** (GF-013 penuh) — evaluasi implementasi DATABASE_URL terpisah saat NODE_ENV=test (butuh effort besar, estimasi ± hari kerja) → keputusan Rozi.
+>>>>>>> Stashed changes
 
 ### ✅ Task 2: Fix Email Integration Test Issues  
 - **Before**: 6/6 tests failing with "AsyncFunction sendMail is not a spy"

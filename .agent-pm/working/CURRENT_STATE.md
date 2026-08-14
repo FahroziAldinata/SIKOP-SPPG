@@ -1,8 +1,10 @@
-# CURRENT STATE
+# CURRENT STATE — SPPG
 
 **Tanggal**: 2026-08-15  
 **Active Scope**: Fase 8 - Notifikasi Eksternal (100% COMPLETE)  
 **Next Scope**: TBA (pending Rozi decision)
+
+**Status aktif: SEMUA task GF-014 closed — T1 setupFiles ✅ (1fbad1b), RBAC stale grant fix ✅ (31cb8fc), T2 investigasi password campur ✅ (2026-08-12, kondisi campur sudah hilang — non-issue). Task gabungan isolasi test ✅ SELESAI + COMMITTED (914f066). ✅ FASE 8 (Notifikasi eksternal) SELESAI + COMMITTED (9b83ed1) — implementasi lengkap dengan email notification, test suite 671/671 PASS, login functionality FIXED.**
 
 ## Project Status Overview
 

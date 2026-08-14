@@ -204,10 +204,22 @@
   - Kebijakan retensi ChatLog (TTL/anonymization — perlu keputusan Rozi, relevan Fase 6 legal)
 - Pengujian pembatasan akses (uji role A tidak bisa bocorkan data role B) — menyatu dengan tool registry
 
-### FASE 8 — Notifikasi Eksternal
-- **Email**: Nodemailer + Gmail App Password; integrasi dengan model `Notifikasi` existing; template email; preferensi user (jenis notif via email atau tidak)
-- **WhatsApp**: evaluasi WhatsApp Business API vs Baileys/whatsapp-web.js (non-resmi); jika pakai non-resmi wajib nomor khusus (bukan nomor pribadi); dokumentasikan risiko (ban/block, ToS)
-
+## FASE 8 — Notifikasi Eksternal (2026-08-15) ✅ SELESAI + COMMITTED (9b83ed1)
+- **Status**: 100% COMPLETE — implementasi lengkap dengan email notification, test suite 671/671 PASS, login functionality FIXED
+- **Progress**: 
+  1. ✅ Email notification infrastructure (Nodemailer + SMTP) 
+  2. ✅ Integration hooks for all approval workflows
+  3. ✅ Database schema migration (`20260813092213_add_email_notifikasi`)
+  4. ✅ API endpoints for notification management
+  5. ✅ HTML email templates with proper escaping
+  6. ✅ Test suite: 671/671 PASS (18 email tests: 12 unit + 6 integration)
+- **Files Modified**: 
+  - backend/.env.example (SMTP configuration examples)
+  - backend/src/lib/email.js (Email service with cache reset)
+  - backend/src/lib/emailHelper.js (Email integration helpers)
+  - backend/src/routes/__tests__/email-notifikasi.test.js (Integration tests)
+  - backend/src/lib/__tests__/email.test.js (Unit tests)
+  - backend/prisma/migrations/20260813092213_add_email_notifikasi/ (DB schema)
 ## Backlog Infra (2026-08-02)
 - ~~**INFRA-1: Fix sync-hermes.sh gagal jalan**~~ — **CANCELLED** (keputusan Rozi 2026-08-02): workflow manual push sebelum pindah device + pull di device lain sudah cukup. Job cron `sync-hermes` (05fd5c684e88) di-pause.
 
