@@ -9,6 +9,7 @@ const {
 } = require("../../lib/accountingHelper");
 const { validate } = require("../../middleware/validate");
 const { logAudit } = require("../../lib/auditHelper");
+const { createNotifikasiRows, queueEmailDispatch } = require("../../lib/emailHelper");
 const schemas = require("../../validators/akuntan");
 const {
   hitungPaguHarian,
@@ -429,6 +430,8 @@ router.put("/:id", requireAuth, requirePermission("akuntan-rab", "UPDATE"), vali
     const { id } = req.params;
     const { tanggal, status } = req.body;
 
+    const emailQueue = [];
+
     const updated = await prisma.$transaction(async (tx) => {
       const existing = await tx.rabHarian.findUnique({ where: { id } });
       if (!existing) {
@@ -472,15 +475,16 @@ router.put("/:id", requireAuth, requirePermission("akuntan-rab", "UPDATE"), vali
         });
         if (kepalaUsers.length > 0) {
           const formattedDate = new Date(existing.tanggal).toLocaleDateString('id-ID', { dateStyle: 'medium' });
-          await tx.notifikasi.createMany({
-            data: kepalaUsers.map((k) => ({
-              userId: k.id,
-              judul: "RAB Harian Baru Butuh Persetujuan",
-              pesan: `RAB Harian tanggal ${formattedDate} telah diajukan dan menunggu persetujuan Anda.`,
-              entityType: "RAB",
-              entityId: id
-            }))
+          const judul = "RAB Harian Baru Butuh Persetujuan";
+          const pesan = `RAB Harian tanggal ${formattedDate} telah diajukan dan menunggu persetujuan Anda.`;
+          const rows = await createNotifikasiRows(tx, {
+            userIds: kepalaUsers.map((k) => k.id),
+            judul,
+            pesan,
+            entityType: "RAB",
+            entityId: id
           });
+          emailQueue.push({ rows, msg: { judul, pesan, entityType: "RAB" } });
         }
       }
 
@@ -530,6 +534,11 @@ router.put("/:id", requireAuth, requirePermission("akuntan-rab", "UPDATE"), vali
 
       return rec;
     });
+
+    // Kirim email async SETELAH transaksi commit — tidak memblok respons submit
+    for (const { rows, msg } of emailQueue) {
+      queueEmailDispatch(rows, msg);
+    }
 
     res.json(updated);
   } catch (error) {

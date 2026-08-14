@@ -3,6 +3,7 @@ const prisma = require("../lib/prisma");
 const { requireAuth, requirePermission } = require("../middleware/auth");
 const { logger } = require("../lib/logger");
 const { logAudit } = require("../lib/auditHelper");
+const { createNotifikasiRows, queueEmailDispatch } = require("../lib/emailHelper");
 
 const router = express.Router();
 
@@ -86,6 +87,9 @@ async function handlePostApproval(req, res) {
       return res.status(400).json({ error: "Catatan wajib diisi jika status ditolak" });
     }
 
+    // Registrasi email yang harus dikirim SETELAH transaksi commit (tidak block approval)
+    const emailQueue = [];
+
     // Eksekusi atomik via transaction
     const result = await prisma.$transaction(async (tx) => {
       // 5. Lock row target & verifikasi status saat ini (wajib DIAJUKAN)
@@ -119,7 +123,7 @@ async function handlePostApproval(req, res) {
         dataBaru: { status, catatan: catatan ? catatan.trim() : null }
       });
 
-      // 8. Kirim Notifikasi kepada Pembuat Dokumen
+      // 8. Kirim Notifikasi kepada Pembuat Dokumen (in-app) + antri email (setelah commit)
       if (targetType === "MENU") {
         // [ASUMSI] Notifikasi dikirim ke seluruh kontributor (Ahli Gizi) unik dari blok menu harian
         const blocks = await tx.menuHarianBlok.findMany({
@@ -132,16 +136,18 @@ async function handlePostApproval(req, res) {
           // [ASUMSI] Jika MenuHarian tidak memiliki blok sama sekali, lewati pembuatan notifikasi
           logger.warn(`[NOTIFIKASI] MenuHarian ID ${targetId} tidak memiliki blok, lewati pengiriman notifikasi.`);
         } else {
-          const notifData = creatorIds.map((creatorId) => ({
-            userId: creatorId,
-            judul: `Menu Harian Anda ${status === "DISETUJUI" ? "Disetujui" : "Ditolak"}`,
-            pesan: status === "DISETUJUI"
-              ? "Menu Harian Anda telah disetujui oleh Kepala SPPG."
-              : `Menu Harian Anda ditolak oleh Kepala SPPG. Alasan: ${catatan ? catatan.trim() : "-"}`,
+          const judul = `Menu Harian Anda ${status === "DISETUJUI" ? "Disetujui" : "Ditolak"}`;
+          const pesan = status === "DISETUJUI"
+            ? "Menu Harian Anda telah disetujui oleh Kepala SPPG."
+            : `Menu Harian Anda ditolak oleh Kepala SPPG. Alasan: ${catatan ? catatan.trim() : "-"}`;
+          const rows = await createNotifikasiRows(tx, {
+            userIds: creatorIds,
+            judul,
+            pesan,
             entityType: "MENU",
             entityId: targetId
-          }));
-          await tx.notifikasi.createMany({ data: notifData });
+          });
+          emailQueue.push({ rows, msg: { judul, pesan, entityType: "MENU" } });
         }
       } else if (targetType === "RAB") {
         const rab = await tx.rabHarian.findUnique({
@@ -149,19 +155,20 @@ async function handlePostApproval(req, res) {
           select: { createdById: true, tanggal: true }
         });
         if (rab) {
-          await tx.notifikasi.create({
-            data: {
-              userId: rab.createdById,
-              judul: `RAB Harian Anda ${status === "DISETUJUI" ? "Disetujui" : "Ditolak"}`,
-              pesan: status === "DISETUJUI"
-                ? "RAB Harian Anda telah disetujui oleh Kepala SPPG."
-                : `RAB Harian Anda ditolak oleh Kepala SPPG. Alasan: ${catatan ? catatan.trim() : "-"}`,
-              entityType: "RAB",
-              entityId: targetId
-            }
+          const judul = `RAB Harian Anda ${status === "DISETUJUI" ? "Disetujui" : "Ditolak"}`;
+          const pesan = status === "DISETUJUI"
+            ? "RAB Harian Anda telah disetujui oleh Kepala SPPG."
+            : `RAB Harian Anda ditolak oleh Kepala SPPG. Alasan: ${catatan ? catatan.trim() : "-"}`;
+          const rows = await createNotifikasiRows(tx, {
+            userIds: [rab.createdById],
+            judul,
+            pesan,
+            entityType: "RAB",
+            entityId: targetId
           });
+          emailQueue.push({ rows, msg: { judul, pesan, entityType: "RAB" } });
 
-          // C.4 — Notifikasi ke Mitra saat RAB DISETUJUI
+          // C.4 — Notifikasi ke Mitra saat RAB DISETUJUI (in-app saja, tanpa email)
           if (status === "DISETUJUI") {
             const mitraUsers = await tx.user.findMany({
               where: { role: "MITRA" },
@@ -183,6 +190,11 @@ async function handlePostApproval(req, res) {
 
       return approval;
     });
+
+    // Kirim email async SETELAH transaksi commit — gagal tidak pernah memengaruhi hasil approval
+    for (const { rows, msg } of emailQueue) {
+      queueEmailDispatch(rows, msg);
+    }
 
     res.status(201).json(result);
   } catch (error) {

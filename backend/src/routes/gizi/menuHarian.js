@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/gizi");
 const { HARI_MAP } = require("../../lib/accountingHelper");
 const { logger } = require("../../lib/logger");
+const { createNotifikasiRows, queueEmailDispatch } = require("../../lib/emailHelper");
 
 const router = express.Router();
 
@@ -277,6 +278,8 @@ router.put("/menu-harian/:id", requireAuth, requirePermission("gizi-menu", "UPDA
     const { id } = req.params;
     const { tanggal, status } = req.body;
 
+    const emailQueue = [];
+
     const updated = await prisma.$transaction(async (tx) => {
       const existing = await tx.menuHarian.findUnique({ where: { id } });
       if (!existing) {
@@ -357,15 +360,16 @@ router.put("/menu-harian/:id", requireAuth, requirePermission("gizi-menu", "UPDA
         });
         if (kepalaUsers.length > 0) {
           const formattedDate = new Date(existing.tanggal).toLocaleDateString('id-ID', { dateStyle: 'medium' });
-          await tx.notifikasi.createMany({
-            data: kepalaUsers.map((k) => ({
-              userId: k.id,
-              judul: "Menu Harian Baru Butuh Persetujuan",
-              pesan: `Menu Harian tanggal ${formattedDate} telah diajukan dan menunggu persetujuan Anda.`,
-              entityType: "MENU",
-              entityId: id
-            }))
+          const judul = "Menu Harian Baru Butuh Persetujuan";
+          const pesan = `Menu Harian tanggal ${formattedDate} telah diajukan dan menunggu persetujuan Anda.`;
+          const rows = await createNotifikasiRows(tx, {
+            userIds: kepalaUsers.map((k) => k.id),
+            judul,
+            pesan,
+            entityType: "MENU",
+            entityId: id
           });
+          emailQueue.push({ rows, msg: { judul, pesan, entityType: "MENU" } });
         }
       }
 
@@ -381,6 +385,11 @@ router.put("/menu-harian/:id", requireAuth, requirePermission("gizi-menu", "UPDA
         }
       });
     });
+
+    // Kirim email async SETELAH transaksi commit — tidak memblok respons submit
+    for (const { rows, msg } of emailQueue) {
+      queueEmailDispatch(rows, msg);
+    }
 
     res.json(updated);
   } catch (error) {

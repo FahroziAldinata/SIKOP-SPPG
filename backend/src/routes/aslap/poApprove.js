@@ -5,6 +5,7 @@ const { validate } = require("../../middleware/validate");
 const schemas = require("../../validators/aslap");
 const { logger } = require("../../lib/logger");
 const { logAudit } = require("../../lib/auditHelper");
+const { createNotifikasiRows, queueEmailDispatch } = require("../../lib/emailHelper");
 
 const router = express.Router();
 
@@ -15,6 +16,8 @@ router.put("/po/:id/approve", requireAuth, requirePermission("aslap-po-approval"
   try {
     const { id } = req.params;
     const { items } = req.body;
+
+    const emailQueue = [];
 
     const result = await prisma.$transaction(async (tx) => {
       const poRows = await tx.$queryRaw`
@@ -73,6 +76,24 @@ router.put("/po/:id/approve", requireAuth, requirePermission("aslap-po-approval"
         dataBaru: { status: "DITERIMA", diterimaOlehId: req.user.sub, diterimaAt: new Date() }
       });
 
+      // Fase 8 — PO diterima (DITERIMA) → notif ke AKUNTAN pembuat PO (in-app + email)
+      const poCreator = await tx.transaksiPembelian.findUnique({
+        where: { id },
+        select: { createdById: true, tanggal: true }
+      });
+      if (poCreator) {
+        const judul = "PO Telah Diterima";
+        const pesan = `Purchase Order tanggal ${new Date(poCreator.tanggal).toLocaleDateString('id-ID', { dateStyle: 'medium' })} telah dikonfirmasi diterima oleh ASLAP.`;
+        const rows = await createNotifikasiRows(tx, {
+          userIds: [poCreator.createdById],
+          judul,
+          pesan,
+          entityType: "PO",
+          entityId: id
+        });
+        emailQueue.push({ rows, msg: { judul, pesan, entityType: "PO" } });
+      }
+
       return await tx.transaksiPembelian.update({
         where: { id },
         data: {
@@ -87,6 +108,11 @@ router.put("/po/:id/approve", requireAuth, requirePermission("aslap-po-approval"
         }
       });
     });
+
+    // Kirim email async SETELAH transaksi commit — tidak memblok respons approval
+    for (const { rows, msg } of emailQueue) {
+      queueEmailDispatch(rows, msg);
+    }
 
     res.json({ success: true, data: result });
   } catch (error) {
