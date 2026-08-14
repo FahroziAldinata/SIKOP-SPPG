@@ -320,6 +320,7 @@ model User {
   role         Role
   aktif        Boolean  @default(true)
   tokenVersion Int      @default(0)
+  email        String? // email penerima notifikasi eksternal (Fase 8 — email notification)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   ttdPath      String?
@@ -1203,6 +1204,8 @@ model Notifikasi {
   entityType String?
   entityId   String?
   dibaca     Boolean  @default(false)
+  emailSent  Boolean  @default(false) // true jika email notifikasi berhasil terkirim
+  emailError String? // pesan error kalau pengiriman email gagal (fallback retry)
   createdAt  DateTime @default(now())
 
   @@index([userId, dibaca])

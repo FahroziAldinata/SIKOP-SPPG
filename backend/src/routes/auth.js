@@ -102,7 +102,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 
   res.json({
     token,
-    user: { id: user.id, nama: user.nama, username: user.username, role: user.role },
+    user: { id: user.id, nama: user.nama, username: user.username, role: user.role, email: user.email },
   });
 });
 
@@ -128,17 +128,29 @@ router.get("/me", requireAuth, async (req, res) => {
     return res.status(401).json({ error: "User tidak aktif atau sudah dihapus" });
   }
 
-  res.json({ id: user.id, nama: user.nama, username: user.username, role: user.role });
+  res.json({ id: user.id, nama: user.nama, username: user.username, role: user.role, email: user.email });
 });
 
 // PUT /api/auth/profile - Update user profile & settings
 router.put("/profile", requireAuth, async (req, res) => {
   try {
-    const { nama, username, password } = req.body || {};
+    const { nama, username, password, email } = req.body || {};
     const userId = req.user.sub;
 
     const data = {};
     if (nama) data.nama = nama;
+
+    if (email !== undefined) {
+      if (email === null || email.trim() === "") {
+        data.email = null;
+      } else {
+        const normalized = email.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+          return res.status(400).json({ error: "Format email tidak valid" });
+        }
+        data.email = normalized;
+      }
+    }
 
     if (username) {
       // Check unique username conflict
@@ -169,7 +181,7 @@ router.put("/profile", requireAuth, async (req, res) => {
 
     res.json({
       success: true,
-      user: { id: updated.id, nama: updated.nama, username: updated.username, role: updated.role }
+      user: { id: updated.id, nama: updated.nama, username: updated.username, role: updated.role, email: updated.email }
     });
   } catch (error) {
     logger.error(error);

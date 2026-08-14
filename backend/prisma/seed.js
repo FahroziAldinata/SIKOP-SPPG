@@ -170,12 +170,12 @@ async function main() {
   // 6. USER — 1 akun per role. GANTI PASSWORD INI SEBELUM DIPAKAI DI PROD.
   // ---------------------------------------------------------------------
   const userData = [
-    { username: "admin", nama: "Admin", role: "ADMIN" },
-    { username: "aslap", nama: "Aslap", role: "ASLAP" },
-    { username: "mitra", nama: "Mitra", role: "MITRA" },
-    { username: "ahligizi", nama: "Ahli Gizi", role: "AHLI_GIZI" },
-    { username: "akuntan", nama: "Akuntan", role: "AKUNTAN" },
-    { username: "kepalasppg", nama: "Kepala SPPG", role: "KEPALA_SPPG" },
+    { username: "admin", nama: "Admin", role: "ADMIN", email: "admin@sppg.local" },
+    { username: "aslap", nama: "Aslap", role: "ASLAP", email: "aslap@sppg.local" },
+    { username: "mitra", nama: "Mitra", role: "MITRA", email: "mitra@sppg.local" },
+    { username: "ahligizi", nama: "Ahli Gizi", role: "AHLI_GIZI", email: "ahligizi@sppg.local" },
+    { username: "akuntan", nama: "Akuntan", role: "AKUNTAN", email: "akuntan@sppg.local" },
+    { username: "kepalasppg", nama: "Kepala SPPG", role: "KEPALA_SPPG", email: "kepalasppg@sppg.local" },
   ];
 
   const defaultPasswordHash = await bcrypt.hash("ganti-password-ini", 12);

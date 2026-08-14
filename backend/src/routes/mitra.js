@@ -10,6 +10,7 @@ const { renderPoRealisasiHtml } = require("../templates/dokumen/poRealisasi");
 const { injectTtdImages } = require("../templates/dokumen/shared");
 const { logger } = require("../lib/logger");
 const { logAudit } = require("../lib/auditHelper");
+const { createNotifikasiRows, queueEmailDispatch } = require("../lib/emailHelper");
 
 const router = express.Router();
 
@@ -692,6 +693,8 @@ router.put("/po/:id/realisasi", requireAuth, requirePermission("mitra-po", "UPDA
       });
     }
 
+    const emailQueue = [];
+
     const result = await prisma.$transaction(async (tx) => {
       for (const item of items) {
         const { itemId, qtyRealisasi, hargaSatuanRealisasi } = item;
@@ -732,6 +735,27 @@ router.put("/po/:id/realisasi", requireAuth, requirePermission("mitra-po", "UPDA
       const allRealized = allItems.every(i => i.qtyRealisasi !== null);
       const newStatus = allRealized ? "DIREALISASI" : "DIAJUKAN";
 
+      // Fase 8 — PO direalisasi (DIREALISASI) → notif ke ASLAP (in-app + email)
+      if (newStatus === "DIREALISASI") {
+        const aslapUsers = await tx.user.findMany({
+          where: { role: "ASLAP", aktif: true },
+          select: { id: true }
+        });
+        if (aslapUsers.length > 0) {
+          const formattedPoDate = new Date(po.tanggal).toLocaleDateString('id-ID', { dateStyle: 'medium' });
+          const judul = "PO Telah Direalisasi Mitra";
+          const pesan = `PO untuk RAB tanggal ${formattedPoDate} telah direalisasi oleh Mitra dan menunggu konfirmasi penerimaan fisik Anda.`;
+          const rows = await createNotifikasiRows(tx, {
+            userIds: aslapUsers.map((a) => a.id),
+            judul,
+            pesan,
+            entityType: "PO",
+            entityId: po.id
+          });
+          emailQueue.push({ rows, msg: { judul, pesan, entityType: "PO" } });
+        }
+      }
+
       const updatedPo = await tx.transaksiPembelian.update({
         where: { id },
         data: { status: newStatus },
@@ -752,6 +776,11 @@ router.put("/po/:id/realisasi", requireAuth, requirePermission("mitra-po", "UPDA
 
       return updatedPo;
     });
+
+    // Kirim email async SETELAH transaksi commit — tidak memblok respons realisasi
+    for (const { rows, msg } of emailQueue) {
+      queueEmailDispatch(rows, msg);
+    }
 
     res.json({ success: true, data: result });
   } catch (error) {

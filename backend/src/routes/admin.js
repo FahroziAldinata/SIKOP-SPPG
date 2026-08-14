@@ -21,6 +21,7 @@ router.get("/users", requirePermission("admin-user", "READ"), async (req, res) =
         id: true,
         nama: true,
         username: true,
+        email: true,
         role: true,
         aktif: true,
         createdAt: true,
@@ -38,7 +39,7 @@ router.get("/users", requirePermission("admin-user", "READ"), async (req, res) =
 // POST /api/admin/users - Create new user
 router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res) => {
   try {
-    const { nama, username, password, role } = req.body || {};
+    const { nama, username, email, password, role } = req.body || {};
 
     if (!nama || !username || !password || !role) {
       return res.status(400).json({ error: "nama, username, password, dan role wajib diisi" });
@@ -52,6 +53,14 @@ router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res
       return res.status(400).json({ error: "Password minimal 6 karakter" });
     }
 
+    if (email !== undefined && email !== null && email.trim() !== "") {
+      const normalized = email.trim();
+      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+      if (!emailValid) {
+        return res.status(400).json({ error: "Format email tidak valid" });
+      }
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
 
     const newUser = await prisma.$transaction(async (tx) => {
@@ -59,6 +68,7 @@ router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res
         data: {
           nama,
           username,
+          email: email !== undefined && email !== null && email.trim() !== "" ? email.trim() : null,
           passwordHash,
           role,
           aktif: true
@@ -67,6 +77,7 @@ router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res
           id: true,
           nama: true,
           username: true,
+          email: true,
           role: true,
           aktif: true,
           createdAt: true
@@ -81,6 +92,7 @@ router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res
         dataBaru: {
           nama: userRec.nama,
           username: userRec.username,
+          email: userRec.email,
           role: userRec.role,
           aktif: userRec.aktif
         }
@@ -102,11 +114,23 @@ router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res
 router.put("/users/:id", requirePermission("admin-user", "UPDATE"), async (req, res) => {
   try {
     const { id } = req.params;
-    const { nama, role, aktif, password } = req.body || {};
+    const { nama, role, aktif, password, email } = req.body || {};
 
     const data = {};
     if (nama !== undefined) data.nama = nama;
     if (aktif !== undefined) data.aktif = aktif;
+
+    if (email !== undefined) {
+      if (email === null || email.trim() === "") {
+        data.email = null;
+      } else {
+        const normalized = email.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+          return res.status(400).json({ error: "Format email tidak valid" });
+        }
+        data.email = normalized;
+      }
+    }
 
     if (role !== undefined) {
       if (!VALID_ROLES.includes(role)) {
@@ -134,6 +158,7 @@ router.put("/users/:id", requirePermission("admin-user", "UPDATE"), async (req, 
           id: true,
           nama: true,
           username: true,
+          email: true,
           role: true,
           aktif: true,
           createdAt: true,
@@ -143,6 +168,7 @@ router.put("/users/:id", requirePermission("admin-user", "UPDATE"), async (req, 
       const dataBaruObj = {
         nama: rec.nama,
         username: rec.username,
+        email: rec.email,
         role: rec.role,
         aktif: rec.aktif
       };
@@ -157,6 +183,7 @@ router.put("/users/:id", requirePermission("admin-user", "UPDATE"), async (req, 
         dataLama: {
           nama: existing.nama,
           username: existing.username,
+          email: existing.email,
           role: existing.role,
           aktif: existing.aktif
         },

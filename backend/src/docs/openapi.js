@@ -167,6 +167,7 @@ const routeDefinitions = [
       nama: z.string(),
       username: z.string(),
       password: z.string().min(6),
+      email: z.string().email().nullable().optional(),
       role: z.enum(['ASLAP', 'MITRA', 'AHLI_GIZI', 'AKUNTAN', 'KEPALA_SPPG', 'ADMIN'])
     }),
     summary: 'Buat user baru'
@@ -180,7 +181,8 @@ const routeDefinitions = [
       nama: z.string().optional(),
       role: z.enum(['ASLAP', 'MITRA', 'AHLI_GIZI', 'AKUNTAN', 'KEPALA_SPPG', 'ADMIN']).optional(),
       aktif: z.boolean().optional(),
-      password: z.string().optional()
+      password: z.string().optional(),
+      email: z.string().email().nullable().optional()
     }),
     summary: 'Update data user'
   },

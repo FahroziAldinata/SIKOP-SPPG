@@ -8,6 +8,7 @@ const {
 } = require("../../lib/accountingHelper");
 const { validate } = require("../../middleware/validate");
 const { logAudit } = require("../../lib/auditHelper");
+const { createNotifikasiRows, queueEmailDispatch } = require("../../lib/emailHelper");
 const schemas = require("../../validators/akuntan");
 const { logger } = require("../../lib/logger");
 
@@ -841,6 +842,8 @@ router.post("/po", requireAuth, requirePermission("akuntan-master", "CREATE"), v
 
     const targetDate = normalizeDateUTC(tanggal);
 
+    const emailQueue = [];
+
     const result = await prisma.$transaction(async (tx) => {
       // 0. Validate targetDate within periode range (lock periode row)
       const periode = await tx.$queryRaw`
@@ -910,7 +913,7 @@ router.post("/po", requireAuth, requirePermission("akuntan-master", "CREATE"), v
         }
       });
 
-      // Trigger notifikasi ke semua user role MITRA yang aktif
+      // Trigger notifikasi ke semua user role MITRA yang aktif (in-app saja, tanpa email)
       const mitraUsers = await tx.user.findMany({
         where: { role: "MITRA", aktif: true },
         select: { id: true }
@@ -926,6 +929,25 @@ router.post("/po", requireAuth, requirePermission("akuntan-master", "CREATE"), v
             entityId: tp.id
           }))
         });
+      }
+
+      // Notifikasi ke user role ASLAP (in-app + email) — daftar trigger Fase 8: PO dibuat → ASLAP
+      const aslapUsers = await tx.user.findMany({
+        where: { role: "ASLAP", aktif: true },
+        select: { id: true }
+      });
+      if (aslapUsers.length > 0) {
+        const formattedPoDate = new Date(targetDate).toLocaleDateString('id-ID', { dateStyle: 'medium' });
+        const judul = "Purchase Order Baru Butuh Konfirmasi";
+        const pesan = `PO untuk RAB tanggal ${formattedPoDate} telah diterbitkan oleh Akuntan dan menunggu konfirmasi penerimaan fisik Anda.`;
+        const rows = await createNotifikasiRows(tx, {
+          userIds: aslapUsers.map((a) => a.id),
+          judul,
+          pesan,
+          entityType: "PO",
+          entityId: tp.id
+        });
+        emailQueue.push({ rows, msg: { judul, pesan, entityType: "PO" } });
       }
 
       for (const item of items) {
@@ -975,6 +997,11 @@ router.post("/po", requireAuth, requirePermission("akuntan-master", "CREATE"), v
         }
       });
     }, { timeout: 15000 });
+
+    // Kirim email async SETELAH transaksi commit — tidak memblok respons create PO
+    for (const { rows, msg } of emailQueue) {
+      queueEmailDispatch(rows, msg);
+    }
 
     res.status(201).json({ success: true, data: result });
   } catch (error) {
