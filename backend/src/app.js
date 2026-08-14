@@ -1,4 +1,4 @@
-require('dotenv').config();
+if (process.env.VITEST || process.env.NODE_ENV === 'test') process.env.NODE_ENV = 'test';
 const express = require('express');
 const path = require('path');
 const cors = require('cors');

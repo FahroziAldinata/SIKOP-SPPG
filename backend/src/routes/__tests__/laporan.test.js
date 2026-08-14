@@ -67,6 +67,11 @@ describe('Laporan API Integration Tests', () => {
     if (testDate.getUTCDay() === 0) { // If Sunday, add 1 day
       testDate.setUTCDate(testDate.getUTCDate() + 1);
     }
+    
+    // Ensure unique date by adding many random days to avoid duplicate key
+    const randomDays = Math.floor(Math.random() * 365) + 100; // 100-464 random days
+    testDate.setUTCDate(testDate.getUTCDate() + randomDays);
+    
     testDateStr = testDate.toISOString().split('T')[0];
     testMonthKey = testDateStr.substring(0, 7);
 
