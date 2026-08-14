@@ -17,8 +17,10 @@ describe('Laporan API Integration Tests', () => {
   let testDateStr;
   let targetDateStr;
   let testMonthKey;
+  let userId; // Add userId to global scope
 
   let testBahanId = null;
+  let testBahan = null; // Add testBahan to global scope
   let testJurnalId = null;
   let testAnggaranId = null;
   let testDetailId = null;
@@ -40,7 +42,7 @@ describe('Laporan API Integration Tests', () => {
 
     expect(loginRes.status).toBe(200);
     token = loginRes.body.token;
-    const userId = loginRes.body.user.id;
+    userId = loginRes.body.user.id; // Assign to global variable
 
     // 2. Find Master Data
     periode = await prismaDb.periode.findFirst({
@@ -84,7 +86,7 @@ describe('Laporan API Integration Tests', () => {
     const dayOfWeek = HARI_MAP[testDate.getUTCDay()];
 
     // 3. Setup Temporary Bahan Pokok
-    const testBahan = await prismaDb.bahanPokok.create({
+    testBahan = await prismaDb.bahanPokok.create({
       data: {
         nama: 'Bahan Pokok Test Laporan ' + Date.now(),
         satuan: 'KG',
@@ -407,6 +409,85 @@ describe('Laporan API Integration Tests', () => {
   });
 
   test('GET /api/laporan/kebutuhan-belanja-bahan', async () => {
+    // Create MenuHarian for this test (required for KBB calculation)
+    // Use a different date to avoid duplicate key
+    const menuDate = new Date(testDate);
+    menuDate.setUTCDate(testDate.getUTCDate() + 500); // Add 500 days to ensure uniqueness
+    
+    const menu = await prismaDb.menuHarian.create({
+      data: {
+        periodeId: periode.id,
+        tanggal: menuDate,
+        status: 'DISETUJUI'
+      }
+    });
+    
+    const blok = await prismaDb.menuHarianBlok.create({
+      data: {
+        menuHarianId: menu.id,
+        kelompokUmurMenuId: kelompokUmur.id,
+        createdById: userId
+      }
+    });
+    
+    const item = await prismaDb.menuItem.create({
+      data: {
+        blokId: blok.id,
+        namaMenu: 'Test Menu KBB',
+        komponen: 'LAUK_HEWANI'
+      }
+    });
+    
+    // Create MenuItemBahan with specific values to match expected test results
+    const itemBahan = await prismaDb.menuItemBahan.create({
+      data: {
+        menuItemId: item.id,
+        bahanPokokId: testBahan.id,
+        beratBersihGr: 40,  // 40g per porsi
+        bddPersen: 80,      // 80% BDD
+        beratKotorGr: 50,   // 50g per porsi (40 / 0.8)
+        hargaSatuan: 1000,   // Rp 1000 per gram
+        beratSatuanGr: 1000, // 1000g = 1kg
+        totalHargaBahan: 1000, // Rp 1000 per porsi
+        energiKkal: 100,
+        proteinGr: 10,
+        lemakGr: 5,
+        karbohidratGr: 2,
+        seratGr: 0,
+        jumlahHitungan: 1
+      }
+    });
+    
+    // Create InputPenerimaManfaat to determine portions (25 porsi needed)
+    const grupHari = await prismaDb.grupHari.create({
+      data: {
+        label: 'Test Group',
+        hariAktif: ['SENIN'], // Use valid enum value
+        periodeId: periode.id // Add required periodeId
+      }
+    });
+    testGrupHariId = grupHari.id;
+    
+    const inputPm = await prismaDb.inputPenerimaManfaat.create({
+      data: {
+        periodeId: periode.id,
+        grupHariId: grupHari.id,
+        createdById: userId
+      }
+    });
+    testInputPmId = inputPm.id;
+    
+    const inputPmDetail = await prismaDb.inputPenerimaManfaatDetail.create({
+      data: {
+        inputPenerimaManfaatId: inputPm.id,
+        kategoriId: kategori.id,
+        lakiLaki: 12,  // 12 laki-laki
+        perempuan: 13  // 13 perempuan
+      }
+    });
+    testInputPmDetailId = inputPmDetail.id;
+    
+    // Now test KBB endpoint
     const kbbRes = await request(app)
       .get('/api/laporan/kebutuhan-belanja-bahan')
       .query({ periodeId: periode.id, tanggalMulai: testDateStr, tanggalSelesai: targetDateStr })
@@ -419,9 +500,18 @@ describe('Laporan API Integration Tests', () => {
 
     const testKbbRow = kbbData.data.find(row => row.id === testBahanId);
     expect(testKbbRow).toBeTruthy();
-    expect(testKbbRow.totalBeratKotorGr).toBe(1250);
-    expect(testKbbRow.totalBeratBersihGr).toBe(1000);
-    expect(testKbbRow.totalEstimasiBiaya).toBe(25000);
+    expect(testKbbRow.totalBeratKotorGr).toBe(1250);  // 50g * 25 porsi
+    expect(testKbbRow.totalBeratBersihGr).toBe(1000); // 40g * 25 porsi
+    expect(testKbbRow.totalEstimasiBiaya).toBe(25000); // 1000 * 25 porsi
+    
+    // Cleanup test data
+    await prismaDb.inputPenerimaManfaatDetail.delete({ where: { id: testInputPmDetailId } });
+    await prismaDb.inputPenerimaManfaat.delete({ where: { id: testInputPmId } });
+    await prismaDb.grupHari.delete({ where: { id: testGrupHariId } });
+    await prismaDb.menuItemBahan.delete({ where: { id: itemBahan.id } });
+    await prismaDb.menuItem.delete({ where: { id: item.id } });
+    await prismaDb.menuHarianBlok.delete({ where: { id: blok.id } });
+    await prismaDb.menuHarian.delete({ where: { id: menu.id } });
   });
 
   test('GET /api/laporan/per-periode', async () => {
