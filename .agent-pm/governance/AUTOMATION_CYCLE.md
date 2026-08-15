@@ -117,13 +117,13 @@ Governance Module — Siklus Eksekusi Otomatis Per-Task
 - Setelah push, transisi ke DOCUMENTATION_ARCHIVE untuk membuat ringkasan.
 
 ### STATE: DOCUMENTATION_ARCHIVE
-- **Tujuan**: Membuat ringkasan dokumentasi terkonsolidasi dan membersihkan file kerja
+- **Tujuan**: Membuat ringkasan dokumentasi terkonsolidasi SATU FILE per task dan membersihkan file kerja
 - **Proses**:
-  1. Hermes buat ringkasan task di `documentation/[tanggal]-[kode-task]-summary.md`
+  1. Hermes buat ringkasan task di `documentation/DOCUMENTATION.md` (SATU FILE mencakup semua task)
   2. Ringkasan berisi: task overview, implementation details, key decisions, verification results, issues encountered, user feedback
   3. Hermes minta approval Rozi untuk ringkasan dan penghapusan file kerja
   4. **APPROVAL WAJIB dalam sesi yang sama** - tidak boleh menggantung lintas sesi
-  5. Setelah approval, Hermes hapus semua file plans/ dan pre-check/ untuk task ini
+  5. Setelah approval, Hermes hapus SEMUA isi folder `.agent-pm/plans/` DAN `.agent-pm/prompts/` (WAJIB kosongkan, sisakan .gitkeep)
   6. Jalankan `git push` agar dokumentasi terbaru naik ke remote — sinkron multi-perangkat
   7. Transisi ke CYCLE_END setelah approval
 - **File Cleanup**: Hermes BOLEH menghapus file kerja internal (plans/, pre-check/) karena ini bukan kode produksi
