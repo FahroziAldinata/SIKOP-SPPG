@@ -5,7 +5,16 @@
 		}
 	],
 	"settings": {
-		"task.allowAutomaticTasks": "on"
+		"task.allowAutomaticTasks": "on",
+		"terminal.integrated.env.windows": {
+			"NODE_ENV": "development"
+		},
+		"terminal.integrated.env.osx": {
+			"NODE_ENV": "development"
+		},
+		"terminal.integrated.env.linux": {
+			"NODE_ENV": "development"
+		}
 	},
 	"tasks": {
 		"version": "2.0.0",
@@ -15,7 +24,11 @@
 				"type": "shell",
 				"command": "npm run dev",
 				"options": {
-					"cwd": "${workspaceFolder}/backend"
+					"cwd": "${workspaceFolder}/backend",
+					"env": {
+						"PORT": "3000",
+						"NODE_ENV": "development"
+					}
 				},
 				"isBackground": true,
 				"presentation": {
@@ -34,7 +47,11 @@
 				"type": "shell",
 				"command": "npm run dev",
 				"options": {
-					"cwd": "${workspaceFolder}/frontend"
+					"cwd": "${workspaceFolder}/frontend",
+					"env": {
+						"PORT": "5173",
+						"NODE_ENV": "development"
+					}
 				},
 				"isBackground": true,
 				"presentation": {
@@ -47,6 +64,48 @@
 				"runOptions": {
 					"runOn": "folderOpen"
 				}
+			},
+			{
+				"label": "Install Dependencies",
+				"type": "shell",
+				"command": "npm install",
+				"options": {
+					"cwd": "${workspaceFolder}/backend"
+				},
+				"problemMatcher": [],
+				"runOptions": {
+					"runOn": "folderOpen"
+				}
+			},
+			{
+				"label": "Install Frontend Dependencies",
+				"type": "shell",
+				"command": "npm install",
+				"options": {
+					"cwd": "${workspaceFolder}/frontend"
+				},
+				"problemMatcher": [],
+				"runOptions": {
+					"runOn": "folderOpen"
+				}
+			},
+			{
+				"label": "Run All Tests",
+				"type": "shell",
+				"command": "npm test",
+				"options": {
+					"cwd": "${workspaceFolder}/backend"
+				},
+				"problemMatcher": []
+			},
+			{
+				"label": "Run Frontend Build",
+				"type": "shell",
+				"command": "npm run build",
+				"options": {
+					"cwd": "${workspaceFolder}/frontend"
+				},
+				"problemMatcher": []
 			}
 		]
 	}
