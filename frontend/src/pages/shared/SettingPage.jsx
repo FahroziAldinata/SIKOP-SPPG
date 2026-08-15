@@ -12,6 +12,7 @@ export const SettingPage = () => {
 
     const [nama, setNama] = useState('');
     const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -37,6 +38,7 @@ export const SettingPage = () => {
         if (user) {
             setNama(user.nama || '');
             setUsername(user.username || '');
+            setEmail(user.email || '');
         }
     }, [user]);
 
@@ -241,6 +243,11 @@ export const SettingPage = () => {
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
+        if (email && email.trim() !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            toast.error('Format email tidak valid.');
+            return;
+        }
+
         if (password && password.length < 6) {
             toast.error('Password minimal harus 6 karakter.');
             return;
@@ -253,7 +260,7 @@ export const SettingPage = () => {
 
         setLoading(true);
         try {
-            const body = { nama, username };
+            const body = { nama, username, email: email.trim() || null };
             if (password) {
                 body.password = password;
             }
@@ -270,10 +277,10 @@ export const SettingPage = () => {
                 setPassword('');
                 setConfirmPassword('');
                 // Update user details in context
-                                await login(token, resJson.user);
+                await login(token, resJson.user);
             } else {
                 const d = await r.json().catch(() => ({ error: 'Gagal memperbarui profil.' }));
-                toast.error(d.error);
+                toast.error(d.error || 'Gagal memperbarui profil.');
             }
         } catch (err) {
             toast.error('Terjadi kesalahan koneksi.');
@@ -375,6 +382,18 @@ export const SettingPage = () => {
                             onChange={e => setUsername(e.target.value)}
                             className="form-field"
                             required
+                        />
+                    </div>
+                    <div style={{ flex: '1 1 200px' }}>
+                        <label style={labelStyle}>
+                            Email (Notifikasi):
+                        </label>
+                        <input
+                            type="email"
+                            placeholder="nama@email.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            className="form-field"
                         />
                     </div>
                 </div>

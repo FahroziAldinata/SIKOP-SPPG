@@ -16,8 +16,8 @@ const ROLE_OPTIONS = [
   { value: 'MITRA', label: 'Mitra' },
 ];
 
-const EMPTY_FORM = { nama: '', username: '', password: '', role: '' };
-const EMPTY_EDIT = { nama: '', role: '', password: '' };
+const EMPTY_FORM = { nama: '', username: '', email: '', password: '', role: '' };
+const EMPTY_EDIT = { nama: '', email: '', role: '', password: '' };
 
 export const UserManagementPage = () => {
   const { request } = useApi();
@@ -60,12 +60,20 @@ export const UserManagementPage = () => {
       toast.error('Semua field wajib diisi');
       return;
     }
+    if (form.email && form.email.trim() !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      toast.error('Format email tidak valid');
+      return;
+    }
     setSubmitting(true);
     try {
+      const payload = {
+        ...form,
+        email: form.email.trim() || null
+      };
       const res = await request('/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         toast.success('User berhasil dibuat');
@@ -85,7 +93,7 @@ export const UserManagementPage = () => {
   // ── EDIT ─────────────────────────────────────────────────────────────────
   const openEdit = (user) => {
     setEditTarget(user);
-    setEditForm({ nama: user.nama, role: user.role, password: '' });
+    setEditForm({ nama: user.nama, email: user.email || '', role: user.role, password: '' });
     setEditOpen(true);
   };
 
@@ -95,9 +103,17 @@ export const UserManagementPage = () => {
       toast.error('Nama dan Role wajib diisi');
       return;
     }
+    if (editForm.email && editForm.email.trim() !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email.trim())) {
+      toast.error('Format email tidak valid');
+      return;
+    }
     setEditSubmitting(true);
     try {
-      const payload = { nama: editForm.nama, role: editForm.role };
+      const payload = {
+        nama: editForm.nama,
+        role: editForm.role,
+        email: editForm.email.trim() || null
+      };
       if (editForm.password.trim() !== '') payload.password = editForm.password;
 
       const res = await request(`/admin/users/${editTarget.id}`, {
@@ -165,6 +181,11 @@ export const UserManagementPage = () => {
       render: (v) => <span style={{ fontWeight: 600, color: 'var(--text)' }}>{v}</span>
     },
     { key: 'username', header: 'Username' },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (v) => v ? <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{v}</span> : <span style={{ fontSize: 13, color: 'var(--text-muted)', fontStyle: 'italic' }}>-</span>
+    },
     {
       key: 'role',
       header: 'Role',
@@ -278,6 +299,16 @@ export const UserManagementPage = () => {
               />
             </div>
             <div>
+              <label style={labelStyle}>Email (Opsional)</label>
+              <input
+                type="email"
+                style={inputStyle}
+                placeholder="contoh@email.com"
+                value={form.email}
+                onChange={(e) => setForm(f => ({ ...f, email: e.target.value }))}
+              />
+            </div>
+            <div>
               <label style={labelStyle}>Password</label>
               <input
                 type="password"
@@ -364,6 +395,16 @@ export const UserManagementPage = () => {
                   style={inputStyle}
                   value={editForm.nama}
                   onChange={(e) => setEditForm(f => ({ ...f, nama: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Email (Opsional)</label>
+                <input
+                  type="email"
+                  style={inputStyle}
+                  placeholder="contoh@email.com"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm(f => ({ ...f, email: e.target.value }))}
                 />
               </div>
               <div>

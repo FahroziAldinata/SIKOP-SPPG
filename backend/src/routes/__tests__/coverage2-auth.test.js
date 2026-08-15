@@ -130,4 +130,63 @@ describe('COVERAGE2 TEST — Auth Routes (3 endpoints)', () => {
       expect(res.status).toBe(401);
     });
   });
+
+  // 4. PUT /api/auth/profile email validation & duplicate check
+  describe('PUT /api/auth/profile (email integration)', () => {
+    let dummyUser;
+
+    beforeAll(async () => {
+      dummyUser = await prismaDb.user.create({
+        data: {
+          nama: 'User Email Test',
+          username: 'user_email_test_dup',
+          email: 'duplicate_test@sppg.test',
+          passwordHash: 'dummy',
+          role: 'ASLAP',
+        }
+      });
+    });
+
+    afterAll(async () => {
+      if (dummyUser) {
+        await prismaDb.user.delete({ where: { id: dummyUser.id } }).catch(() => {});
+      }
+    });
+
+    test('400 — email format invalid', async () => {
+      const res = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${tokenAhliGizi}`)
+        .send({ email: 'not-an-email' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toBe('Format email tidak valid');
+    });
+
+    test('409 — email sudah digunakan oleh user lain', async () => {
+      const res = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${tokenAhliGizi}`)
+        .send({ email: 'duplicate_test@sppg.test' });
+
+      expect(res.status).toBe(409);
+      expect(res.body.error).toBe('Email sudah digunakan oleh user lain');
+    });
+
+    test('200 — update email valid', async () => {
+      const res = await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${tokenAhliGizi}`)
+        .send({ email: 'ahligizi_new@sppg.test' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.user.email).toBe('ahligizi_new@sppg.test');
+
+      // reset back
+      await request(app)
+        .put('/api/auth/profile')
+        .set('Authorization', `Bearer ${tokenAhliGizi}`)
+        .send({ email: null });
+    });
+  });
 });

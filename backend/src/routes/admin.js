@@ -59,6 +59,12 @@ router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res
       if (!emailValid) {
         return res.status(400).json({ error: "Format email tidak valid" });
       }
+      const existEmail = await prisma.user.findFirst({
+        where: { email: normalized }
+      });
+      if (existEmail) {
+        return res.status(409).json({ error: "Email sudah digunakan oleh user lain" });
+      }
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
@@ -104,7 +110,7 @@ router.post("/users", requirePermission("admin-user", "CREATE"), async (req, res
   } catch (error) {
     logger.error(error);
     if (error.code === 'P2002') {
-      return res.status(409).json({ error: "Username sudah digunakan oleh user lain" });
+      return res.status(409).json({ error: "Username atau email sudah digunakan oleh user lain" });
     }
     res.status(500).json({ error: "Gagal membuat user baru" });
   }
@@ -127,6 +133,15 @@ router.put("/users/:id", requirePermission("admin-user", "UPDATE"), async (req, 
         const normalized = email.trim();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
           return res.status(400).json({ error: "Format email tidak valid" });
+        }
+        const existEmail = await prisma.user.findFirst({
+          where: {
+            email: normalized,
+            NOT: { id }
+          }
+        });
+        if (existEmail) {
+          return res.status(409).json({ error: "Email sudah digunakan oleh user lain" });
         }
         data.email = normalized;
       }

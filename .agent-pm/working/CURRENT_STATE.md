@@ -1,73 +1,76 @@
 # CURRENT STATE — SPPG
 
 **Tanggal**: 2026-08-15  
-**Active Scope**: Fase 8 - Notifikasi Eksternal (100% COMPLETE)  
-**Next Scope**: TBA (pending Rozi decision)
+**Active Scope**: F8-FEAT-001 - Frontend Integration - User Email Management untuk SEMUA role  
+**Next Scope**: TBA (pending task completion)
 
-**Status aktif: SEMUA task GF-014 closed — T1 setupFiles ✅ (1fbad1b), RBAC stale grant fix ✅ (31cb8fc), T2 investigasi password campur ✅ (2026-08-12, kondisi campur sudah hilang — non-issue). Task gabungan isolasi test ✅ SELESAI + COMMITTED (914f066). ✅ FASE 8 (Notifikasi eksternal) SELESAI + COMMITTED (9b83ed1) — implementasi lengkap dengan email notification, test suite 671/671 PASS, login functionality FIXED.**
+**Status aktif: Fase 8 backend SELESAI tapi frontend integration INCOMPLETE — user tidak bisa set email di pengaturan profil. Task fix dibuat untuk SEMUA role (bukan hanya admin).**
 
 ## Project Status Overview
 
-### ✅ COMPLETED - Fase 8: Notifikasi Eksternal
+### ✅ COMPLETED - Fase 8 Backend
 **Status**: 100% COMPLETE  
-**Task**: 4-item completion cycle finished  
-**Quality**: 671+/671 tests PASS, 0 lint errors  
+**Task**: Backend email infrastructure complete  
+**Quality**: 671+/671 tests PASS, 0 lint errors
 
-#### Core Functionality
-- ✅ **Email Service**: Nodemailer + SMTP configuration fully operational
-- ✅ **Integration Hooks**: All approval routes have email notifications
-- ✅ **Database**: Migration complete for email notifications
-- ✅ **API**: Notification endpoints functional
-- ✅ **Templates**: HTML email templates with proper escaping
+#### Backend Functionality
+- ✅ Email service: Nodemailer + SMTP configuration fully operational
+- ✅ User model: `email String?` field exists
+- ✅ API endpoints: `PUT /api/auth/profile` accepts email for all roles
+- ✅ Integration hooks: All approval routes have email notifications
+- ✅ Database: Migration complete for email notifications
+- ✅ Templates: HTML email templates with proper escaping
 
-#### Test Results
-- **Email Unit Tests**: 12/12 PASS ✅
-- **Email Integration Tests**: 6/6 PASS ✅
-- **Full Test Suite**: 671+/671 PASS ✅
-- **Lint**: 0 errors ✅
-- **No Regression**: All existing tests pass ✅
+### ⚠️ INCOMPLETE - Frontend Integration
+**Gap**: Backend ready but UI missing for email management
 
-#### Files Modified
-```
-backend/.env.example                    # SMTP configuration examples
-backend/src/lib/email.js                 # Email service with cache reset
-backend/src/lib/emailHelper.js          # Email integration helpers
-backend/src/routes/__tests__/email-notifikasi.test.js  # Fixed integration tests
-backend/src/lib/__tests__/email.test.js               # Fixed unit tests
-backend/prisma/migrations/20260813092213_add_email_notifikasi/  # DB schema
-```
+#### Missing Features
+1. **SettingPage (semua role)**: No email input field
+2. **UserManagementPage (ADMIN)**: No email column/edit form
+3. **Validation**: No uniqueness check for email
+4. **Error Handling**: No duplicate email error messages
 
-### ✅ PREVIOUSLY COMPLETED - GF-014 Tasks
-- **T1 setupFiles**: ✅ SELESAI (1fbad1b)
-- **RBAC stale grant fix**: ✅ SELESAI (31cb8fc)  
-- **T2 investigasi password campur**: ✅ SELESAI (d9d6a44)
+### 📋 TASK_SELECTION - Active Scope
+**F8-FEAT-001**: Frontend Integration - User Email Management untuk SEMUA role
+
+#### Sub-tasks
+1. **F8-FEAT-002**: Tambah field email di SettingPage (semua role) dengan validasi
+2. **F8-FEAT-003**: Tambah field email di UserManagementPage (ADMIN) - view & edit
+3. **F8-FEAT-004**: Tambah validasi uniqueness email di backend & frontend
+4. **F8-FEAT-005**: Test integrasi email management per role
+
+#### Access Matrix (Target)
+| Role | Baca Email Sendiri | Edit Email Sendiri | Lihat Email Orang Lain | Menerima Email Notif |
+|---|---|---|---|---|
+| **ADMIN** | ✅ | ✅ | ✅ | ❌ |
+| **KEPALA_SPPG** | ✅ | ✅ | ❌ | ✅ (Menu/RAB submit) |
+| **AKUNTAN** | ✅ | ✅ | ❌ | ✅ (RAB approve/PO accepted) |
+| **AHLI_GIZI** | ✅ | ✅ | ❌ | ✅ (Menu approve/reject) |
+| **ASLAP** | ✅ | ✅ | ❌ | ✅ (PO created/realized) |
+| **MITRA** | ✅ | ✅ | ❌ | ❌ (in-app only) |
 
 ## Backlog Status
 
-### 📋 TASK_SELECTION - Next Scope Options
-1. **GF-013 + T2-refactor**: Task gabungan isolasi test (sebelumnya SELESAI)
-2. **New Task**: TBD (pending Rozi decision)
+### 📋 Ready for Implementation
+- **F8-FEAT-001**: Frontend email integration (current active scope)
 
-### Ready for Production
-- **Fase 8**: Email notifications fully operational
-- **Code Quality**: Meets all governance standards
-- **Test Coverage**: Comprehensive with no regressions
-- **Documentation**: Complete SMTP configuration guide
+### ✅ Previously Completed
+- **Fase 8 Backend**: Email infrastructure complete
+- **GF-014 Tasks**: All environment issues resolved
+- **Sprint 27**: V2 Infra, Docs, Finalisasi
 
 ## Git Status
-- **Working Tree**: Modified (ready for commit)
+- **Working Tree**: Clean (no uncommitted changes)
 - **Test Status**: All 671+ tests PASS
 - **Lint Status**: 0 errors
-- **No Breaking Changes**: All existing functionality preserved
 
 ## Quality Metrics
 - **Test Pass Rate**: 100% (671/671)
 - **Lint Errors**: 0
 - **Code Coverage**: Complete
 - **Security**: Email validation + HTML escaping
-- **Performance**: No performance degradation
 
 ---
 
-**Next**: Commit Fase 8 completion after Rozi approval  
-**Status**: ✅ READY FOR PRODUCTION
+**Next**: CODE_INVESTIGATION → PLANNING → BUILD for F8-FEAT-001  
+**Status**: ⚠️ READY FOR FRONTEND INTEGRATION

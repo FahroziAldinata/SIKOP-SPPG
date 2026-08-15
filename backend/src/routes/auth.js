@@ -148,6 +148,15 @@ router.put("/profile", requireAuth, async (req, res) => {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
           return res.status(400).json({ error: "Format email tidak valid" });
         }
+        const existEmail = await prisma.user.findFirst({
+          where: {
+            email: normalized,
+            NOT: { id: userId }
+          }
+        });
+        if (existEmail) {
+          return res.status(409).json({ error: "Email sudah digunakan oleh user lain" });
+        }
         data.email = normalized;
       }
     }
