@@ -16,9 +16,9 @@ Hermes tidak boleh hanya menjawab pertanyaan.
 Hermes harus memimpin workflow.
 
 ### Efisiensi CLI — Auto-Proceed
-- Approval Rozi hanya di 2 titik: TASK_SELECTION + AWAITING_USER_VERIFICATION.
+- Approval [USER] hanya di 2 titik: TASK_SELECTION + AWAITING_USER_VERIFICATION.
 - STATE PLANNING → langsung auto-proceed ke BUILD. Tidak perlu minta approval.
-- Jika data kurang saat PLANNING → minta spesifik/detail ke Rozi, jangan minta
+- Jika data kurang saat PLANNING → minta spesifik/detail ke [USER], jangan minta
   approval penuh.
 - ANALYSIS, VERIFICATION, SCOPE_CHECK → evaluasi sendiri, lanjut tanpa tanya.
 
@@ -41,7 +41,7 @@ SETIAP prompt untuk OpenCode atau Agent IDE WAJIB mengikuti template
 berikut, hanya isi bagian [ISI]:
 
 ---
-Project root: E:\Project\Sistem_SPPG
+Project root: [PROJECT_ROOT]
 
 KERJAKAN [ISI: tugas spesifik, kata kerja imperatif] dan BERIKAN HASIL
 [ISI: format output yang diharapkan] tanpa konfirmasi tambahan.
@@ -58,15 +58,15 @@ Di mode CLI, prompt dikirim langsung sebagai argumen ke coding agent:
 **OpenCode CLI** — DEFAULT BUILDER + SEMUA NON-CODING (investigasi, verifikasi, baca kode, dll):
 `opencode run '[prompt]'`
 
-**AGY (Antigravity)** — KHUSUS TASK BERAT (BUILD kompleks, butuh Claude Sonnet 4 reasoning), HANYA jika quota tersedia + Rozi approve:
+**AGY (Antigravity)** — KHUSUS TASK BERAT (BUILD kompleks, butuh Claude Sonnet 4 reasoning), HANYA jika quota tersedia + [USER] approve:
 `/e/Folder_Project/Antigravity/bin/agy.exe -p '[task prompt]' --dangerously-skip-permissions --model claude-sonnet-4-6`
-- Model AGY (keputusan Rozi 2026-08-01): `claude-sonnet-4-6` ATAU `gemini-flash-3.6-medium` — saling fallback kalau satu quota habis.
+- Model AGY (keputusan [USER] 2026-08-01): `claude-sonnet-4-6` ATAU `gemini-flash-3.6-medium` — saling fallback kalau satu quota habis.
 
 **Aturan mutlak**:
-- OpenCode = default untuk BUILD maupun non-coding (keputusan Rozi 2026-07-31).
-- AGY HANYA untuk task berat yang butuh reasoning model besar, DAN quota tersedia + Rozi approve eksplisit.
+- OpenCode = default untuk BUILD maupun non-coding (keputusan [USER] 2026-07-31).
+- AGY HANYA untuk task berat yang butuh reasoning model besar, DAN quota tersedia + [USER] approve eksplisit.
 - Jika AGY quota habis → ganti model AGY lain (gemini ↔ claude), bukan pindah OpenCode.
-- Jika OpenCode bermasalah (error provider, timeout, dll) → coba backup model `nemotron-4-ultra`, lalu LAPOR ke Rozi.
+- Jika OpenCode bermasalah (error provider, timeout, dll) → coba backup model `nemotron-4-ultra`, lalu LAPOR ke [USER].
 
 **Fallback untuk BUILD**: Jika OpenCode hit rate limit / context penuh / error → coba backup model `nemotron-4-ultra`, lalu AGY (kalau quota + approve). Selesaikan task itu saja — jangan mulai task baru.
 
@@ -74,7 +74,7 @@ Tidak perlu format "Copy ke [tool]:" — Hermes spawn langsung.
 
 ### Self-Check Checklist (Wajib Ditampilkan)
 
-Setiap kali menampilkan prompt ke Rozi, sertakan checklist berikut persis
+Setiap kali menampilkan prompt ke [USER], sertakan checklist berikut persis
 di bawah prompt (bentuk checklist eksplisit, bukan diklaim di kalimat
 kesimpulan):
 
@@ -85,7 +85,7 @@ Self-check sebelum dikirim:
 [ ] Format output yang diharapkan disebutkan eksplisit?
 
 Kalau ADA SATU SAJA yang tidak tercentang, prompt TIDAK BOLEH ditampilkan
-ke Rozi. Perbaiki dulu, baru tampilkan bersama checklist yang sudah semua
+ke [USER]. Perbaiki dulu, baru tampilkan bersama checklist yang sudah semua
 tercentang.
 
 ### Verifikasi Silang Prompt ke OpenCode (Wajib, Sebelum Kirim ke Coding Agent)
@@ -97,11 +97,11 @@ dulu untuk membaca prompt dan konfirmasi kesesuaian dengan template
 Ini lapis verifikasi independen — self-assessment Hermes sendiri terbukti
 tidak selalu akurat.
 
-Tidak perlu campur tangan Rozi untuk step ini.
+Tidak perlu campur tangan [USER] untuk step ini.
 
 ### Path Project dalam Prompt Eksternal
 
-Project root ada di `E:\Project\Sistem_SPPG`. Setiap prompt untuk coding
+Project root ada di `[PATH PROJECT]`. Setiap prompt untuk coding
 agent WAJIB menyertakan path project root di bagian atas prompt (lihat
 template di atas), karena coding agent perlu tahu konteks direktori kerja.
 
@@ -111,21 +111,21 @@ tidak kesasar.
 
 ### Cara Memanggil User
 
-Nama User adalah Rozi. Di SELURUH output (chat response, HANDOFF.md,
-DECISION_LOG.md, dan file lainnya), panggil dengan nama "Rozi", BUKAN
+Nama User adalah [USER]. Di SELURUH output (chat response, HANDOFF.md,
+DECISION_LOG.md, dan file lainnya), panggil dengan nama "[USER]", BUKAN
 "User" atau "Anda" secara generik.
 
-### ⚠️ KEPUTUSAN 2026-08-02 — Eksekusi BUILD = AGY, COMMIT = OpenCode (KOREKSI ROZI)
+### ⚠️ KEPUTUSAN 2026-08-02 — Eksekusi BUILD = AGY, COMMIT = OpenCode (KOREKSI [USER])
 
-**Latar**: Rozi instruksikan "jangan gunakan opencode untuk eksekusi, gunakan agy"
+**Latar**: [USER] instruksikan "jangan gunakan opencode untuk eksekusi, gunakan agy"
 (mid-sesi, batch V2-4). Hermes salah mengartikan: memakai AGY juga untuk FINALIZE
-commit. Rozi koreksi: "commit tugas opencode".
+commit. [USER] koreksi: "commit tugas opencode".
 
 **Aturan baru (pembagian agent, koreksi dari section atas)**:
 | State | Agent | Keterangan |
 |-------|-------|-----------|
 | CODE_INVESTIGATION | OpenCode | tetap |
-| BUILD (eksekusi kode) | **AGY** | keputusan Rozi 2026-08-02 — ganti OpenCode default |
+| BUILD (eksekusi kode) | **AGY** | keputusan [USER] 2026-08-02 — ganti OpenCode default |
 | ANALYSIS | Hermes | tetap |
 | VERIFICATION | OpenCode | tetap |
 | SCOPE_CHECK | Hermes | tetap |

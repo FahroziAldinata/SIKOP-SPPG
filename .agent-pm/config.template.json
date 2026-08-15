@@ -1,0 +1,53 @@
+{
+  "project": {
+    "name": "My Awesome Project",
+    "description": "A brief description of my project",
+    "root_path": "C:\\projects\\my-awesome-project"
+  },
+  "user": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "role": "Project Manager"
+  },
+  "agent": {
+    "agy": {
+      "path_laptop": "D:\\Tools_Project\\agy\\bin\\agy.exe",
+      "path_pc": "E:\\Folder_Project\\Antigravity\\bin\\agy.exe",
+      "timeout": 120,
+      "model_primary": "claude-sonnet-4-6",
+      "model_backup": "gemini-flash-3.6-medium"
+    },
+    "default_builder": "OpenCode",
+    "commit_tool": "OpenCode"
+  },
+  "telegram": {
+    "bot_token": "YOUR_TELEGRAM_BOT_TOKEN",
+    "allowed_users": "YOUR_TELEGRAM_USER_ID",
+    "user_id": "YOUR_TELEGRAM_USER_ID",
+    "service_name": "Telegram_Gateway",
+    "script_path": "gateway-service/Telegram_Gateway.cmd",
+    "pid": 0,
+    "profile_name": "telegram-gateway",
+    "home_channel": "",
+    "idle_threshold": 10,
+    "snapshot_interval": 10
+  },
+  "development": {
+    "node_version": "18.18",
+    "npm_version": "9.0.0"
+  },
+  "workflow": {
+    "auto_proceed_planning": true,
+    "require_user_approval": [
+      "TASK_SELECTION",
+      "AWAITING_USER_VERIFICATION"
+    ],
+    "forbidden_direct_actions": [
+      "read_file project/*",
+      "write_file project/src/*",
+      "terminal project git *",
+      "terminal project grep *",
+      "terminal project node *"
+    ]
+  }
+}

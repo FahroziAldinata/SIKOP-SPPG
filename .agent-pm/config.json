@@ -1,0 +1,80 @@
+{
+  "project": {
+    "name": "[PROJECT_NAME]",
+    "description": "[PROJECT_DESCRIPTION]",
+    "root_path": "[PROJECT_ROOT]"
+  },
+  "user": {
+    "name": "[USER_NAME]",
+    "email": "[USER_EMAIL]",
+    "role": "[USER_ROLE]"
+  },
+  "agent": {
+    "agy": {
+      "path_laptop": "[AGY_PATH_LAPTOP]",
+      "path_pc": "[AGY_PATH_PC]",
+      "timeout": "[AGY_TIMEOUT]",
+      "model_primary": "[AGY_MODEL_PRIMARY]",
+      "model_backup": "[AGY_MODEL_BACKUP]"
+    },
+    "default_builder": "[DEFAULT_BUILDER]",
+    "commit_tool": "[COMMIT_TOOL]"
+  },
+  "telegram": {
+    "bot_token": "[TELEGRAM_BOT_TOKEN]",
+    "allowed_users": "[TELEGRAM_ALLOWED_USERS]",
+    "user_id": "[TELEGRAM_USER_ID]",
+    "service_name": "[TELEGRAM_SERVICE_NAME]",
+    "script_path": "[TELEGRAM_SCRIPT_PATH]",
+    "pid": "[TELEGRAM_PID]",
+    "profile_name": "[TELEGRAM_PROFILE_NAME]",
+    "home_channel": "[TELEGRAM_HOME_CHANNEL]",
+    "idle_threshold": 10,
+    "snapshot_interval": 10
+  },
+  "development": {
+    "node_version": "[NODE_VERSION]",
+    "npm_version": "[NPM_VERSION]"
+  },
+  "workflow": {
+    "auto_proceed_planning": true,
+    "require_user_approval": [
+      "TASK_SELECTION",
+      "AWAITING_USER_VERIFICATION"
+    ],
+    "forbidden_direct_actions": [
+      "read_file project/*",
+      "write_file project/src/*",
+      "terminal project git *",
+      "terminal project grep *",
+      "terminal project node *"
+    ]
+  },
+  "placeholders": [
+    "[PROJECT_NAME]",
+    "[PROJECT_DESCRIPTION]", 
+    "[PROJECT_ROOT]",
+    "[USER_NAME]",
+    "[USER_EMAIL]",
+    "[USER_ROLE]",
+    "[AGY_PATH_LAPTOP]",
+    "[AGY_PATH_PC]",
+    "[AGY_TIMEOUT]",
+    "[AGY_MODEL_PRIMARY]",
+    "[AGY_MODEL_BACKUP]",
+    "[NODE_VERSION]",
+    "[NPM_VERSION]",
+    "[DEFAULT_BUILDER]",
+    "[COMMIT_TOOL]",
+    "[TELEGRAM_BOT_TOKEN]",
+    "[TELEGRAM_ALLOWED_USERS]",
+    "[TELEGRAM_USER_ID]",
+    "[TELEGRAM_SERVICE_NAME]",
+    "[TELEGRAM_SCRIPT_PATH]",
+    "[TELEGRAM_PID]",
+    "[TELEGRAM_PROFILE_NAME]",
+    "[TELEGRAM_HOME_CHANNEL]",
+    "[IDLE_THRESHOLD]",
+    "[SNAPSHOT_INTERVAL]"
+  ]
+}

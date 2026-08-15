@@ -37,15 +37,25 @@ PUPPETEER_EXECUTABLE_PATH=
 
 Keterangan variabel yang dipakai kode:
 
-| KEY | Dibutuhkan untuk |
-|---|---|
-| `DATABASE_URL` | Koneksi Prisma ke PostgreSQL (contoh: `postgresql://user:pass@localhost:5432/dbname`) |
-| `JWT_SECRET` | Menandatangani token JWT (wajib ada — backend gagal start jika kosong) |
-| `PORT` | Port backend (default `3000`) |
-| `NODE_ENV` | Mode environment (`development` / `production`) |
-| `ALLOWED_ORIGINS` | Daftar origin CORS, dipisah koma (default `http://localhost:5173,http://127.0.0.1:5173`) |
-| `TEST_PASSWORD` | Password akun test/seed |
-| `PUPPETEER_EXECUTABLE_PATH` | Path executable Chromium untuk pembuatan PDF |
+|| KEY | Dibutuhkan untuk |
+||---|---|
+|| `DATABASE_URL` | Koneksi Prisma ke PostgreSQL (contoh: `postgresql://user:***@localhost:5432/dbname`) |
+|| `JWT_SECRET` | Menandatangani token JWT (wajib ada — backend gagal start jika kosong) |
+|| `PORT` | Port backend (default `3000`) |
+|| `NODE_ENV` | Mode environment (`development` / `production`) |
+|| `ALLOWED_ORIGINS` | Daftar origin CORS, dipisah koma (default `http://localhost:5173,http://127.0.0.1:5173`) |
+|| `TEST_PASSWORD` | Password akun test/seed |
+|| `PUPPETEER_EXECUTABLE_PATH` | Path executable Chromium untuk pembuatan PDF |
+|| **Email Configuration (V3)** | |
+|| `SMTP_HOST` | SMTP server host (contoh: `smtp.gmail.com`) |
+|| `SMTP_PORT` | SMTP server port (contoh: `587`) |
+|| `SMTP_USER` | SMTP username |
+|| `SMTP_PASS` | SMTP password |
+|| **Chatbot Configuration (V3)** | |
+|| `ENCRYPTION_KEY` | AES-256-GCM key untuk chatbot encryption (64 hex chars) |
+|| `OPENAI_API_KEY` | OpenAI API key (opsional jika pakai provider lain) |
+|| `GEMINI_API_KEY` | Gemini API key (opsional) |
+|| `GROQ_API_KEY` | Groq API key (opsional) |
 
 ## 3. Migrasi Database
 
@@ -91,4 +101,8 @@ Buka `http://localhost:5173`. Pastikan backend dan frontend berjalan bersamaan.
 
 - **Lint FE**: `cd frontend && npm run lint` (oxlint).
 - **Build FE**: `cd frontend && npm run build` (vite build).
-- **Test BE**: `cd backend && npm test` (skrip masih placeholder — `echo "Error: no test specified"`; tes aktual ada di `backend/src/routes/__tests__/`).
+- **Test BE**: `cd backend && npm test` (vitest + supertest, 671+ tests).
+- **Test FE**: `cd frontend && npm test` (vitest).
+- **API Documentation**: `http://localhost:3000/api-docs` (OpenAPI/Swagger).
+- **Email Testing**: Configure SMTP in `.env` for email notifications.
+- **Chatbot Testing**: Set `ENCRYPTION_KEY` and provider API keys for chatbot features.

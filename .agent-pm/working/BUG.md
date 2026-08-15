@@ -4,8 +4,8 @@
 
 ### [BUG-003] TTD Basah tidak muncul di PDF + ukuran kecil (2026-08-03)
 - **Root cause 1**: `getTtdBase64` (shared.js:162) path salah `'../../uploads/ttd'` dari `backend/src/templates/dokumen` → `backend/src/uploads/ttd` (tidak ada). Harus `'../../../'` → `backend/uploads/ttd`. Fix `acc8d6b`.
-- **Root cause 2 (revisi Rozi)**: img TTD clamp `height:40px;max-width:180px` + PNG rasio 7.2:1 (canvas 100% lebar) → tinggi efektif ~25px + goresan off-center. Fix `24f640a` (canvas 480px rasio 3:1 + img 55px/220px + wrapper max(ruangTtd,55)).
-- **Status**: SELESAI 2026-08-03 — diuji Rozi OK, task approved.
+- **Root cause 2 (revisi [USER])**: img TTD clamp `height:40px;max-width:180px` + PNG rasio 7.2:1 (canvas 100% lebar) → tinggi efektif ~25px + goresan off-center. Fix `24f640a` (canvas 480px rasio 3:1 + img 55px/220px + wrapper max(ruangTtd,55)).
+- **Status**: SELESAI 2026-08-03 — diuji [USER] OK, task approved.
 
 ### [BUG-001] 500 error pada GET /rab-p12/harian dan /rab-p12/rekap
 - **Severity**: Medium
@@ -21,7 +21,7 @@
   3. Response 500: `{"error":"Gagal mengambil daftar master menu"}`
 - **Root cause**: Schema drift — `schema.prisma` model `MasterMenuMingguan` punya kolom `mingguKe` + `@@unique([periodeId,jalur,hari,mingguKe])`, tapi migration `20260703220600_init` TIDAK pernah membuat kolom itu (index DB masih 3 kolom). Query `orderBy: mingguKe` → Prisma P2022 (column does not exist) → 500.
 - **Status**: SELESAI 2026-08-02 — migration `20260802220000_add_minggu_ke_master_menu` (ALTER TABLE add catatan + mingguKe DEFAULT 1, drop index lama, create unique 4-kolom). Cek duplikat (periodeId,jalur,hari) = 0. Verifikasi: kolom + index ada, findMany SUCCESS, endpoint 200 (periodeId `cms4u62zn001rt38c3x54zwrh` + `cms4uaudx0054t3x4mmuud2ab`).
-- **Ditemukan saat**: test FE Menu Harian gizi oleh Rozi (2026-08-02, sesi 28)
+- **Ditemukan saat**: test FE Menu Harian gizi oleh [USER] (2026-08-02, sesi 28)
 - **Catatan**: PRE-EXISTING (bukan bug refactor batch 3c) — handler asli query identik, `git diff c017282..HEAD -- schema.prisma` kosong. Fix via `npx prisma db push` (AGY) — tanpa migration file sebelumnya; migration SQL dibuat manual oleh AGY.
 
 ### [BUG-004] 404 gambar bukti LPD2M di web (2026-08-03) — RESOLVED
@@ -36,8 +36,8 @@
   - vite.config.js tambah proxy `/uploads` → localhost:3000 (root cause)
   - `Lpd2mBuktiSection.jsx:173` revert `'/uploads/'+` → `'/'+` (single prefix)
   - `Lpd2mBuktiSection.jsx:186` `nextSibling` → `nextElementSibling` (fallback onError crash di DOM React)
-- **Verifikasi**: build PASS (independen OpenCode), diff scope 2 file, BE restart Rozi → thumbnail ✓ PDF ✓ → APPROVED.
-- **Status**: SELESAI 2026-08-03 — approved Rozi, committed `d383faf` + `e602a9c` (hapus summary duplikat).
+- **Verifikasi**: build PASS (independen OpenCode), diff scope 2 file, BE restart [USER] → thumbnail ✓ PDF ✓ → APPROVED.
+- **Status**: SELESAI 2026-08-03 — approved [USER], committed `d383faf` + `e602a9c` (hapus summary duplikat).
 
 ## Format Pelaporan Bug
 

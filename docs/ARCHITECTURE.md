@@ -7,11 +7,13 @@ Dokumen ini menjelaskan struktur folder aktual proyek serta alur data utama **SP
 ### Backend (`backend/`)
 
 ```
-backend/
+backend/src/
 ├── index.js                        # entry point (require src/app)
 ├── prisma/
 │   ├── migrations/                 # migrasi database
-│   ├── schema.prisma               # 49 model Prisma (tabel = nama model)
+│   │   ├── 20260813092213_add_email_notifikasi/    # Email notifikasi schema
+│   │   └── 20260807063342_add_chatbot_step1/       # Chatbot schema
+│   ├── schema.prisma               # 49+ model Prisma (tabel = nama model)
 │   └── seed.js                     # data awal (kategori, master, akun, dll)
 └── src/
     ├── app.js                      # setup Express, CORS, mount semua router
@@ -23,12 +25,19 @@ backend/
     │   ├── exportExcel.js          # ekspor Excel (ExcelJS / xlsx)
     │   ├── launchPuppeteer.js      # bootstrap puppeteer-core + @sparticuz/chromium
     │   ├── pemeriksaanBahanHelper.js
-    │   └── prisma.js               # PrismaClient singleton
+    │   ├── prisma.js               # PrismaClient singleton
+    │   ├── email.js                # Email service (Nodemailer + SMTP)
+    │   ├── emailHelper.js          # Email integration helpers
+    │   ├── chat/                   # Chatbot infrastructure
+    │   │   ├── encryption.js       # AES-256-GCM encryption
+    │   │   ├── tools/              # Tool registry (4 tools status)
+    │   │   └── openaiCompatible.js  # Multi-provider adapter
+    │   └── chat.js                 # Chat endpoint + RBAC protection
     ├── middleware/
-    │   ├── auth.js                 # requireAuth (JWT) + requireRole (RBAC)
+    │   ├── auth.js                 # requireAuth (JWT) + requirePermission (RBAC v2)
     │   └── validate.js             # validasi Zod per request (body/params/query)
     ├── routes/
-    │   ├── auth.js                 # /api/auth — login, me, profile
+    │   ├── auth.js                 # /api/auth — login, me, profile, email management
     │   ├── akuntan/                # /api/akuntan — router modular per domain
     │   │   ├── index.js            # aggregator & mount sub-router
     │   │   ├── _helpers.js
@@ -45,12 +54,13 @@ backend/
     │   ├── laporan.js              # /api/laporan
     │   ├── bukti-lpd2m.js          # /api/laporan/lpd2m/bukti
     │   ├── pemeriksaan-bahan.js    # /api/laporan/pemeriksaan-bahan
-    │   ├── kepala.js               # /api/kepala — approval
+    │   ├── kepala.js               # /api/kepala — approval + email notif
     │   ├── dashboard.js            # /api/dashboard
-    │   ├── notifikasi.js           # /api/notifikasi
-    │   ├── admin.js                # /api/admin — users
+    │   ├── notifikasi.js           # /api/notifikasi — email management
+    │   ├── admin.js                # /api/admin — users + permission RBAC
     │   ├── laporanBug.js           # /api/laporan-bug
-    │   └── __tests__/              # smoke/behavioral tests (supertest)
+    │   ├── chat.js                 # /api/chat — chatbot + API key CRUD
+    │   └── __tests__/              # smoke/behavioral tests (supertest + vitest)
     ├── templates/
     │   └── dokumen/                # generator template dokumen (HTML → PDF)
     │       ├── lpa.js, sptj.js, bapsd.js, bku.js, lra.js, lpd2m.js
@@ -84,10 +94,11 @@ frontend/src/
 │   ├── ConfirmDialog.jsx, StatusBadge.jsx, Toast.jsx, Skeleton.jsx
 │   ├── NumberInput.jsx, NominatifUpahGrid.jsx, GrupHariManager.jsx
 │   ├── DashboardSummaryCards.jsx, NotifikasiList.jsx, FieldButton.jsx
+│   ├── ChatWidget.jsx              # Chatbot widget (Fase 7)
 │   └── utils.js
 ├── pages/
 │   ├── auth/Login.jsx
-│   ├── admin/        — AdminDashboard, UserManagementPage, LaporanBugPage
+│   ├── admin/        — AdminDashboard, UserManagementPage, LaporanBugPage, PermissionMatrixPage
 │   ├── akuntan/      — AkuntanDashboard, RabHarianPage, NominatifUpahPage,
 │   │                   JurnalTransaksiPage, DokumenResmiPage, SaldoAwalBarangPage,
 │   │                   MutasiStokPage, ValidasiStokPage, AkuntanPoPage,
@@ -99,7 +110,7 @@ frontend/src/
 │   ├── kepala/       — KepalaDashboard, ApprovalPage
 │   ├── mitra/        — MitraDashboard, HargaBahanPage, MitraPoPage,
 │   │                   KendaraanPage, LaporanPage
-│   └── shared/       — SettingPage
+│   └── shared/       — SettingPage (email management + TTD basah + chat API key)
 └── styles/tokens.css               # design tokens Tailwind
 ```
 
@@ -130,10 +141,13 @@ React FE → render UI
 ## Pola / Pattern Konsisten
 
 - **Modular Express Router per resource** — `routes/akuntan/` dipecah per domain (`rabP12.js`, `jurnal.js`, `stok.js`, dst) dan digabung di `index.js`.
-- **Autentikasi & otorisasi** — `middleware/auth.js`: `requireAuth` verifikasi JWT (`Authorization: Bearer <token>`) sekaligus memastikan akun masih aktif; `requireRole` membatasi akses berdasarkan peran.
+- **Autentikasi & otorisasi** — `middleware/auth.js`: `requireAuth` verifikasi JWT (`Authorization: Bearer ***`) sekaligus memastikan akun masih aktif; `requirePermission` (RBAC v2) membatasi akses berdasarkan permission dengan SEED/MANUAL source distinction.
 - **Validasi Zod** — `middleware/validate.js` mem-parse `body`/`params`/`query` dengan skema dari `validators/`; error dikembalikan sebagai 400 berisi pesan per field.
 - **Prisma `$transaction`** — operasi yang menyentuh beberapa tabel (mis. input penerima manfaat + detail, transaksi pembelian + item, pembuatan dokumen resmi) dibungkus transaksi agar atomik.
 - **PDF generation** — `lib/launchPuppeteer.js` membootstrap `puppeteer-core` + `@sparticuz/chromium`; tiap dokumen punya template HTML sendiri di `templates/dokumen/`.
 - **Akuntansi double-entry** — `lib/accountingHelper.js` menjamin jurnal dan laporan keuangan (BKU, LRA, neraca saldo) konsisten.
+- **Email notification** — `lib/email.js` dengan Nodemailer + SMTP configuration (Gmail, Brevo, Ethereal, Custom) dan HTML email templates dengan proper escaping.
+- **AI Chatbot** — `lib/chat/` dengan multi-provider adapter (OpenAI, Gemini, Groq, Custom), tool registry baca-saja, encryption AES-256-GCM, dan ChatLog retensi 30 hari.
 - **Penanganan error global** — error handler di `app.js` mengembalikan JSON tanpa membocorkan stack trace ke client.
 - **Audit trail** — `lib/auditHelper.js` mencatat aksi penting ke `AuditLog`.
+- **Dynamic RBAC v2** — kolom `source` (SEED/MANUAL) untuk safe pruning grant manual dan UI matrix permission management.

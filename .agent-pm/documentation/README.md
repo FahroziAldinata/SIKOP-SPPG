@@ -110,7 +110,7 @@ Setiap file ringkasan mengikuti format standar berikut:
 
 ### Approval Process
 1. Hermes creates summary file
-2. Hermes requests Rozi approval
+2. Hermes requests User approval
 3. After approval, Hermes **directly deletes** working files (plans/, pre-check/)
 4. Hermes proceeds to CYCLE_END
 5. Commit reference section remains empty (filled during commit execution in FINALIZE)
@@ -133,7 +133,7 @@ Setiap file ringkasan mengikuti format standar berikut:
 
 ### Process Compliance
 - **Template Consistency**: All files follow the same template
-- **Approval Required**: Rozi approval before file deletion
+- **Approval Required**: User approval before file deletion
 - **Timing**: Documentation completed in same session as task completion
 - **Cross-references**: Links to relevant commits and other documentation
 

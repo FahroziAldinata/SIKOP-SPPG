@@ -49,6 +49,62 @@ Referensi format nilai: `backend/.env.example` dan `frontend/.env.example`.
 
 ### Generate `JWT_SECRET`
 
+```bash
+openssl rand -hex 32
+```
+
+### Email Configuration (V3)
+
+Untuk email notifications, konfigurasi SMTP di production:
+
+```bash
+# Gmail (contoh)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# Brevo/SendGrid (alternatif)
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=582
+SMTP_USER=your-brevo-api-key
+SMTP_PASS=
+
+# Custom SMTP
+SMTP_HOST=your-smtp-server.com
+SMTP_PORT=587
+SMTP_USER=your-username
+SMTP_PASS=your-password
+```
+
+**Security Notes**:
+- Jangan gunakan password Gmail personal - gunakan App Password
+- Untuk production, simpan SMTP credentials di Railway/Vercel environment variables
+- Test SMTP configuration sebelum production deployment
+
+### Chatbot Configuration (V3)
+
+Untuk AI chatbot features:
+
+```bash
+# Generate encryption key (64 hex characters)
+openssl rand -hex 32
+
+# Set di environment
+ENCRYPTION_KEY=your-64-hex-char-key-here
+
+# Provider API keys (opsional - pilih salah satu atau lebih)
+OPENAI_API_KEY=sk-your-openai-key
+GEMINI_API_KEY=your-gemini-api-key
+GROQ_API_KEY=your-groq-api-key
+```
+
+**Notes**:
+- `ENCRYPTION_KEY` wajib untuk chatbot encryption
+- Pilih minimal satu provider API key
+- API keys diset di Railway/Vercel environment variables
+- Chatbot bisa berjalan tanpa API key (menolak request)
+
 Backend gagal start jika `JWT_SECRET` kosong (`backend/src/middleware/auth.js`). Generate secret acak 64 byte (wajib unik, beda dari dev):
 
 ```bash

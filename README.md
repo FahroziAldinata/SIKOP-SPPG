@@ -22,17 +22,33 @@ Pengelolaan harga bahan per periode, pembuatan PO + realisasi + PDF, dan laporan
 ### Auth & RBAC
 Login JWT, profil, dan kontrol akses berbasis peran: Admin, Akuntan, Aslap, Gizi, Kepala, dan Mitra.
 
-#### Manajemen Grant RBAC
+#### Manajemen Grant RBAC (V3)
 Sistem membedakan asal-usul permission grant (`RolePermission`) menggunakan kolom `source` (`SEED` vs `MANUAL`):
 - **Grant SEED**: Berasal dari definisi bawaan di `src/lib/rbacSeeder.js`. Saat `seedRbacPermissions` dijalankan, grant `SEED` yang tidak ada lagi di definisi kode akan di-prune (dihapus dari database).
 - **Grant MANUAL**: Dibuat atau diperbarui via UI/API Admin (`POST` & `PUT` `/api/admin/permissions`). Grant `MANUAL` terlindungi dan **tidak akan dihapus** oleh pruning seeder di resource apa pun.
 - **Pengembangan**: Untuk menambahkan grant permanen baru pada resource existing, tambahkan definisi ke `rbacSeeder.js`. Penambahan resource custom atau grant manual via UI akan otomatis bernilai `MANUAL` dan aman dari overwrite.
 
+### AI Chatbot (V3)
+Fitur AI chatbot dengan multiple providers:
+- **Backend**: Chatbot dengan providers OpenAI, Gemini, Groq, dan custom
+- **Tool Registry**: Akses data sistem baca-saja (gizi-menu-status, akuntan-rab-status, mitra-po-status, aslap-input-status)
+- **Frontend**: Widget chat + halaman kelola API key (admin-managed)
+- **Security**: RBAC proteksi, rate limiting, encryption AES-256-GCM
+- **Retensi**: ChatLog otomatis delete 30 hari
+
+### Notifikasi Eksternal (V3)
+Email notification system:
+- **Email Service**: Nodemailer + SMTP configuration (Gmail, Brevo, Ethereal, Custom)
+- **Integration Hooks**: Semua approval workflows (kepala, menuHarian, rabHarian, poApprove)
+- **Frontend**: Email management di SettingPage (semua role) + UserManagementPage (ADMIN)
+- **Validation**: Email uniqueness check + format validation
+- **Templates**: HTML email dengan proper escaping
+
 ### Dashboard & Kepala
 Dashboard dengan ringkasan 6 tahap alur kerja + notifikasi, serta modul approval untuk Kepala.
 
 ### Admin
-Manajemen pengguna (users), laporan bug, dan pengaturan umum sistem.
+Manajemen pengguna (users), laporan bug, pengaturan umum sistem, dan manajemen permission RBAC.
 
 ## Tech Stack
 
@@ -40,6 +56,11 @@ Manajemen pengguna (users), laporan bug, dan pengaturan umum sistem.
 - **Frontend**: React.js, Vite, Tailwind CSS, HeroUI
 - **PDF**: puppeteer-core + @sparticuz/chromium
 - **Excel**: ExcelJS
+- **AI Chatbot**: Multiple providers (OpenAI, Gemini, Groq, Custom)
+- **Email**: Nodemailer + SMTP
+- **Authentication**: JWT + Dynamic RBAC
+- **Testing**: Vitest + supertest
+- **Documentation**: OpenAPI/Swagger
 
 ## Quick Start
 

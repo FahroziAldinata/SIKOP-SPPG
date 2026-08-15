@@ -5,6 +5,29 @@ Semua perubahan penting pada proyek ini didokumentasikan di file ini.
 Format mengikuti [Keep a Changelog](https://keepachangelog.com/id/1.1.0/),
 dan versi mengikuti [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-08-15
+
+### Added
+- **Fase 8 - Notifikasi Eksternal**: Email notification infrastructure (Nodemailer + SMTP), integration hooks di semua approval workflows, frontend email management untuk semua role, dan complete test coverage (671/671 PASS)
+- **Fase 7 - AI Chatbot**: Backend chatbot dengan multiple providers (OpenAI, Gemini, Groq, Custom), tool registry untuk akses data sistem baca-saja, frontend widget chat + API key management, ChatLog dengan retensi 30 hari, dan encryption AES-256-GCM
+- **Dynamic RBAC v2**: Kolom `source` (SEED/MANUAL) untuk safe pruning grant manual, UI matrix role-resource permission, dan CRUD permission admin
+- **Test isolation**: Isolasi dari data seed nyata (refactor 5 test file) + validasi API key placeholder + GF-014 environment fixes
+- **Production readiness**: Complete deployment documentation, disaster recovery procedures, dan security audit
+
+### Changed
+- **RBAC system**: Migrasi dari role-based ke permission-based dengan dynamic RBAC v2
+- **Security**: Rate limiting endpoint login, bcrypt cost factor 12, audit trail lengkap, dan JWT tokenVersion
+- **Frontend email integration**: Email input di SettingPage (semua role) + email management di UserManagementPage (ADMIN)
+- **Backend email service**: SMTP configuration dengan multiple provider support dan HTML email templates
+- **Chatbot integration**: Function calling dengan tool registry per role dan RBAC proteksi
+
+### Fixed
+- **GF-014 Environment issues**: DATABASE_URL race condition di vitest, password DB campur, dan drift RBAC grant
+- **GF-013 Test isolation**: Suite test tidak lagi menghapus data seed produksi
+- **BUG-004**: LPD2M gambar bukti web 404 fix (vite proxy + double prefix)
+- **BUG-003**: TTD basah ukuran/center fix (canvas 480px rasio 3:1 + img 55x220px)
+- **BUG-001**: 500 error /rab-p12/harian & /rekap (hariAktif drift ke GrupHari)
+
 ## [2.0.0] - 2026-08-04
 
 ### Added

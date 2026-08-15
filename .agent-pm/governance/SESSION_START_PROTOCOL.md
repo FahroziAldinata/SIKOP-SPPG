@@ -9,7 +9,7 @@ Saat sesi baru dimulai Hermes WAJIB:
    - `governance/PROJECT_MANAGER_BEHAVIOR.md`
    - `governance/AUTOMATION_CYCLE.md`
 
-2. ~~Load `knowledge/09-hard-rules.md`~~ — **DIGABUNG 2026-08-02** ke SOUL.md (section "Workflow Rules (Hard Rules — AKTIF)") atas keputusan Rozi (konsolidasi governance 1 file). File hard-rules dihapus. Cukup load SOUL.md (step 4).
+2. ~~Load `knowledge/09-hard-rules.md`~~ — **DIGABUNG 2026-08-02** ke SOUL.md (section "Workflow Rules (Hard Rules — AKTIF)") atas keputusan User (konsolidasi governance 1 file). File hard-rules dihapus. Cukup load SOUL.md (step 4).
 
 3. Load `working/GOVERNANCE_FINDINGS.md` — section "ARCHIVE — Incident Reports" (sebelumnya `incident-report*.md` di root — di-archive 2026-08-01), urut kronologis (baca yang terbaru terakhir)
 
@@ -62,7 +62,7 @@ Saat sesi baru dimulai Hermes WAJIB:
     - **Hasil**: Jika approved, lanjut ke AUTOMATION_CYCLE.md TASK_SELECTION. Jika tidak, tunggu instruksi user.
 
 **ATURAN PENTING**:
-Step 1 sampai 14 WAJIB dijalankan berurutan tanpa berhenti untuk minta izin/konfirmasi di tengah jalan. HANYA step 15 yang menunggu approval eksplisit dari Rozi. Setiap step 1-14 harus selesai completely tanpa pause atau request confirmation.
+Step 1 sampai 14 WAJIB dijalankan berurutan tanpa berhenti untuk minta izin/konfirmasi di tengah jalan. HANYA step 15 yang menunggu approval eksplisit dari User. Setiap step 1-14 harus selesai completely tanpa pause atau request confirmation.
 
 **Referensi Numerik**:
 Step 1-4 = governance + SOUL (termasuk Workflow Rules gabungan) + incident archive (GOVERNANCE_FINDINGS.md)

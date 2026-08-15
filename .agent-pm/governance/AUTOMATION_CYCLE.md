@@ -3,7 +3,7 @@ Governance Module — Siklus Eksekusi Otomatis Per-Task
 
 > **Status**: Aktif — sudah dimigrasi ke CLI. Hermes menjalankan langsung tiap
 > state dengan spawn agent (OpenCode CLI / agy clie) via terminal/process tools,
-> tanpa copy-paste manual oleh Rozi. Detail mekanisme CLI ada di keterangan tiap state.
+> tanpa copy-paste manual oleh [USER]. Detail mekanisme CLI ada di keterangan tiap state.
 
 ---
 
@@ -12,10 +12,10 @@ Governance Module — Siklus Eksekusi Otomatis Per-Task
 - Siklus otomatis ini **SELALU** scoped untuk SATU task. Tidak ada auto-lanjut ke
   task berikutnya setelah commit. Setiap task baru WAJIB mulai lagi dari mode
   diskusi manusia (lihat bagian TASK_SELECTION).
-- Rozi adalah **gate akhir wajib** setelah task selesai dan diuji. Tidak ada
-  commit sebelum Rozi test & approve hasil.
-- Approval Rozi hanya di **2 titik**: (1) TASK_SELECTION — diskusi task,
-  (2) AWAITING_USER_VERIFICATION — setelah Rozi test hasil.
+- [USER] adalah **gate akhir wajib** setelah task selesai dan diuji. Tidak ada
+  commit sebelum [USER] test & approve hasil.
+- Approval [USER] hanya di **2 titik**: (1) TASK_SELECTION — diskusi task,
+  (2) AWAITING_USER_VERIFICATION — setelah [USER] test hasil.
 - State di antaranya (PLANNING → BUILD → ANALYSIS → VERIFICATION → SCOPE_CHECK)
   Hermes evaluasi sendiri dan auto-proceed tanpa approval manual — efisiensi CLI.
 - Hermes adalah murni **orkestrator** — Hermes TIDAK PERNAH menulis/mengedit kode
@@ -29,25 +29,25 @@ Governance Module — Siklus Eksekusi Otomatis Per-Task
 ## State Machine
 
 ### STATE: TASK_SELECTION
-- Task dipilih dari todo list lewat diskusi eksplisit dengan Rozi.
-- Hermes bantu prioritasasi berdasarkan dependency/dampak, Rozi keputusan akhir.
+- Task dipilih dari todo list lewat diskusi eksplisit dengan [USER].
+- Hermes bantu prioritasasi berdasarkan dependency/dampak, [USER] keputusan akhir.
 
 ### STATE: CODE_INVESTIGATION (baru, sebelum planning)
 - Sebelum bikin Implementation Plan, Hermes WAJIB spawn OpenCode CLI
   langsung via `opencode run '...'` — untuk memetakan kode existing
   yang bersinggungan dengan scope task (file relevan, fungsi yang sudah
   ada, pattern yang harus diikuti).
-- **CLI**: `terminal(command="opencode run 'Investigate [file/pattern]. Report: existing functions, imports, patterns, endpoints.'", workdir="E:\\Project\\Sistem_SPPG")`
+- **CLI**: `terminal(command="opencode run 'Investigate [file/pattern]. Report: existing functions, imports, patterns, endpoints.'", workdir="[PROJECT_ROOT]")`
 - Hasil investigasi jadi basis fakta Implementation Plan — bukan asumsi
   Hermes sendiri.
-- **No more** Rozi copy-paste prompt ke OpenCode Desktop.
+- **No more** [USER] copy-paste prompt ke OpenCode Desktop.
 
 ### STATE: PLANNING
 - Berdasarkan hasil CODE_INVESTIGATION, Hermes susun Implementation Plan
   (file target, langkah konkret, endpoint yang dipakai, referensi kode) di
   `.agent-pm/plans/`.
 - **CLI — auto proceed**: Hermes evaluasi sendiri apakah plan sudah cukup
-  detail dan benar. Jika ya → LANGSUNG ke BUILD tanpa minta approval Rozi.
+  detail dan benar. Jika ya → LANGSUNG ke BUILD tanpa minta approval [USER].
   Jika data kurang → minta detail ke Rozi dengan tegas dan spesifik.
 - Tidak perlu approval Rozi di state ini — efisiensi CLI.
 
