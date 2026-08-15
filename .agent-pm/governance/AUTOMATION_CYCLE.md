@@ -105,16 +105,9 @@ Governance Module — Siklus Eksekusi Otomatis Per-Task
   lewat AWAITING_USER_VERIFICATION dengan Rozi bilang OK? [Ya/Tidak]"
   Kalau Tidak, DILARANG lanjut ke FINALIZE.
 
-### STATE: FINALIZE (OpenCode CLI — commit + push)
-- Hermes spawn OpenCode CLI langsung untuk update TODO/progress DAN
-  commit dengan pesan yang mencerminkan pekerjaan (bukan pesan generik).
-- **CLI**: `terminal(command="opencode run 'Update TODO/progress file dan commit dengan pesan: [deskripsi task]'")`
-- OpenCode yang eksekusi commit, bukan Hermes — Hermes tetap PM.
-- **No more** Rozi commit manual.
-- **SYNC**: Setelah commit, OpenCode WAJIB jalankan `git push` agar `.agent-pm/working/` terbaru
-  naik ke remote. Ini krusial untuk multi-perangkat — supaya TODO/CURRENT_STATE sinkron
-  antar device.
-- Setelah push, transisi ke DOCUMENTATION_ARCHIVE untuk membuat ringkasan.
+### STATE: COMMIT
+- **State ini dihapus** - logika commit dipindahkan ke FINALIZE
+- Transisi langsung ke DOCUMENTATION_ARCHIVE setelah commit di FINALIZE
 
 ### STATE: DOCUMENTATION_ARCHIVE
 - **Tujuan**: Membuat ringkasan dokumentasi terkonsolidasi SATU FILE per task dan membersihkan file kerja
@@ -131,9 +124,16 @@ Governance Module — Siklus Eksekusi Otomatis Per-Task
   - Success → CYCLE_END (setelah Rozi approval)
   - Revision needed → kembali ke DOCUMENTATION_ARCHIVE (untuk revisi ringkasan, tanpa OpenCode/Agent IDE)
 
-### STATE: COMMIT
-- **State ini dihapus** - logika commit dipindahkan ke FINALIZE
-- Transisi langsung ke DOCUMENTATION_ARCHIVE setelah commit di FINALIZE
+### STATE: FINALIZE (OpenCode CLI — commit + push)
+- Hermes spawn OpenCode CLI langsung untuk update TODO/progress DAN
+  commit dengan pesan yang mencerminkan pekerjaan (bukan pesan generik).
+- **CLI**: `terminal(command="opencode run 'Update TODO/progress file dan commit dengan pesan: [deskripsi task]'")`
+- OpenCode yang eksekusi commit, bukan Hermes — Hermes tetap PM.
+- **No more** Rozi commit manual.
+- **SYNC**: Setelah commit, OpenCode WAJIB jalankan `git push` agar `.agent-pm/working/` terbaru
+  naik ke remote. Ini krusial untuk multi-perangkat — supaya TODO/CURRENT_STATE sinkron
+  antar device.
+- Setelah push, transisi ke DOCUMENTATION_ARCHIVE untuk membuat ringkasan.
 
 ### STATE: CYCLE_END
 - Siklus berhenti total. Task berikutnya wajib mulai lagi dari
